@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Histórico e Cultural de Malanje - SICAMI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        /* Estilo geral - mantido do original */
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-image: url('images/monumental.png');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navbar superior - Glassmorphism */
+        .top-navbar {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .top-navbar .page-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .top-navbar .btn {
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .top-navbar .form-control,
+        .top-navbar .form-select {
+            font-family: 'Times New Roman', Times, serif;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .top-navbar .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .top-navbar .form-control:focus,
+        .top-navbar .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(13, 110, 253, 0.5);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+
+        .top-navbar .form-select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        /* Tabs - Glassmorphism */
+        .nav-tabs .nav-link {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 16px;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin-right: 5px;
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(255, 255, 255, 0.20);
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.20);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: #fff;
+            border-bottom: 3px solid #0d6efd;
+            font-weight: bold;
+            box-shadow: 0 -2px 20px rgba(13, 110, 253, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .tab-content {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 0 8px 8px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Índice Lateral - Glassmorphism */
+        .index-sidebar {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .index-sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .index-sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .index-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+
+        .index-sidebar .index-title {
+            color: #fff;
+            font-family: 'Times New Roman', Times, serif;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.10);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .index-item {
+            padding: 8px 15px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-family: 'Times New Roman', Times, serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .index-item:hover {
+            background: rgba(255, 255, 255, 0.10);
+            color: #fff;
+            transform: translateX(5px);
+        }
+
+        .index-item.active {
+            background: rgba(13, 110, 253, 0.20);
+            color: #fff;
+            border-left: 3px solid #0d6efd;
+        }
+
+        .index-item .index-icon {
+            width: 24px;
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        .index-item .index-badge {
+            margin-left: auto;
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.10);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* Conteúdo principal - Glassmorphism */
+        .content-main {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            min-height: 500px;
+        }
+
+        .content-main .content-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.10);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .content-main .content-body {
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.8;
+        }
+
+        .content-main .content-body .section-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin: 15px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        .content-main .content-body .section-image-placeholder {
+            width: 100%;
+            height: 250px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.2);
+            border: 2px dashed rgba(255, 255, 255, 0.10);
+            margin: 15px 0;
+        }
+
+        .content-main .content-body h3 {
+            color: #6ee7ff;
+            margin-top: 25px;
+        }
+
+        .content-main .content-body h4 {
+            color: #ffd75a;
+            margin-top: 20px;
+        }
+
+        .content-main .content-body .highlight-box {
+            background: rgba(13, 110, 253, 0.10);
+            border-left: 4px solid #0d6efd;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .content-main .content-body .timeline-item {
+            padding: 12px 20px;
+            border-left: 3px solid #0d6efd;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .content-main .content-body .timeline-item .year {
+            font-weight: bold;
+            color: #ffd75a;
+            font-size: 1.2rem;
+        }
+
+        .content-main .content-body .timeline-item .description {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Cards de galeria */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            background: rgba(255, 255, 255, 0.10);
+            transform: scale(1.05);
+            border-color: rgba(13, 110, 253, 0.3);
+        }
+
+        /* Cards de monumento */
+        .monument-card {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .monument-card:hover {
+            background: rgba(255, 255, 255, 0.10);
+            transform: translateY(-3px);
+            border-color: rgba(13, 110, 253, 0.3);
+        }
+
+        .monument-card .monument-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .monument-card .monument-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .monument-card .monument-desc {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Cards de gastronomia */
+        .food-card {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: #fff;
+            text-align: center;
+        }
+
+        .food-card:hover {
+            background: rgba(255, 255, 255, 0.10);
+            transform: translateY(-3px);
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+
+        .food-card .food-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Botões - Glassmorphism */
+        .btn-primary {
+            background: rgba(13, 110, 253, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        .btn-primary:hover {
+            background: rgba(13, 110, 253, 0.7);
+        }
+
+        .btn-success {
+            background: rgba(25, 135, 84, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        .btn-success:hover {
+            background: rgba(25, 135, 84, 0.7);
+        }
+
+        .btn-warning {
+            background: rgba(255, 193, 7, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff;
+        }
+
+        .btn-warning:hover {
+            background: rgba(255, 193, 7, 0.6);
+        }
+
+        .btn-info {
+            background: rgba(13, 202, 240, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        .btn-info:hover {
+            background: rgba(13, 202, 240, 0.6);
+        }
+
+        .btn-outline-secondary {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, 0.10);
+        }
+
+        /* Badge de status */
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Rodapé */
+        .footer-manual {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* Scroll personalizado */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Animação fade-in */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toggle modo escuro/claro */
+        .theme-toggle {
+            cursor: pointer;
+            color: #fff;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .index-sidebar {
+                max-height: 300px;
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-navbar .page-title {
+                font-size: 1.3rem;
+            }
+            .top-navbar .d-flex {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .content-main {
+                padding: 15px;
+            }
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+
+        /* Badge de idioma */
+        .lang-badge {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2px 12px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .lang-badge.active-lang {
+            background: rgba(13, 110, 253, 0.3);
+            color: #fff;
+            border-color: rgba(13, 110, 253, 0.3);
+        }
+
+        /* Tabela de conteúdo */
+        .toc-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .toc-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .toc-item .toc-number {
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.3);
+            min-width: 25px;
+        }
+        
+        .rainha{
+            align-content: center;
+            align-items: center;
+            width: 255px;
+            height: 250px;
+            border-radius: 12px 0 0 12px;
+        }
+        
+        .kimbundu{
+            align-content: center;
+            align-items: center;
+            width: 300px;
+            height: 250px;
+            border-radius: 12px 0 0 12px;
+        }
+        
+        .instrumentos{
+            align-content: center;
+            align-items: center;
+            width: 100px;
+            height: 250px;
+            border-radius: 12px 0 0 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-3">
+        <!-- Navbar Superior - Glassmorphism -->
+        <div class="top-navbar">
+            <div class="row align-items-center g-3">
+                <div class="col-lg-3 col-md-12">
+                    <h4 class="page-title mb-0">
+                        <i class="bi bi-book text-primary"></i> Manual Histórico e Cultural
+                    </h4>
+                    <small class="text-muted">Província de Malanje</small>
+                </div>
+                <div class="col-lg-9 col-md-12">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <!-- Pesquisa -->
+                        <div class="input-group" style="flex: 1; min-width: 200px;">
+                            <input type="text" id="searchManual" class="form-control" placeholder="🔍 Pesquisar conteúdo...">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+
+                        <!-- Seletor de Idioma -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-globe"></i> <span id="currentLangLabel">Português</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" style="background: rgba(20,20,40,0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
+                                <li><a class="dropdown-item text-white lang-option" data-lang="pt" href="#"><i class="bi bi-check-circle-fill text-success" style="display: none;"></i> Português</a></li>
+                                <li><a class="dropdown-item text-white lang-option" data-lang="en" href="#"><i class="bi bi-check-circle-fill text-success" style="display: none;"></i> English</a></li>
+                                <li><a class="dropdown-item text-white lang-option" data-lang="fr" href="#"><i class="bi bi-check-circle-fill text-success" style="display: none;"></i> Français</a></li>
+                                <li><a class="dropdown-item text-white lang-option" data-lang="es" href="#"><i class="bi bi-check-circle-fill text-success" style="display: none;"></i> Español</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Modo Claro/Escuro -->
+                        <span class="theme-toggle" id="themeToggle" title="Alternar tema">
+                            <i class="bi bi-moon-fill"></i>
+                        </span>
+
+                        <!-- Ações Rápidas -->
+                        <button class="btn btn-success" id="btnDownloadPDF">
+                            <i class="bi bi-filetype-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-info" id="btnAudioContent">
+                            <i class="bi bi-headphones"></i>
+                        </button>
+                        <button class="btn btn-warning" id="btnFavoritosManual">
+                            <i class="bi bi-star"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel de Estatísticas -->
+        <div class="row mb-3">
+            <div class="col-md-2 col-6">
+                <div class="indicator-card fade-in">
+                    <div class="number" id="totalChapters">0</div>
+                    <div class="label"><i class="bi bi-layers"></i> Capítulos</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="indicator-card success fade-in">
+                    <div class="number" id="totalPages">0</div>
+                    <div class="label"><i class="bi bi-file-text"></i> Páginas</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="indicator-card info fade-in">
+                    <div class="number" id="totalImages">0</div>
+                    <div class="label"><i class="bi bi-image"></i> Imagens</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="indicator-card warning fade-in">
+                    <div class="number" id="totalVideos">0</div>
+                    <div class="label"><i class="bi bi-play-btn"></i> Vídeos</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="indicator-card danger fade-in">
+                    <div class="number" id="lastUpdate">Hoje</div>
+                    <div class="label"><i class="bi bi-calendar"></i> Atualização</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="indicator-card success fade-in">
+                    <div class="number" id="favoritesCountManual">0</div>
+                    <div class="label"><i class="bi bi-star-fill"></i> Favoritos</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs de navegação -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="conteudo-tab" data-bs-toggle="tab" data-bs-target="#conteudo" type="button" role="tab">
+                    <i class="bi bi-book"></i> Conteúdo
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="galeria-tab" data-bs-toggle="tab" data-bs-target="#galeria" type="button" role="tab">
+                    <i class="bi bi-images"></i> Galeria
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="linha-tempo-tab" data-bs-toggle="tab" data-bs-target="#linha-tempo" type="button" role="tab">
+                    <i class="bi bi-clock-history"></i> Linha do Tempo
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <!-- Aba Conteúdo -->
+            <div class="tab-pane fade show active" id="conteudo" role="tabpanel">
+                <div class="row">
+                    <!-- Índice Lateral -->
+                    <div class="col-lg-3 col-md-12">
+                        <div class="index-sidebar">
+                            <h6 class="index-title"><i class="bi bi-list-ul"></i> Índice</h6>
+                            <div id="indexContainer">
+                                <!-- Índice via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conteúdo Principal -->
+                    <div class="col-lg-9 col-md-12">
+                        <div class="content-main" id="contentMain">
+                            <!-- Conteúdo via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Galeria -->
+            <div class="tab-pane fade" id="galeria" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <h5 class="text-white mb-3"><i class="bi bi-images text-info"></i> Galeria Histórica e Cultural</h5>
+                        <div class="gallery-grid" id="galleryGrid">
+                            <!-- Galeria via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Linha do Tempo -->
+            <div class="tab-pane fade" id="linha-tempo" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <h5 class="text-white mb-3"><i class="bi bi-clock-history text-warning"></i> Linha do Tempo - História de Malanje</h5>
+                        <div id="timelineContainer">
+                            <!-- Linha do tempo via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rodapé -->
+        <div class="footer-manual mt-4">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-md-start">
+                    <i class="bi bi-c-circle"></i> Sistema Web de Apoio ao Turismo em Malanje
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span class="me-3">Última atualização: <span id="footerUpdate">15/06/2026</span></span>
+                    <span class="badge bg-primary">v2.1</span>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <small>Fontes: Arquivo Histórico de Malanje, Ministério da Cultura de Angola, Bibliografia especializada</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Favoritos -->
+    <div class="modal fade" id="favoritesManualModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-star-fill text-warning"></i> Conteúdos Favoritos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="favoritesManualBody">
+                    <!-- Favoritos via JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Imagem -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="background: transparent; border: none; box-shadow: none;">
+                <div class="modal-body text-center">
+                    <div style="background: rgba(0,0,0,0.8); border-radius: 16px; padding: 20px; position: relative;">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" style="position: absolute; top: 10px; right: 10px; filter: invert(1);"></button>
+                        <div id="imageModalContent" style="min-height: 200px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3); font-size: 1.2rem;">
+                            <i class="bi bi-image" style="font-size: 4rem;"></i>
+                            <span class="ms-3">Imagem em alta resolução</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Dados do Manual
+            const manualData = {
+                chapters: [
+                    {
+                        id: 'introducao',
+                        icon: 'bi bi-house',
+                        title: 'Introdução',
+                        content: `
+                            <h3>Bem-vindo ao Manual Histórico e Cultural de Malanje</h3>
+                            <p>Este manual digital foi desenvolvido para proporcionar aos visitantes uma imersão completa na rica história, cultura e património da província de Malanje, uma das regiões mais fascinantes de Angola.</p>
+                            <p>Malanje é conhecida como a "Capital da Agricultura" e guarda tesouros históricos e naturais que remontam ao Reino de Ndongo e à resistência contra a colonização portuguesa.</p>
+                            <div class="highlight-box">
+                                <strong>📌 Objetivo:</strong> Preservar e divulgar a memória histórica, promover o turismo cultural e valorizar as tradições locais.
+                            </div>
+                            <div class="section-image-placeholder">
+                                <i class="bi bi-image"></i> Mapa da Província de Malanje
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'historia',
+                        icon: 'bi bi-clock-history',
+                        title: 'História de Malanje',
+                        content: `
+                            <h3>História da Província de Malanje</h3>
+                            <p>A região de Malanje possui uma história milenar, sendo habitada por povos de língua Kimbundu desde tempos imemoriais. A área fazia parte do poderoso <strong>Reino de Ndongo</strong>, uma das mais importantes entidades políticas pré-coloniais da África Central.</p>
+                            <h4>Período Pré-Colonial</h4>
+                            <p>O Reino de Ndongo, também conhecido como Angola, dominava a região entre os séculos XVI e XVII. Malanje era uma área estratégica para o comércio e a agricultura.</p>
+                            <h4>Colonização Portuguesa</h4>
+                            <p>A partir do século XVII, os portugueses iniciaram a ocupação da região, encontrando forte resistência liderada pela <strong>Rainha Njinga Mbande</strong>, que se tornou um símbolo da luta pela liberdade.</p>
+                            <div class="section-image-placeholder">
+                                <img src="images/rainha-portugues.png" class="rainha"/> 
+                                <i class="bi bi-image"></i> Ilustração histórica da região
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'rainha-njinga',
+                        icon: 'bi bi-crown',
+                        title: 'Rainha Njinga Mbande',
+                        content: `
+                            <h3>👑 Rainha Njinga Mbande</h3>
+                            <div class="section-image-placeholder">
+                                <img src="images/rainha-retrato.jpg" class="rainha"/> Retrato da Rainha Njinga
+                            </div>
+                            <p><strong>Nascimento:</strong> 1583</p>
+                            <p><strong>Falecimento:</strong> 1663</p>
+                            <p>A Rainha Njinga Mbande foi uma das mais importantes figuras da história de Angola. Governante do Reino de Ndongo e Matamba, liderou a resistência contra a colonização portuguesa por mais de 40 anos.</p>
+                            <h4>Importância para Malanje</h4>
+                            <p>A região de Malanje desempenhou um papel estratégico nas campanhas de Njinga, servindo como base para suas operações militares e ponto de apoio para as populações locais.</p>
+                            <div class="highlight-box">
+                                <strong>🏛 Legado:</strong> Njinga é considerada a mãe da nação angolana, símbolo de resistência, liderança feminina e luta pela liberdade.
+                            </div>
+                            <h4>Principais Batalhas</h4>
+                            <ul>
+                                <li>Batalha do Dande (1629)</li>
+                                <li>Batalha de Kavanga (1646)</li>
+                                <li>Campanha de Malanje (1650-1655)</li>
+                            </ul>
+                        `
+                    },
+                    {
+                        id: 'monumentos',
+                        icon: 'bi bi-building',
+                        title: 'Monumentos Históricos',
+                        content: `
+                            <h3>🏛 Monumentos Históricos de Malanje</h3>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="monument-card">
+                                        <div class="monument-icon">🏰</div>
+                                        <div class="monument-name">Fortaleza de Malanje</div>
+                                        <div class="monument-desc">Construída no século XIX, testemunha da presença colonial</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="monument-card">
+                                        <div class="monument-icon">⛪</div>
+                                        <div class="monument-name">Igreja da Sé</div>
+                                        <div class="monument-desc">Construída em 1898, arquitetura colonial portuguesa</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="monument-card">
+                                        <div class="monument-icon">🏛</div>
+                                        <div class="monument-name">Palácio do Governo</div>
+                                        <div class="monument-desc">Sede administrativa histórica, construída em 1920</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="monument-card">
+                                        <div class="monument-icon">🪦</div>
+                                        <div class="monument-name">Monumento à Rainha Njinga</div>
+                                        <div class="monument-desc">Homenagem à heroína nacional</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'monumentos-naturais',
+                        icon: 'bi bi-tree',
+                        title: 'Monumentos Naturais',
+                        content: `
+                            <h3>🌿 Monumentos Naturais</h3>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="monument-card">
+                                        <div class="monument-icon">🌊</div>
+                                        <div class="monument-name">Quedas do Calandula</div>
+                                        <div class="monument-desc">Maiores quedas de água de Angola</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="monument-card">
+                                        <div class="monument-icon">⛰</div>
+                                        <div class="monument-name">Pedras Negras</div>
+                                        <div class="monument-desc">Formação rochosa de Pungo Andongo</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="monument-card">
+                                        <div class="monument-icon">🌳</div>
+                                        <div class="monument-name">Floresta do Maiombe</div>
+                                        <div class="monument-desc">Mata atlântica angolana</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'cultura',
+                        icon: 'bi bi-mask',
+                        title: 'Cultura',
+                        content: `
+                            <h3>🎭 Cultura de Malanje</h3>
+                            <p>A cultura de Malanje é um reflexo da rica diversidade étnica e histórica da região, influenciada pelos povos de língua Kimbundu e pelos costumes tradicionais.</p>
+                            <h4>Costumes e Crenças</h4>
+                            <p>As tradições religiosas e espirituais estão profundamente enraizadas nas comunidades, com cerimónias que celebram a vida, a colheita e os ancestrais.</p>
+                            <h4>Organização Social</h4>
+                            <p>A estrutura social tradicional é organizada em torno do <strong>soba</strong> (chefe tradicional), que desempenha um papel fundamental na mediação de conflitos e na preservação da cultura.</p>
+                            <div class="section-image-placeholder">
+                                <img src="images/sobas.png" class="rainha"/>
+                                <i class="bi bi-people"></i> Comunidade tradicional
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'tradicoes',
+                        icon: 'bi bi-music-note-beamed',
+                        title: 'Tradições',
+                        content: `
+                            <h3>🥁 Tradições de Malanje</h3>
+                            <h4>Danças Tradicionais</h4>
+                            <ul>
+                                <li><strong>Kabetula</strong> - Dança de celebração da colheita</li>
+                                <li><strong>Mussamba</strong> - Dança de iniciação</li>
+                                <li><strong>Semba</strong> - Dança de roda tradicional</li>
+                            </ul>
+                            <h4>Música</h4>
+                            <p>Instrumentos tradicionais incluem o <strong>Puita</strong> (tambor), <strong>Marimba</strong> e a <strong>Kisange</strong> (flauta).</p>
+                            <h4>Vestuário Tradicional</h4>
+                            <p>O <strong>Samakaka</strong> é o tecido tradicional usado em cerimónias, caracterizado por padrões geométricos e cores vibrantes.</p>
+                            <div class="section-image-placeholder">
+                                <img src="images/instrumental.png" class="rainha"/>
+                                <i class="bi bi-music-note"></i> Instrumentos tradicionais
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'gastronomia',
+                        icon: 'bi bi-egg-fried',
+                        title: 'Gastronomia',
+                        content: `
+                            <h3>🍲 Gastronomia de Malanje</h3>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="food-card">
+                                        <div class="food-icon"><img src="images/muamba.png" class="rainha"/>
+                                        </div>
+                                        <div><strong>Muamba de Galinha</strong></div>
+                                        <small style="color: rgba(255,255,255,0.5);">Prato típico com quiabo</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="food-card">
+                                        <div class="food-icon"><img src="images/funge.png" class="rainha"/>
+                                        </div>
+                                        <div><strong>Funge</strong></div>
+                                        <small style="color: rgba(255,255,255,0.5);">Papinha de milho</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="food-card">
+                                        <div class="food-icon"><img src="images/muamba.png" class="rainha"/></div>
+                                        <div><strong>Arroz de Funge</strong></div>
+                                        <small style="color: rgba(255,255,255,0.5);">Acompanhamento tradicional</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="highlight-box">
+                                <strong>🍽 Dica:</strong> Experimente o <strong>Mufete</strong>, um prato à base de peixe, e o <strong>Cabrito Assado</strong>, especialidade da região.
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'lingua',
+                        icon: 'bi bi-chat',
+                        title: 'Língua Kimbundu',
+                        content: `
+                            <h3>🗣 Língua Kimbundu</h3>
+                            <p>O Kimbundu é a língua mais falada na província de Malanje e uma das línguas nacionais de Angola. Pertence ao grupo das línguas bantu.</p>
+                            <h4>Curiosidades</h4>
+                            <ul>
+                                <li>Muitas palavras do Kimbundu foram incorporadas ao português angolano</li>
+                                <li>Exemplo: "moleque" (mu'leke), "quilombo" (kilombo)</li>
+                                <li>O Kimbundu tem várias variações dialetais</li>
+                            </ul>
+                            <div class="section-image-placeholder">
+                                <img src="images/kimbundu.jpg" class="kimbundu"/>
+                                <i class="bi bi-chat-dots"></i> Exemplo de escrita em Kimbundu
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'festividades',
+                        icon: 'bi bi-calendar-event',
+                        title: 'Festividades',
+                        content: `
+                            <h3>🎉 Festividades de Malanje</h3>
+                            <div class="timeline-item">
+                                <div class="year">Janeiro</div>
+                                <div class="description">Festa do Rei - Celebração da cultura tradicional</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="year">Maio</div>
+                                <div class="description">Festival da Colheita - Agradecimento pelas plantações</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="year">Agosto</div>
+                                <div class="description">Festa da Njinga - Homenagem à Rainha</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="year">Dezembro</div>
+                                <div class="description">Festival de Natal com tradições locais</div>
+                            </div>
+                        `
+                    }
+                ],
+                timeline: [
+                    { year: 1400, description: 'Reino de Ndongo - Início da organização política na região' },
+                    { year: 1583, description: 'Nascimento da Rainha Njinga Mbande' },
+                    { year: 1624, description: 'Njinga torna-se Rainha do Reino de Ndongo' },
+                    { year: 1650, description: 'Campanha de resistência em Malanje' },
+                    { year: 1670, description: 'Consolidação do domínio português na região' },
+                    { year: 1885, description: 'Conferência de Berlim - Divisão colonial de África' },
+                    { year: 1975, description: 'Independência de Angola - Malanje integra o novo país' },
+                    { year: 1992, description: 'Primeiras eleições democráticas em Angola' },
+                    { year: 2002, description: 'Fim da guerra civil - Reconstrução de Malanje' },
+                    { year: 2024, description: 'Malanje como destino turístico em crescimento' }
+                ],
+                gallery: [
+                    { id: 1, icon: 'bi bi-image', label: 'Mapa Antigo' },
+                    { id: 2, icon: 'bi bi-image', label: 'Foto Histórica' },
+                    { id: 3, icon: 'bi bi-image', label: 'Pintura Colonial' },
+                    { id: 4, icon: 'bi bi-image', label: 'Documento Histórico' },
+                    { id: 5, icon: 'bi bi-image', label: 'Escultura Tradicional' },
+                    { id: 6, icon: 'bi bi-image', label: 'Monumento' },
+                    { id: 7, icon: 'bi bi-image', label: 'Paisagem Natural' },
+                    { id: 8, icon: 'bi bi-image', label: 'Arte Rupestre' },
+                    { id: 9, icon: 'bi bi-image', label: 'Cerimónia Tradicional' },
+                    { id: 10, icon: 'bi bi-image', label: 'Vestuário Típico' }
+                ]
+            };
+
+            let currentChapter = 'introducao';
+            let favoritesManual = JSON.parse(localStorage.getItem('manualMalanjeFavoritos')) || [];
+            let currentLang = 'pt';
+            let darkMode = true;
+
+            const langMap = {
+                'pt': 'Português',
+                'en': 'English',
+                'fr': 'Français',
+                'es': 'Español'
+            };
+
+            // Estatísticas
+            function updateStatsManual() {
+                $('#totalChapters').text(manualData.chapters.length);
+                $('#totalPages').text(manualData.chapters.length * 2);
+                $('#totalImages').text(manualData.gallery.length);
+                $('#totalVideos').text(3);
+                $('#favoritesCountManual').text(favoritesManual.length);
+            }
+            updateStatsManual();
+
+            // Renderizar índice
+            function renderIndex() {
+                const container = $('#indexContainer');
+                container.empty();
+
+                manualData.chapters.forEach((chapter, index) => {
+                    const isActive = currentChapter === chapter.id;
+                    container.append(`
+                        <div class="index-item ${isActive ? 'active' : ''}" data-id="${chapter.id}">
+                            <span class="index-icon"><i class="${chapter.icon}"></i></span>
+                            <span>${chapter.title}</span>
+                            <span class="index-badge">${index + 1}</span>
+                        </div>
+                    `);
+                });
+            }
+
+            // Renderizar conteúdo
+            function renderContent(chapterId) {
+                const chapter = manualData.chapters.find(c => c.id === chapterId);
+                if (!chapter) return;
+
+                currentChapter = chapterId;
+                const container = $('#contentMain');
+
+                // Verificar se é favorito
+                const isFav = favoritesManual.includes(chapterId);
+
+                container.html(`
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h4 class="content-title"><i class="${chapter.icon}"></i> ${chapter.title}</h4>
+                        <button class="btn btn-sm btn-warning btn-fav-manual ${isFav ? 'active' : ''}" data-id="${chapter.id}">
+                            <i class="bi ${isFav ? 'bi-star-fill' : 'bi-star'}"></i>
+                        </button>
+                    </div>
+                    <div class="content-body fade-in">
+                        ${chapter.content}
+                    </div>
+                `);
+
+                // Atualizar índice
+                renderIndex();
+
+                // Scroll para o topo
+                container.scrollTop(0);
+            }
+
+            // Renderizar galeria
+            function renderGallery() {
+                const container = $('#galleryGrid');
+                container.empty();
+
+                manualData.gallery.forEach(item => {
+                    container.append(`
+                        <div class="gallery-item" data-id="${item.id}">
+                            <div class="text-center">
+                                <i class="${item.icon}" style="font-size: 2rem;"></i>
+                                <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">${item.label}</div>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
+            // Renderizar linha do tempo
+            function renderTimeline() {
+                const container = $('#timelineContainer');
+                container.empty();
+
+                manualData.timeline.forEach(item => {
+                    container.append(`
+                        <div class="timeline-item fade-in">
+                            <div class="year">${item.year}</div>
+                            <div class="description">${item.description}</div>
+                        </div>
+                    `);
+                });
+            }
+
+            // Renderizar favoritos (modal)
+            function renderFavoritesManual() {
+                const container = $('#favoritesManualBody');
+                container.empty();
+
+                const favChapters = manualData.chapters.filter(c => favoritesManual.includes(c.id));
+
+                if (favChapters.length === 0) {
+                    container.html(`
+                        <div class="text-center text-white py-4">
+                            <i class="bi bi-star" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <p class="mt-3">Nenhum conteúdo favorito ainda</p>
+                            <p class="text-muted">Marque um capítulo como favorito para acessá-lo rapidamente</p>
+                        </div>
+                    `);
+                    return;
+                }
+
+                favChapters.forEach(ch => {
+                    container.append(`
+                        <div class="expression-card" style="cursor: pointer;" data-id="${ch.id}">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="portuguese"><i class="${ch.icon}"></i> ${ch.title}</div>
+                                    <small class="text-muted">Clique para abrir</small>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-danger btn-remover-fav-manual" data-id="${ch.id}">
+                                        <i class="bi bi-x-lg"></i> Remover
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
+            // Eventos do índice
+            $(document).on('click', '.index-item', function() {
+                const id = $(this).data('id');
+                renderContent(id);
+            });
+
+            // Evento de favoritar
+            $(document).on('click', '.btn-fav-manual', function(e) {
+                e.stopPropagation();
+                const id = $(this).data('id');
+                const index = favoritesManual.indexOf(id);
+                if (index > -1) {
+                    favoritesManual.splice(index, 1);
+                } else {
+                    favoritesManual.push(id);
+                }
+                localStorage.setItem('manualMalanjeFavoritos', JSON.stringify(favoritesManual));
+                updateStatsManual();
+                renderContent(id);
+            });
+
+            // Evento de remover favorito (no modal)
+            $(document).on('click', '.btn-remover-fav-manual', function(e) {
+                e.stopPropagation();
+                const id = $(this).data('id');
+                const index = favoritesManual.indexOf(id);
+                if (index > -1) {
+                    favoritesManual.splice(index, 1);
+                }
+                localStorage.setItem('manualMalanjeFavoritos', JSON.stringify(favoritesManual));
+                updateStatsManual();
+                renderFavoritesManual();
+                // Atualizar o conteúdo atual se for o mesmo
+                if (currentChapter === id) {
+                    renderContent(id);
+                }
+            });
+
+            // Clique no favorito do modal para abrir
+            $(document).on('click', '#favoritesManualBody .expression-card', function() {
+                const id = $(this).data('id');
+                if (id) {
+                    $('#favoritesManualModal').modal('hide');
+                    renderContent(id);
+                    // Mudar para a tab de conteúdo
+                    $('#conteudo-tab').tab('show');
+                }
+            });
+
+            // Botão Favoritos (abrir modal)
+            $('#btnFavoritosManual').click(function() {
+                renderFavoritesManual();
+                $('#favoritesManualModal').modal('show');
+            });
+
+            // Evento de galeria
+            $(document).on('click', '.gallery-item', function() {
+                const label = $(this).find('div').text();
+                $('#imageModalContent').html(`
+                    <div class="text-center">
+                        <i class="bi bi-image" style="font-size: 5rem; color: rgba(255,255,255,0.2);"></i>
+                        <p class="mt-3" style="color: rgba(255,255,255,0.7);">${label}</p>
+                        <p><small class="text-muted">Imagem em alta resolução - Clique fora para fechar</small></p>
+                    </div>
+                `);
+                $('#imageModal').modal('show');
+            });
+
+            // Pesquisa
+            $('#searchManual').on('input', function() {
+                const term = $(this).val().toLowerCase();
+                if (term.length < 2) {
+                    // Voltar ao conteúdo normal
+                    renderContent(currentChapter);
+                    return;
+                }
+
+                const results = manualData.chapters.filter(ch =>
+                    ch.title.toLowerCase().includes(term) ||
+                    ch.content.toLowerCase().includes(term)
+                );
+
+                if (results.length === 0) {
+                    $('#contentMain .content-body').html(`
+                        <div class="text-center text-white py-5">
+                            <i class="bi bi-search" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <p class="mt-3">Nenhum resultado encontrado para "<strong>${term}</strong>"</p>
+                        </div>
+                    `);
+                    return;
+                }
+
+                // Mostrar resultados na área de conteúdo
+                let html = `<h5 class="text-white">🔍 Resultados para "${term}"</h5><div class="mt-3">`;
+                results.forEach(ch => {
+                    html += `
+                        <div class="expression-card" style="cursor: pointer;" data-id="${ch.id}">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="portuguese"><i class="${ch.icon}"></i> ${ch.title}</div>
+                                    <small class="text-muted">${ch.content.substring(0, 100)}...</small>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-primary btn-result-open" data-id="${ch.id}">Abrir</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                $('#contentMain .content-body').html(html);
+            });
+
+            // Abrir resultado da pesquisa
+            $(document).on('click', '.btn-result-open', function() {
+                const id = $(this).data('id');
+                $('#searchManual').val('');
+                renderContent(id);
+            });
+
+            // Idioma
+            $('.lang-option').click(function(e) {
+                e.preventDefault();
+                const lang = $(this).data('lang');
+                currentLang = lang;
+                $('#currentLangLabel').text(langMap[lang]);
+                
+                // Atualizar indicador de seleção
+                $('.lang-option i').hide();
+                $(this).find('i').show();
+                
+                alert(`🌍 Idioma alterado para ${langMap[lang]}\n\n(Em produção, o conteúdo seria traduzido automaticamente)`);
+            });
+
+            // Tema claro/escuro
+            $('#themeToggle').click(function() {
+                darkMode = !darkMode;
+                if (darkMode) {
+                    $('body').css('background-image', 'url(\'../images/dash-rec.jpg\')');
+                    $('body').css('background-color', '');
+                    $('body').find('.container-fluid').css('background', '');
+                    $(this).html('<i class="bi bi-moon-fill"></i>');
+                } else {
+                    $('body').css('background', '#f0f0f0');
+                    $('body').css('background-image', 'none');
+                    $('body').find('.container-fluid').css('background', 'rgba(255,255,255,0.9)');
+                    $(this).html('<i class="bi bi-sun-fill"></i>');
+                    // Ajustar cores para modo claro
+                    $('.text-white').css('color', '#333');
+                    $('.text-muted').css('color', '#666');
+                    $('.page-title, .indicator-card .label, .indicator-card .number, .content-title, .index-title').css('color', '#333');
+                }
+            });
+
+            // Download PDF
+            $('#btnDownloadPDF').click(function() {
+                alert('📄 Download do Manual em PDF iniciado!\n\n(Em produção, seria gerado um PDF com todo o conteúdo do manual)');
+            });
+
+            // Áudio
+            $('#btnAudioContent').click(function() {
+                alert('🎧 Modo de leitura em áudio ativado!\n\nO conteúdo do manual está sendo narrado.');
+            });
+
+            // Inicializar
+            renderIndex();
+            renderContent('introducao');
+            renderGallery();
+            renderTimeline();
+
+            console.log('✅ Manual Histórico e Cultural de Malanje carregado com sucesso!');
+            console.log(`📚 ${manualData.chapters.length} capítulos disponíveis`);
+            console.log(`🖼 ${manualData.gallery.length} itens na galeria`);
+            console.log(`⏳ ${manualData.timeline.length} eventos na linha do tempo`);
+        });
+    </script>
+</body>
+</html>

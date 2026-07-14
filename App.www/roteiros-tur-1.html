@@ -1,0 +1,2667 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roteiros de Malanje</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* ============================================================
+                   ESTILO GERAL - GLASSMORPHISM
+                   ============================================================ */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-image: url('images/roteiro-tur.png');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.40);
+            z-index: 0;
+            transition: all 0.3s ease;
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================================
+                   TEMA CLARO
+                   ============================================================ */
+        body.light-theme::before {
+            background: rgba(255, 255, 255, 0.88);
+        }
+
+        body.light-theme .page-title,
+        body.light-theme .page-title .badge,
+        body.light-theme .info-card .card-title,
+        body.light-theme .nav-tabs .nav-link,
+        body.light-theme .filter-section h6,
+        body.light-theme .activity-table th,
+        body.light-theme .activity-table td,
+        body.light-theme .modal-content,
+        body.light-theme .modal .form-label,
+        body.light-theme .tab-content,
+        body.light-theme .chart-container h6,
+        body.light-theme .roteiro-card .roteiro-nome,
+        body.light-theme .roteiro-card .roteiro-desc,
+        body.light-theme .resumo-item label,
+        body.light-theme .resumo-item span,
+        body.light-theme .hero-title,
+        body.light-theme .hero-subtitle,
+        body.light-theme .filtro-rapido-btn,
+        body.light-theme .roteiro-detalhe-info {
+            color: #1a1a2e !important;
+        }
+
+        body.light-theme .nav-tabs .nav-link {
+            background: rgba(255, 255, 255, 0.5);
+            color: #1a1a2e !important;
+        }
+
+        body.light-theme .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.8);
+            color: #0d6efd !important;
+        }
+
+        body.light-theme .tab-content,
+        body.light-theme .info-card,
+        body.light-theme .filter-section,
+        body.light-theme .chart-container,
+        body.light-theme .activity-table,
+        body.light-theme .roteiro-card,
+        body.light-theme .map-container,
+        body.light-theme .modal-content,
+        body.light-theme .hero-section {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(15px);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .filter-section .form-control,
+        body.light-theme .filter-section .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-theme .filter-section .form-control::placeholder {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-theme #currentDateTime {
+            background: rgba(255, 255, 255, 0.8);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .quick-actions .btn-outline-secondary {
+            background: rgba(108, 117, 125, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .quick-actions .btn-outline-dark {
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-theme .page-title .badge {
+            background: rgba(13, 110, 253, 0.15) !important;
+            color: #0d6efd !important;
+        }
+
+        body.light-theme .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .dashboard-btn {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .filtro-rapido-btn {
+            background: rgba(0, 0, 0, 0.05) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-theme .filtro-rapido-btn:hover {
+            background: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-theme .filtro-rapido-btn.active {
+            background: rgba(13, 110, 253, 0.15) !important;
+            border-color: #0d6efd !important;
+            color: #0d6efd !important;
+        }
+
+        body.light-theme .roteiro-card .badge-nivel {
+            background: rgba(0, 0, 0, 0.08) !important;
+            color: #1a1a2e !important;
+        }
+
+        body.light-theme .language-dropdown .dropdown-toggle {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .language-dropdown .dropdown-menu {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .language-dropdown .dropdown-item {
+            color: #1a1a2e;
+        }
+
+        body.light-theme .language-dropdown .dropdown-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* ============================================================
+                   HERO SECTION
+                   ============================================================ */
+        .hero-section {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 35px 30px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2070') center/cover no-repeat;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .hero-section>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+
+        .filtros-rapidos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .filtro-rapido-btn {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 5px 16px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filtro-rapido-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .filtro-rapido-btn.active {
+            background: rgba(13, 110, 253, 0.25);
+            border-color: rgba(13, 110, 253, 0.4);
+            color: #fff;
+        }
+
+        /* ============================================================
+                   ROTEIRO CARDS
+                   ============================================================ */
+        .roteiro-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .roteiro-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.20);
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .roteiro-card .roteiro-imagem {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .roteiro-card:hover .roteiro-imagem {
+            transform: scale(1.03);
+        }
+
+        .roteiro-card .roteiro-badges {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .roteiro-card .badge-duracao {
+            background: rgba(13, 110, 253, 0.85);
+            backdrop-filter: blur(5px);
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .roteiro-card .badge-tipo {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        .roteiro-card .badge-avaliacao {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            color: #ffc107;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .roteiro-card .badge-nivel {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        .roteiro-card .roteiro-body {
+            padding: 14px 16px 16px;
+        }
+
+        .roteiro-card .roteiro-nome {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 3px;
+        }
+
+        .roteiro-card .roteiro-desc {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.82rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .roteiro-card .roteiro-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .roteiro-card .roteiro-info .item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .roteiro-card .roteiro-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .roteiro-card .roteiro-actions .btn {
+            font-size: 0.75rem;
+            padding: 4px 14px;
+            border-radius: 20px;
+        }
+
+        /* ============================================================
+                   MAPA MINIATURA
+                   ============================================================ */
+        .map-mini-container {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #mapMini {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .leaflet-control-zoom {
+            display: none !important;
+        }
+
+        /* ============================================================
+                   NAVEGAÇÃO - TABS
+                   ============================================================ */
+        .nav-tabs .nav-link {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 17px;
+            color: #fff;
+            border: none;
+            padding: 12px 22px;
+            margin-right: 5px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(15px);
+            color: #fff;
+            border-bottom: 3px solid #0d6efd;
+            font-weight: bold;
+            box-shadow: 0 -2px 20px rgba(13, 110, 253, 0.25);
+        }
+
+        .tab-content {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(15px);
+            border-radius: 0 8px 8px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        /* ============================================================
+                   FILTROS
+                   ============================================================ */
+        .filter-section {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            transition: all 0.3s ease;
+        }
+
+        .filter-section h6 {
+            color: #fff;
+        }
+
+        .filter-section .form-control,
+        .filter-section .form-select {
+            font-family: 'Times New Roman', Times, serif;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff;
+        }
+
+        .filter-section .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .filter-section .form-control:focus,
+        .filter-section .form-select:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(13, 110, 253, 0.4);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.10);
+            color: #fff;
+        }
+
+        .filter-section .form-select option {
+            background: #2c3e50;
+            color: #fff;
+        }
+
+        /* ============================================================
+                   INFO CARD
+                   ============================================================ */
+        .info-card {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            transition: all 0.3s ease;
+        }
+
+        .info-card .card-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* ============================================================
+                   QUICK ACTIONS
+                   ============================================================ */
+        .quick-actions .btn {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 3px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        .quick-actions .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .quick-actions .btn-primary {
+            background: rgba(13, 110, 253, 0.5);
+        }
+        .quick-actions .btn-success {
+            background: rgba(25, 135, 84, 0.5);
+        }
+        .quick-actions .btn-info {
+            background: rgba(13, 202, 240, 0.5);
+        }
+        .quick-actions .btn-warning {
+            background: rgba(255, 193, 7, 0.5);
+        }
+        .quick-actions .btn-danger {
+            background: rgba(220, 53, 69, 0.5);
+        }
+        .quick-actions .btn-outline-secondary {
+            background: rgba(108, 117, 125, 0.20);
+            color: #fff;
+        }
+        .quick-actions .btn-outline-dark {
+            background: rgba(33, 37, 41, 0.20);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ============================================================
+                   HEADER
+                   ============================================================ */
+        .page-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.20);
+        }
+
+        .page-title .bi {
+            animation: bounce 2s infinite;
+        }
+
+        .page-title .badge {
+            background: rgba(13, 110, 253, 0.35);
+            backdrop-filter: blur(5px);
+        }
+
+        @keyframes bounce {
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-8px);
+            }
+            60% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: rotate(30deg);
+        }
+
+        .dashboard-btn {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .dashboard-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        #currentDateTime {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: rgba(13, 110, 253, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-primary:hover {
+            background: rgba(13, 110, 253, 0.7);
+        }
+
+        /* ============================================================
+                   LANGUAGE DROPDOWN
+                   ============================================================ */
+        .language-dropdown .dropdown-toggle {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-family: 'Times New Roman', Times, serif;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .language-dropdown .dropdown-toggle:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .language-dropdown .dropdown-toggle::after {
+            margin-left: 6px;
+        }
+
+        .language-dropdown .dropdown-menu {
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 6px;
+            min-width: 180px;
+        }
+
+        .language-dropdown .dropdown-item {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 0.95rem;
+        }
+
+        .language-dropdown .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .language-dropdown .dropdown-item.active {
+            background: rgba(13, 110, 253, 0.25);
+            color: #fff;
+        }
+
+        .language-dropdown .dropdown-item .flag {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        /* ============================================================
+                   MODAL DETALHES
+                   ============================================================ */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .modal .btn-close {
+            filter: invert(1);
+        }
+
+        .modal .form-label {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .modal-detalhe-imagem {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .modal-detalhe-galeria {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .modal-detalhe-galeria img {
+            width: 100%;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-detalhe-galeria img:hover {
+            transform: scale(1.05);
+        }
+
+        .roteiro-detalhe-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 20px;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .roteiro-detalhe-info .item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .roteiro-detalhe-info .label {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .roteiro-detalhe-info .value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .comentario-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+        }
+
+        .comentario-item .usuario {
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .comentario-item .texto {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .comentario-item .data {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.7rem;
+        }
+
+        /* ============================================================
+                   RESPONSIVIDADE
+                   ============================================================ */
+        @media (max-width: 768px) {
+            .tab-content {
+                padding: 15px;
+            }
+            .page-title {
+                font-size: 1.3rem;
+            }
+            .header-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .nav-tabs .nav-link {
+                font-size: 14px;
+                padding: 10px 14px;
+            }
+            .hero-title {
+                font-size: 1.5rem;
+            }
+            .hero-section {
+                padding: 20px 15px;
+            }
+            .roteiro-card .roteiro-imagem {
+                height: 160px;
+            }
+            .roteiro-detalhe-info {
+                grid-template-columns: 1fr;
+            }
+            .modal-detalhe-galeria {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .modal-detalhe-galeria img {
+                height: 55px;
+            }
+            .filtros-rapidos {
+                gap: 4px;
+            }
+            .filtro-rapido-btn {
+                font-size: 0.7rem;
+                padding: 3px 10px;
+            }
+            .map-mini-container {
+                height: 130px;
+            }
+            .language-dropdown .dropdown-toggle {
+                font-size: 0.85rem;
+                padding: 4px 10px;
+            }
+            .language-dropdown .dropdown-item {
+                font-size: 0.85rem;
+                padding: 6px 12px;
+            }
+        }
+
+        /* ============================================================
+                   ANIMAÇÕES
+                   ============================================================ */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+
+        <!-- ============================================================
+        CABEÇALHO
+        ============================================================ -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap header-actions">
+                    <h2 class="page-title">
+                        <i class="bi bi-signpost-2 text-success"></i>
+                        <span id="tituloPagina">Roteiros de Malanje</span>
+                        <span class="badge bg-success ms-2 pulse-icon" id="badgeItinerarios">ITINERÁRIOS</span>
+                    </h2>
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- LANGUAGE DROPDOWN -->
+                        <div class="language-dropdown dropdown">
+                            <button class="dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span id="currentFlag">🇧🇷</span>
+                                <span id="currentLangLabel">PT</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                                <li>
+                                    <a class="dropdown-item active" href="#" data-lang="pt" data-flag="🇧🇷" data-label="PT">
+                                        <span class="flag">🇧🇷</span> Português
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-lang="en" data-flag="🇺🇸" data-label="EN">
+                                        <span class="flag">🇺🇸</span> English
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-lang="fr" data-flag="🇫🇷" data-label="FR">
+                                        <span class="flag">🇫🇷</span> Français
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-lang="es" data-flag="🇪🇸" data-label="ES">
+                                        <span class="flag">🇪🇸</span> Español
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <a href="#" class="dashboard-btn" id="btnDashboard">
+                            <i class="bi bi-grid-3x3-gap-fill"></i> <span id="btnDashboardLabel">Dashboard</span>
+                        </a>
+                        <button class="theme-toggle-btn" id="themeToggle">
+                            <i class="bi bi-moon-stars" id="themeIcon"></i>
+                        </button>
+                        <span class="badge bg-info text-dark" id="currentDateTime">
+                            <i class="bi bi-clock"></i>
+                            <span id="dateTimeDisplay">Carregando...</span>
+                        </span>
+                        <button class="btn btn-outline-danger" id="btnFavoritosRoteiros">
+                            <i class="bi bi-heart"></i> <span id="btnFavoritosLabel">Favoritos</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        HERO SECTION
+        ============================================================ -->
+        <div class="hero-section">
+            <div class="row">
+                <div class="col-md-8">
+                    <h1 class="hero-title" id="heroTitle">Escolha o seu Roteiro em Malanje</h1>
+                    <p class="hero-subtitle" id="heroSubtitle">De 1 dia a 5 dias – Experiências para todos os gostos</p>
+                    <div class="filtros-rapidos">
+                        <button class="filtro-rapido-btn active" data-filtro="todos" id="filtroTodos">📋 <span>Todos</span></button>
+                        <button class="filtro-rapido-btn" data-filtro="1dia" id="filtro1Dia">1 <span>Dia</span></button>
+                        <button class="filtro-rapido-btn" data-filtro="2dias" id="filtro2Dias">2 <span>Dias</span></button>
+                        <button class="filtro-rapido-btn" data-filtro="3dias" id="filtro3Dias">3 <span>Dias</span></button>
+                        <button class="filtro-rapido-btn" data-filtro="4dias" id="filtro4Dias">4-5 <span>Dias</span></button>
+                        <button class="filtro-rapido-btn" data-filtro="personalizado" id="filtroPersonalizado">✏️ <span>Personalizado</span></button>
+                    </div>
+                </div>
+                <div class="col-md-4 d-none d-md-block">
+                    <div class="map-mini-container" id="mapMiniContainer">
+                        <div id="mapMini"></div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button class="btn btn-sm btn-outline-primary" id="btnVerMapaCompleto">
+                            <i class="bi bi-arrows-expand"></i> <span id="btnVerMapaLabel">Ver no Mapa</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        FILTROS AVANÇADOS
+        ============================================================ -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-12 mb-2">
+                    <h6><i class="bi bi-funnel"></i> <span id="filtrosAvancadosLabel">Filtros Avançados</span></h6>
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroTipoRoteiro" class="form-select">
+                        <option value="todos" id="optTodosTipos">Todos os Tipos</option>
+                        <option value="natureza">🌿 Natureza & Aventura</option>
+                        <option value="ecoturismo">🦋 Ecoturismo</option>
+                        <option value="cultura">🏛️ Cultura e História</option>
+                        <option value="familia">👨‍👩‍👧‍👦 Família</option>
+                        <option value="romantico">💕 Romântico</option>
+                        <option value="economico">💰 Orçamento Baixo</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroNivel" class="form-select">
+                        <option value="todos" id="optTodosNiveis">Todos os Níveis</option>
+                        <option value="facil">🟢 Fácil</option>
+                        <option value="moderado">🟡 Moderado</option>
+                        <option value="avancado">🔴 Avançado</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroPrecoRoteiro" class="form-select">
+                        <option value="todos" id="optTodosPrecos">Todos os Preços</option>
+                        <option value="baixo">💰 Baixo</option>
+                        <option value="medio">💰 Médio</option>
+                        <option value="alto">💰 Alto</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroDuracao" class="form-select">
+                        <option value="todos" id="optTodasDuracao">Todas as Durações</option>
+                        <option value="1">1 Dia</option>
+                        <option value="2">2 Dias</option>
+                        <option value="3">3 Dias</option>
+                        <option value="4">4-5 Dias</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-outline-primary btn-sm" id="btnAplicarFiltros">
+                            <i class="bi bi-check"></i> <span id="btnAplicarLabel">Aplicar Filtros</span>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" id="btnLimparFiltros">
+                            <i class="bi bi-x"></i> <span id="btnLimparLabel">Limpar Filtros</span>
+                        </button>
+                        <div class="ms-auto">
+                            <span style="color:rgba(255,255,255,0.4);font-size:0.85rem;" id="contadorRoteiros">0 roteiros</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        TABS - ROTEIROS E PERSONALIZAR
+        ============================================================ -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="roteiros-tab" data-bs-toggle="tab" data-bs-target="#roteiros" type="button" role="tab">
+                    <i class="bi bi-list-ul"></i> <span id="tabTodosLabel">Todos os Roteiros</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="populares-tab" data-bs-toggle="tab" data-bs-target="#populares" type="button" role="tab">
+                    <i class="bi bi-star"></i> <span id="tabPopularesLabel">Mais Populares</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="personalizar-tab" data-bs-toggle="tab" data-bs-target="#personalizar" type="button" role="tab">
+                    <i class="bi bi-pencil-square"></i> <span id="tabCriarLabel">Criar Roteiro</span>
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+
+            <!-- ============================================================
+            TODOS OS ROTEIROS
+            ============================================================ -->
+            <div class="tab-pane fade show active" id="roteiros" role="tabpanel">
+                <div class="row" id="gridRoteiros">
+                    <!-- Renderizado via JavaScript -->
+                </div>
+            </div>
+
+            <!-- ============================================================
+            MAIS POPULARES
+            ============================================================ -->
+            <div class="tab-pane fade" id="populares" role="tabpanel">
+                <div class="row" id="gridPopulares">
+                    <!-- Renderizado via JavaScript -->
+                </div>
+            </div>
+
+            <!-- ============================================================
+            CRIAR ROTEIRO PERSONALIZADO
+            ============================================================ -->
+            <div class="tab-pane fade" id="personalizar" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-plus-circle"></i> <span id="criarRoteiroTitulo">Criar seu Roteiro</span></h6>
+                            <p style="color:rgba(255,255,255,0.6);" id="criarRoteiroDesc">
+                                Monte seu roteiro do zero escolhendo as atrações que deseja visitar.
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label" id="labelNomeRoteiro">Nome do Roteiro</label>
+                                <input type="text" class="form-control" id="novoRoteiroNome" placeholder="Ex: Minha Aventura em Malanje">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" id="labelDuracaoRoteiro">Duração (dias)</label>
+                                <select class="form-select" id="novoRoteiroDuracao">
+                                    <option value="1">1 Dia</option>
+                                    <option value="2" selected>2 Dias</option>
+                                    <option value="3">3 Dias</option>
+                                    <option value="4">4 Dias</option>
+                                    <option value="5">5 Dias</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" id="labelTipoRoteiro">Tipo de Viagem</label>
+                                <select class="form-select" id="novoRoteiroTipo">
+                                    <option value="natureza">🌿 Natureza & Aventura</option>
+                                    <option value="ecoturismo">🦋 Ecoturismo</option>
+                                    <option value="cultura">🏛️ Cultura e História</option>
+                                    <option value="familia">👨‍👩‍👧‍👦 Família</option>
+                                    <option value="romantico">💕 Romântico</option>
+                                    <option value="economico">💰 Orçamento Baixo</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" id="labelNivelRoteiro">Nível de Dificuldade</label>
+                                <select class="form-select" id="novoRoteiroNivel">
+                                    <option value="facil">🟢 Fácil</option>
+                                    <option value="moderado" selected>🟡 Moderado</option>
+                                    <option value="avancado">🔴 Avançado</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-success w-100" id="btnCriarRoteiroPersonalizado">
+                                <i class="bi bi-magic"></i> <span id="btnCriarLabel">Criar Roteiro Personalizado</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-info-circle"></i> <span id="dicasTitulo">Dicas para seu Roteiro</span></h6>
+                            <div style="color:rgba(255,255,255,0.6);">
+                                <div class="mb-2">
+                                    <i class="bi bi-check-circle text-success"></i>
+                                    <strong id="dica1Titulo">Planeje com antecedência</strong>
+                                    <p style="font-size:0.85rem;" id="dica1Desc">Verifique a melhor época para visitar cada atração.</p>
+                                </div>
+                                <div class="mb-2">
+                                    <i class="bi bi-check-circle text-success"></i>
+                                    <strong id="dica2Titulo">Considere distâncias</strong>
+                                    <p style="font-size:0.85rem;" id="dica2Desc">Algumas atrações estão a mais de 100km de distância.</p>
+                                </div>
+                                <div class="mb-2">
+                                    <i class="bi bi-check-circle text-success"></i>
+                                    <strong id="dica3Titulo">Inclua pausas</strong>
+                                    <p style="font-size:0.85rem;" id="dica3Desc">Reserve tempo para descanso e refeições.</p>
+                                </div>
+                                <div class="mb-2">
+                                    <i class="bi bi-check-circle text-success"></i>
+                                    <strong id="dica4Titulo">Verifique eventos</strong>
+                                    <p style="font-size:0.85rem;" id="dica4Desc">Consulte a agenda de eventos para aproveitar ao máximo.</p>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-outline-primary btn-sm" id="btnVerPlaneador">
+                                    <i class="bi bi-calendar"></i> <span id="btnPlaneadorLabel">Ir para Planeador</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /tab-content -->
+
+        <!-- ============================================================
+        AÇÕES RÁPIDAS
+        ============================================================ -->
+        <div class="quick-actions mt-4 d-flex flex-wrap gap-2">
+            <button class="btn btn-success" id="btnUsarRoteiro">
+                <i class="bi bi-check-circle"></i> <span id="btnUsarLabel">Usar Roteiro</span>
+            </button>
+            <button class="btn btn-info" id="btnCompararRoteiros">
+                <i class="bi bi-arrow-left-right"></i> <span id="btnCompararLabel">Comparar Roteiros</span>
+            </button>
+            <button class="btn btn-danger" id="btnDownloadPDF">
+                <i class="bi bi-file-pdf"></i> <span id="btnDownloadLabel">Download PDF</span>
+            </button>
+            <button class="btn btn-outline-primary" id="btnAtualizar">
+                <i class="bi bi-arrow-repeat"></i> <span id="btnAtualizarLabel">Atualizar</span>
+            </button>
+            <button class="btn btn-outline-dark" id="btnVoltar">
+                <i class="bi bi-arrow-left"></i> <span id="btnVoltarLabel">Voltar</span>
+            </button>
+        </div>
+
+    </div><!-- /container-fluid -->
+
+    <!-- ============================================================
+    MODAL - DETALHES DO ROTEIRO
+    ============================================================ -->
+    <div class="modal fade" id="detalhesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detalhesTitulo"><i class="bi bi-signpost-2"></i> Roteiro</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalhesConteudo">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="modalFecharLabel">Fechar</button>
+                    <button type="button" class="btn btn-success" id="btnUsarRoteiroModal">
+                        <i class="bi bi-check-circle"></i> <span id="modalUsarLabel">Usar este Roteiro</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnAdicionarPlaneador">
+                        <i class="bi bi-calendar-plus"></i> <span id="modalAdicionarLabel">Adicionar ao Planeador</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL - COMPARAR ROTEIROS
+    ============================================================ -->
+    <div class="modal fade" id="compararModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-arrow-left-right"></i> <span id="compararTitulo">Comparar Roteiros</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label" id="compararRoteiro1Label">Roteiro 1</label>
+                            <select class="form-select" id="compararRoteiro1">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" id="compararRoteiro2Label">Roteiro 2</label>
+                            <select class="form-select" id="compararRoteiro2">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="compararResultado" class="mt-3" style="display:none;">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="compararCancelarLabel">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnCompararConfirm"><span id="compararBtnLabel">Comparar</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js">
+    </script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script>
+        $(document).ready(function() {
+
+            // ============================================================
+            // TRADUÇÕES
+            // ============================================================
+
+            const translations = {
+                pt: {
+                    titulo: 'Roteiros de Malanje',
+                    badgeItinerarios: 'ITINERÁRIOS',
+                    btnDashboard: 'Dashboard',
+                    btnFavoritos: 'Favoritos',
+                    heroTitle: 'Escolha o seu Roteiro em Malanje',
+                    heroSubtitle: 'De 1 dia a 5 dias – Experiências para todos os gostos',
+                    filtroTodos: 'Todos',
+                    filtro1Dia: '1 Dia',
+                    filtro2Dias: '2 Dias',
+                    filtro3Dias: '3 Dias',
+                    filtro4Dias: '4-5 Dias',
+                    filtroPersonalizado: 'Personalizado',
+                    btnVerMapa: 'Ver no Mapa',
+                    filtrosAvancados: 'Filtros Avançados',
+                    optTodosTipos: 'Todos os Tipos',
+                    optTodosNiveis: 'Todos os Níveis',
+                    optTodosPrecos: 'Todos os Preços',
+                    optTodasDuracao: 'Todas as Durações',
+                    btnAplicar: 'Aplicar Filtros',
+                    btnLimpar: 'Limpar Filtros',
+                    tabTodos: 'Todos os Roteiros',
+                    tabPopulares: 'Mais Populares',
+                    tabCriar: 'Criar Roteiro',
+                    criarTitulo: 'Criar seu Roteiro',
+                    criarDesc: 'Monte seu roteiro do zero escolhendo as atrações que deseja visitar.',
+                    labelNome: 'Nome do Roteiro',
+                    labelDuracao: 'Duração (dias)',
+                    labelTipo: 'Tipo de Viagem',
+                    labelNivel: 'Nível de Dificuldade',
+                    btnCriar: 'Criar Roteiro Personalizado',
+                    dicasTitulo: 'Dicas para seu Roteiro',
+                    dica1Titulo: 'Planeje com antecedência',
+                    dica1Desc: 'Verifique a melhor época para visitar cada atração.',
+                    dica2Titulo: 'Considere distâncias',
+                    dica2Desc: 'Algumas atrações estão a mais de 100km de distância.',
+                    dica3Titulo: 'Inclua pausas',
+                    dica3Desc: 'Reserve tempo para descanso e refeições.',
+                    dica4Titulo: 'Verifique eventos',
+                    dica4Desc: 'Consulte a agenda de eventos para aproveitar ao máximo.',
+                    btnPlaneador: 'Ir para Planeador',
+                    btnUsar: 'Usar Roteiro',
+                    btnComparar: 'Comparar Roteiros',
+                    btnDownload: 'Download PDF',
+                    btnAtualizar: 'Atualizar',
+                    btnVoltar: 'Voltar',
+                    modalFechar: 'Fechar',
+                    modalUsar: 'Usar este Roteiro',
+                    modalAdicionar: 'Adicionar ao Planeador',
+                    compararTitulo: 'Comparar Roteiros',
+                    compararRoteiro1: 'Roteiro 1',
+                    compararRoteiro2: 'Roteiro 2',
+                    compararCancelar: 'Cancelar',
+                    compararBtn: 'Comparar',
+                    contador: 'roteiros',
+                    semRoteiros: 'Nenhum roteiro encontrado',
+                    semRoteirosMsg: 'Tente ajustar os filtros ou crie seu próprio roteiro.',
+                    favoritosVazio: '💔 Você ainda não tem roteiros favoritos.\n\nClique no ❤️ de um roteiro para adicioná-lo aos favoritos.',
+                    favoritosTitulo: '❤️ {count} roteiros favoritos',
+                    pdfGerado: '📄 PDF gerado com sucesso!\n\n📋 {count} roteiros exportados\n📎 Disponível para download.',
+                    atualizado: '🔄 Dados atualizados com sucesso!\n\n📋 {total} roteiros disponíveis\n❤️ {favoritos} favoritos',
+                    voltarConfirm: 'Deseja realmente sair da tela de roteiros?',
+                    voltarMsg: '🔙 Retornando ao menu principal...',
+                    mapaCompleto: '🗺️ Redirecionando para o Mapa Interativo completo...\n\n{count} roteiros disponíveis.',
+                    dashboardMsg: '🔙 Redirecionando para o Dashboard Principal...',
+                    planeadorMsg: '🗺️ Redirecionando para o Planeador de Viagem...',
+                    personalizadoCriado: '✅ Roteiro personalizado criado!\n\n📋 Nome: {nome}\n📅 Duração: {duracao} dia(s)\n🏷️ Tipo: {tipo}\n📊 Nível: {nivel}\n\n💡 O roteiro foi adicionado ao Planeador de Viagem.',
+                    erroNome: '⚠️ Dê um nome ao seu roteiro.',
+                    selecioneDois: '⚠️ Selecione dois roteiros para comparar.',
+                    selecioneDiferentes: '⚠️ Selecione dois roteiros diferentes.',
+                    nenhumDisponivel: '⚠️ Nenhum roteiro disponível.',
+                    roteiroSelecionado: '✅ Roteiro "{nome}" selecionado!\n\n📅 Duração: {duracao} dia(s)\n📍 {atracoes} atrações\n💰 Custo: {custo}\n\n💡 O roteiro foi carregado no Planeador de Viagem.',
+                    adicionadoPlaneador: '✅ Roteiro "{nome}" adicionado ao Planeador!\n\n📅 {duracao} dia(s)\n📍 {atracoes} atrações\n\n💡 Personalize seu roteiro no Planeador de Viagem.',
+                },
+                en: {
+                    titulo: 'Malanje Itineraries',
+                    badgeItinerarios: 'ITINERARIES',
+                    btnDashboard: 'Dashboard',
+                    btnFavoritos: 'Favorites',
+                    heroTitle: 'Choose Your Itinerary in Malanje',
+                    heroSubtitle: '1 to 5 days – Experiences for all tastes',
+                    filtroTodos: 'All',
+                    filtro1Dia: '1 Day',
+                    filtro2Dias: '2 Days',
+                    filtro3Dias: '3 Days',
+                    filtro4Dias: '4-5 Days',
+                    filtroPersonalizado: 'Custom',
+                    btnVerMapa: 'View on Map',
+                    filtrosAvancados: 'Advanced Filters',
+                    optTodosTipos: 'All Types',
+                    optTodosNiveis: 'All Levels',
+                    optTodosPrecos: 'All Prices',
+                    optTodasDuracao: 'All Durations',
+                    btnAplicar: 'Apply Filters',
+                    btnLimpar: 'Clear Filters',
+                    tabTodos: 'All Itineraries',
+                    tabPopulares: 'Most Popular',
+                    tabCriar: 'Create Itinerary',
+                    criarTitulo: 'Create Your Itinerary',
+                    criarDesc: 'Build your itinerary from scratch choosing the attractions you want to visit.',
+                    labelNome: 'Itinerary Name',
+                    labelDuracao: 'Duration (days)',
+                    labelTipo: 'Trip Type',
+                    labelNivel: 'Difficulty Level',
+                    btnCriar: 'Create Custom Itinerary',
+                    dicasTitulo: 'Tips for Your Itinerary',
+                    dica1Titulo: 'Plan ahead',
+                    dica1Desc: 'Check the best time to visit each attraction.',
+                    dica2Titulo: 'Consider distances',
+                    dica2Desc: 'Some attractions are over 100km away.',
+                    dica3Titulo: 'Include breaks',
+                    dica3Desc: 'Allow time for rest and meals.',
+                    dica4Titulo: 'Check events',
+                    dica4Desc: 'Check the events calendar to make the most of it.',
+                    btnPlaneador: 'Go to Planner',
+                    btnUsar: 'Use Itinerary',
+                    btnComparar: 'Compare Itineraries',
+                    btnDownload: 'Download PDF',
+                    btnAtualizar: 'Refresh',
+                    btnVoltar: 'Back',
+                    modalFechar: 'Close',
+                    modalUsar: 'Use this Itinerary',
+                    modalAdicionar: 'Add to Planner',
+                    compararTitulo: 'Compare Itineraries',
+                    compararRoteiro1: 'Itinerary 1',
+                    compararRoteiro2: 'Itinerary 2',
+                    compararCancelar: 'Cancel',
+                    compararBtn: 'Compare',
+                    contador: 'itineraries',
+                    semRoteiros: 'No itineraries found',
+                    semRoteirosMsg: 'Try adjusting the filters or create your own itinerary.',
+                    favoritosVazio: '💔 You don\'t have favorite itineraries yet.\n\nClick the ❤️ on an itinerary to add it to favorites.',
+                    favoritosTitulo: '❤️ {count} favorite itineraries',
+                    pdfGerado: '📄 PDF generated successfully!\n\n📋 {count} itineraries exported\n📎 Available for download.',
+                    atualizado: '🔄 Data updated successfully!\n\n📋 {total} itineraries available\n❤️ {favoritos} favorites',
+                    voltarConfirm: 'Do you really want to leave the itineraries screen?',
+                    voltarMsg: '🔙 Returning to the main menu...',
+                    mapaCompleto: '🗺️ Redirecting to the Interactive Map...\n\n{count} itineraries available.',
+                    dashboardMsg: '🔙 Redirecting to the Main Dashboard...',
+                    planeadorMsg: '🗺️ Redirecting to the Travel Planner...',
+                    personalizadoCriado: '✅ Custom itinerary created!\n\n📋 Name: {nome}\n📅 Duration: {duracao} day(s)\n🏷️ Type: {tipo}\n📊 Level: {nivel}\n\n💡 The itinerary has been added to the Travel Planner.',
+                    erroNome: '⚠️ Please give a name to your itinerary.',
+                    selecioneDois: '⚠️ Please select two itineraries to compare.',
+                    selecioneDiferentes: '⚠️ Please select two different itineraries.',
+                    nenhumDisponivel: '⚠️ No itineraries available.',
+                    roteiroSelecionado: '✅ Itinerary "{nome}" selected!\n\n📅 Duration: {duracao} day(s)\n📍 {atracoes} attractions\n💰 Cost: {custo}\n\n💡 The itinerary has been loaded into the Travel Planner.',
+                    adicionadoPlaneador: '✅ Itinerary "{nome}" added to Planner!\n\n📅 {duracao} day(s)\n📍 {atracoes} attractions\n\n💡 Customize your itinerary in the Travel Planner.',
+                },
+                fr: {
+                    titulo: 'Itinéraires de Malanje',
+                    badgeItinerarios: 'ITINÉRAIRES',
+                    btnDashboard: 'Tableau de bord',
+                    btnFavoritos: 'Favoris',
+                    heroTitle: 'Choisissez votre itinéraire à Malanje',
+                    heroSubtitle: '1 à 5 jours – Des expériences pour tous les goûts',
+                    filtroTodos: 'Tous',
+                    filtro1Dia: '1 Jour',
+                    filtro2Dias: '2 Jours',
+                    filtro3Dias: '3 Jours',
+                    filtro4Dias: '4-5 Jours',
+                    filtroPersonalizado: 'Personnalisé',
+                    btnVerMapa: 'Voir sur la carte',
+                    filtrosAvancados: 'Filtres avancés',
+                    optTodosTipos: 'Tous les types',
+                    optTodosNiveis: 'Tous les niveaux',
+                    optTodosPrecos: 'Tous les prix',
+                    optTodasDuracao: 'Toutes les durées',
+                    btnAplicar: 'Appliquer les filtres',
+                    btnLimpar: 'Effacer les filtres',
+                    tabTodos: 'Tous les itinéraires',
+                    tabPopulares: 'Les plus populaires',
+                    tabCriar: 'Créer un itinéraire',
+                    criarTitulo: 'Créez votre itinéraire',
+                    criarDesc: 'Créez votre itinéraire à partir de zéro en choisissant les attractions que vous souhaitez visiter.',
+                    labelNome: 'Nom de l\'itinéraire',
+                    labelDuracao: 'Durée (jours)',
+                    labelTipo: 'Type de voyage',
+                    labelNivel: 'Niveau de difficulté',
+                    btnCriar: 'Créer un itinéraire personnalisé',
+                    dicasTitulo: 'Conseils pour votre itinéraire',
+                    dica1Titulo: 'Planifiez à l\'avance',
+                    dica1Desc: 'Vérifiez la meilleure période pour visiter chaque attraction.',
+                    dica2Titulo: 'Tenez compte des distances',
+                    dica2Desc: 'Certaines attractions sont à plus de 100 km.',
+                    dica3Titulo: 'Prévoyez des pauses',
+                    dica3Desc: 'Prévoyez du temps pour le repos et les repas.',
+                    dica4Titulo: 'Vérifiez les événements',
+                    dica4Desc: 'Consultez le calendrier des événements pour en profiter au maximum.',
+                    btnPlaneador: 'Aller au planificateur',
+                    btnUsar: 'Utiliser l\'itinéraire',
+                    btnComparar: 'Comparer les itinéraires',
+                    btnDownload: 'Télécharger PDF',
+                    btnAtualizar: 'Actualiser',
+                    btnVoltar: 'Retour',
+                    modalFechar: 'Fermer',
+                    modalUsar: 'Utiliser cet itinéraire',
+                    modalAdicionar: 'Ajouter au planificateur',
+                    compararTitulo: 'Comparer les itinéraires',
+                    compararRoteiro1: 'Itinéraire 1',
+                    compararRoteiro2: 'Itinéraire 2',
+                    compararCancelar: 'Annuler',
+                    compararBtn: 'Comparer',
+                    contador: 'itinéraires',
+                    semRoteiros: 'Aucun itinéraire trouvé',
+                    semRoteirosMsg: 'Essayez d\'ajuster les filtres ou créez votre propre itinéraire.',
+                    favoritosVazio: '💔 Vous n\'avez pas encore d\'itinéraires favoris.\n\nCliquez sur le ❤️ d\'un itinéraire pour l\'ajouter aux favoris.',
+                    favoritosTitulo: '❤️ {count} itinéraires favoris',
+                    pdfGerado: '📄 PDF généré avec succès !\n\n📋 {count} itinéraires exportés\n📎 Disponible en téléchargement.',
+                    atualizado: '🔄 Données mises à jour avec succès !\n\n📋 {total} itinéraires disponibles\n❤️ {favoritos} favoris',
+                    voltarConfirm: 'Voulez-vous vraiment quitter l\'écran des itinéraires ?',
+                    voltarMsg: '🔙 Retour au menu principal...',
+                    mapaCompleto: '🗺️ Redirection vers la carte interactive...\n\n{count} itinéraires disponibles.',
+                    dashboardMsg: '🔙 Redirection vers le tableau de bord principal...',
+                    planeadorMsg: '🗺️ Redirection vers le planificateur de voyage...',
+                    personalizadoCriado: '✅ Itinéraire personnalisé créé !\n\n📋 Nom : {nome}\n📅 Durée : {duracao} jour(s)\n🏷️ Type : {tipo}\n📊 Niveau : {nivel}\n\n💡 L\'itinéraire a été ajouté au planificateur de voyage.',
+                    erroNome: '⚠️ Donnez un nom à votre itinéraire.',
+                    selecioneDois: '⚠️ Veuillez sélectionner deux itinéraires à comparer.',
+                    selecioneDiferentes: '⚠️ Veuillez sélectionner deux itinéraires différents.',
+                    nenhumDisponivel: '⚠️ Aucun itinéraire disponible.',
+                    roteiroSelecionado: '✅ Itinéraire "{nome}" sélectionné !\n\n📅 Durée : {duracao} jour(s)\n📍 {atracoes} attractions\n💰 Coût : {custo}\n\n💡 L\'itinéraire a été chargé dans le planificateur de voyage.',
+                    adicionadoPlaneador: '✅ Itinéraire "{nome}" ajouté au planificateur !\n\n📅 {duracao} jour(s)\n📍 {atracoes} attractions\n\n💡 Personnalisez votre itinéraire dans le planificateur de voyage.',
+                },
+                es: {
+                    titulo: 'Itinerarios de Malanje',
+                    badgeItinerarios: 'ITINERARIOS',
+                    btnDashboard: 'Panel',
+                    btnFavoritos: 'Favoritos',
+                    heroTitle: 'Elige tu Itinerario en Malanje',
+                    heroSubtitle: 'De 1 a 5 días – Experiencias para todos los gustos',
+                    filtroTodos: 'Todos',
+                    filtro1Dia: '1 Día',
+                    filtro2Dias: '2 Días',
+                    filtro3Dias: '3 Días',
+                    filtro4Dias: '4-5 Días',
+                    filtroPersonalizado: 'Personalizado',
+                    btnVerMapa: 'Ver en el mapa',
+                    filtrosAvancados: 'Filtros avanzados',
+                    optTodosTipos: 'Todos los tipos',
+                    optTodosNiveis: 'Todos los niveles',
+                    optTodosPrecos: 'Todos los precios',
+                    optTodasDuracao: 'Todas las duraciones',
+                    btnAplicar: 'Aplicar filtros',
+                    btnLimpar: 'Limpiar filtros',
+                    tabTodos: 'Todos los itinerarios',
+                    tabPopulares: 'Más populares',
+                    tabCriar: 'Crear itinerario',
+                    criarTitulo: 'Crea tu Itinerario',
+                    criarDesc: 'Construye tu itinerario desde cero eligiendo las atracciones que deseas visitar.',
+                    labelNome: 'Nombre del itinerario',
+                    labelDuracao: 'Duración (días)',
+                    labelTipo: 'Tipo de viaje',
+                    labelNivel: 'Nivel de dificultad',
+                    btnCriar: 'Crear itinerario personalizado',
+                    dicasTitulo: 'Consejos para tu itinerario',
+                    dica1Titulo: 'Planifica con antelación',
+                    dica1Desc: 'Verifica la mejor época para visitar cada atracción.',
+                    dica2Titulo: 'Considera las distancias',
+                    dica2Desc: 'Algunas atracciones están a más de 100 km de distancia.',
+                    dica3Titulo: 'Incluye pausas',
+                    dica3Desc: 'Reserva tiempo para descansar y comer.',
+                    dica4Titulo: 'Verifica eventos',
+                    dica4Desc: 'Consulta el calendario de eventos para aprovechar al máximo.',
+                    btnPlaneador: 'Ir al planificador',
+                    btnUsar: 'Usar itinerario',
+                    btnComparar: 'Comparar itinerarios',
+                    btnDownload: 'Descargar PDF',
+                    btnAtualizar: 'Actualizar',
+                    btnVoltar: 'Volver',
+                    modalFechar: 'Cerrar',
+                    modalUsar: 'Usar este itinerario',
+                    modalAdicionar: 'Agregar al planificador',
+                    compararTitulo: 'Comparar itinerarios',
+                    compararRoteiro1: 'Itinerario 1',
+                    compararRoteiro2: 'Itinerario 2',
+                    compararCancelar: 'Cancelar',
+                    compararBtn: 'Comparar',
+                    contador: 'itinerarios',
+                    semRoteiros: 'No se encontraron itinerarios',
+                    semRoteirosMsg: 'Intenta ajustar los filtros o crea tu propio itinerario.',
+                    favoritosVazio: '💔 Aún no tienes itinerarios favoritos.\n\nHaz clic en el ❤️ de un itinerario para agregarlo a favoritos.',
+                    favoritosTitulo: '❤️ {count} itinerarios favoritos',
+                    pdfGerado: '📄 PDF generado con éxito!\n\n📋 {count} itinerarios exportados\n📎 Disponible para descargar.',
+                    atualizado: '🔄 Datos actualizados con éxito!\n\n📋 {total} itinerarios disponibles\n❤️ {favoritos} favoritos',
+                    voltarConfirm: '¿Realmente deseas salir de la pantalla de itinerarios?',
+                    voltarMsg: '🔙 Volviendo al menú principal...',
+                    mapaCompleto: '🗺️ Redirigiendo al mapa interactivo...\n\n{count} itinerarios disponibles.',
+                    dashboardMsg: '🔙 Redirigiendo al panel principal...',
+                    planeadorMsg: '🗺️ Redirigiendo al planificador de viajes...',
+                    personalizadoCriado: '✅ Itinerario personalizado creado!\n\n📋 Nombre: {nome}\n📅 Duración: {duracao} día(s)\n🏷️ Tipo: {tipo}\n📊 Nivel: {nivel}\n\n💡 El itinerario ha sido agregado al planificador de viajes.',
+                    erroNome: '⚠️ Dale un nombre a tu itinerario.',
+                    selecioneDois: '⚠️ Selecciona dos itinerarios para comparar.',
+                    selecioneDiferentes: '⚠️ Selecciona dos itinerarios diferentes.',
+                    nenhumDisponivel: '⚠️ No hay itinerarios disponibles.',
+                    roteiroSelecionado: '✅ Itinerario "{nome}" seleccionado!\n\n📅 Duración: {duracao} día(s)\n📍 {atracoes} atracciones\n💰 Costo: {custo}\n\n💡 El itinerario ha sido cargado en el planificador de viajes.',
+                    adicionadoPlaneador: '✅ Itinerario "{nome}" agregado al planificador!\n\n📅 {duracao} día(s)\n📍 {atracoes} atracciones\n\n💡 Personaliza tu itinerario en el planificador de viajes.',
+                }
+            };
+
+            let currentLang = localStorage.getItem('sicami-lang') || 'pt';
+
+            function t(key, params = {}) {
+                let text = translations[currentLang]?.[key] || translations.pt[key] || key;
+                for (const [k, v] of Object.entries(params)) {
+                    text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
+                }
+                return text;
+            }
+
+            // ============================================================
+            // APLICAR TRADUÇÕES
+            // ============================================================
+
+            function applyTranslations() {
+                // Atualiza flag e label no dropdown
+                const langData = {
+                    pt: { flag: '🇧🇷', label: 'PT' },
+                    en: { flag: '🇺🇸', label: 'EN' },
+                    fr: { flag: '🇫🇷', label: 'FR' },
+                    es: { flag: '🇪🇸', label: 'ES' }
+                };
+                $('#currentFlag').text(langData[currentLang].flag);
+                $('#currentLangLabel').text(langData[currentLang].label);
+
+                // Marca o item ativo no dropdown
+                $('.language-dropdown .dropdown-item').removeClass('active');
+                $(`.language-dropdown .dropdown-item[data-lang="${currentLang}"]`).addClass('active');
+
+                // Títulos e labels
+                $('#tituloPagina').text(t('titulo'));
+                $('#badgeItinerarios').text(t('badgeItinerarios'));
+                $('#btnDashboardLabel').text(t('btnDashboard'));
+                $('#btnFavoritosLabel').text(t('btnFavoritos'));
+                $('#heroTitle').text(t('heroTitle'));
+                $('#heroSubtitle').text(t('heroSubtitle'));
+                $('#filtroTodos span').text(t('filtroTodos'));
+                $('#filtro1Dia span').text(t('filtro1Dia'));
+                $('#filtro2Dias span').text(t('filtro2Dias'));
+                $('#filtro3Dias span').text(t('filtro3Dias'));
+                $('#filtro4Dias span').text(t('filtro4Dias'));
+                $('#filtroPersonalizado span').text(t('filtroPersonalizado'));
+                $('#btnVerMapaLabel').text(t('btnVerMapa'));
+                $('#filtrosAvancadosLabel').text(t('filtrosAvancados'));
+                $('#optTodosTipos').text(t('optTodosTipos'));
+                $('#optTodosNiveis').text(t('optTodosNiveis'));
+                $('#optTodosPrecos').text(t('optTodosPrecos'));
+                $('#optTodasDuracao').text(t('optTodasDuracao'));
+                $('#btnAplicarLabel').text(t('btnAplicar'));
+                $('#btnLimparLabel').text(t('btnLimpar'));
+                $('#tabTodosLabel').text(t('tabTodos'));
+                $('#tabPopularesLabel').text(t('tabPopulares'));
+                $('#tabCriarLabel').text(t('tabCriar'));
+                $('#criarRoteiroTitulo').text(t('criarTitulo'));
+                $('#criarRoteiroDesc').text(t('criarDesc'));
+                $('#labelNomeRoteiro').text(t('labelNome'));
+                $('#labelDuracaoRoteiro').text(t('labelDuracao'));
+                $('#labelTipoRoteiro').text(t('labelTipo'));
+                $('#labelNivelRoteiro').text(t('labelNivel'));
+                $('#btnCriarLabel').text(t('btnCriar'));
+                $('#dicasTitulo').text(t('dicasTitulo'));
+                $('#dica1Titulo').text(t('dica1Titulo'));
+                $('#dica1Desc').text(t('dica1Desc'));
+                $('#dica2Titulo').text(t('dica2Titulo'));
+                $('#dica2Desc').text(t('dica2Desc'));
+                $('#dica3Titulo').text(t('dica3Titulo'));
+                $('#dica3Desc').text(t('dica3Desc'));
+                $('#dica4Titulo').text(t('dica4Titulo'));
+                $('#dica4Desc').text(t('dica4Desc'));
+                $('#btnPlaneadorLabel').text(t('btnPlaneador'));
+                $('#btnUsarLabel').text(t('btnUsar'));
+                $('#btnCompararLabel').text(t('btnComparar'));
+                $('#btnDownloadLabel').text(t('btnDownload'));
+                $('#btnAtualizarLabel').text(t('btnAtualizar'));
+                $('#btnVoltarLabel').text(t('btnVoltar'));
+                $('#modalFecharLabel').text(t('modalFechar'));
+                $('#modalUsarLabel').text(t('modalUsar'));
+                $('#modalAdicionarLabel').text(t('modalAdicionar'));
+                $('#compararTitulo').text(t('compararTitulo'));
+                $('#compararRoteiro1Label').text(t('compararRoteiro1'));
+                $('#compararRoteiro2Label').text(t('compararRoteiro2'));
+                $('#compararCancelarLabel').text(t('compararCancelar'));
+                $('#compararBtnLabel').text(t('compararBtn'));
+
+                // Atualiza contador
+                const count = roteirosFiltrados ? roteirosFiltrados.length : roteiros.length;
+                $('#contadorRoteiros').text(`${count} ${t('contador')}`);
+
+                // Re-renderiza para atualizar textos dinâmicos
+                if (roteirosFiltrados) {
+                    renderizarRoteiros(roteirosFiltrados);
+                    renderizarPopulares();
+                }
+            }
+
+            // ============================================================
+            // EVENTOS DE IDIOMA
+            // ============================================================
+
+            $('.language-dropdown .dropdown-item').click(function(e) {
+                e.preventDefault();
+                const lang = $(this).data('lang');
+                if (lang !== currentLang) {
+                    currentLang = lang;
+                    localStorage.setItem('sicami-lang', lang);
+                    applyTranslations();
+                    // Recarrega os dados visuais
+                    aplicarFiltros();
+                }
+            });
+
+            // ============================================================
+            // BANCO DE DADOS - ROTEIROS
+            // ============================================================
+
+            const roteiros = [{
+                id: 1,
+                nome: 'Essencial de Malanje',
+                tipo: 'natureza',
+                duracao: 1,
+                nivel: 'facil',
+                precoCategoria: 'baixo',
+                descricao: 'O melhor de Malanje em um dia. Perfeito para quem tem pouco tempo.',
+                descricaoCompleta: 'Este roteiro de 1 dia leva você aos pontos mais icônicos de Malanje. Comece com uma visita às Pedras Negras de Pungo Andongo, depois siga para as impressionantes Quedas de Kalandula. O dia termina com um almoço típico na região.',
+                distancia: 120,
+                tempoEstimado: '8 horas',
+                custoAproximado: '8500 Kz',
+                avaliacao: 4.9,
+                reviews: 124,
+                imagem: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=400&h=300&fit=crop'
+                ],
+                itinerario: [
+                    '🕐 08:00 - Saída de Malanje',
+                    '🕐 09:30 - Pedras Negras de Pungo Andongo (2h)',
+                    '🕐 12:30 - Almoço no Restaurante Típico',
+                    '🕐 14:00 - Quedas de Kalandula (3h)',
+                    '🕐 18:00 - Retorno a Malanje'
+                ],
+                atracoes: ['Pedras Negras de Pungo Andongo', 'Quedas de Kalandula'],
+                hospedagem: 'Hotel Malanje Palace',
+                restaurantes: ['Restaurante Típico Malanje'],
+                comentarios: [
+                    { usuario: 'João Silva', texto: 'Roteiro perfeito para um dia!', data: '2025-08-10' },
+                    { usuario: 'Maria Santos', texto: 'As quedas são impressionantes!', data: '2025-07-25' }
+                ],
+                favorito: false,
+                popular: true
+            }, {
+                id: 2,
+                nome: 'Maravilhas Naturais',
+                tipo: 'natureza',
+                duracao: 2,
+                nivel: 'moderado',
+                precoCategoria: 'medio',
+                descricao: 'Explore as belezas naturais de Malanje em 2 dias.',
+                descricaoCompleta: 'Este roteiro de 2 dias leva você a uma imersão na natureza de Malanje. No primeiro dia, visite as Pedras Negras e as Quedas de Kalandula. No segundo dia, explore o Parque Nacional da Cangandala e os Rápidos do Kwanza.',
+                distancia: 280,
+                tempoEstimado: '16 horas',
+                custoAproximado: '18500 Kz',
+                avaliacao: 4.8,
+                reviews: 98,
+                imagem: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=400&h=300&fit=crop'
+                ],
+                itinerario: [
+                    '📅 Dia 1:',
+                    '🕐 08:00 - Saída para Pedras Negras',
+                    '🕐 09:30 - Pedras Negras de Pungo Andongo (2h)',
+                    '🕐 12:30 - Almoço',
+                    '🕐 14:00 - Quedas de Kalandula (3h)',
+                    '🕐 18:00 - Check-in no hotel',
+                    '',
+                    '📅 Dia 2:',
+                    '🕐 07:00 - Saída para Cangandala',
+                    '🕐 08:00 - Parque Nacional da Cangandala (4h)',
+                    '🕐 13:00 - Almoço',
+                    '🕐 14:30 - Rápidos do Kwanza (2.5h)',
+                    '🕐 17:30 - Retorno'
+                ],
+                atracoes: ['Pedras Negras de Pungo Andongo', 'Quedas de Kalandula', 'Parque Nacional da Cangandala',
+                    'Rápidos do Kwanza'
+                ],
+                hospedagem: 'Hotel Malanje Palace',
+                restaurantes: ['Restaurante Típico Malanje'],
+                comentarios: [
+                    { usuario: 'Pedro Costa', texto: 'Dois dias incríveis!', data: '2025-07-15' },
+                    { usuario: 'Ana Pereira', texto: 'A Cangandala é espetacular!', data: '2025-06-20' }
+                ],
+                favorito: false,
+                popular: true
+            }, {
+                id: 3,
+                nome: 'Imersão Cultural',
+                tipo: 'cultura',
+                duracao: 3,
+                nivel: 'facil',
+                precoCategoria: 'medio',
+                descricao: 'Mergulhe na cultura e história da província de Malanje.',
+                descricaoCompleta: 'Este roteiro de 3 dias combina cultura, história e natureza. Visite o Museu Regional, explore as Pedras Negras, participe da Celebração da Rainha Ginga e conheça as Quedas de Kalandula.',
+                distancia: 200,
+                tempoEstimado: '20 horas',
+                custoAproximado: '22000 Kz',
+                avaliacao: 4.7,
+                reviews: 76,
+                imagem: 'https://images.unsplash.com/photo-1566127992631-137a642a90f4?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1566127992631-137a642a90f4?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=400&h=300&fit=crop'
+                ],
+                itinerario: [
+                    '📅 Dia 1:',
+                    '🕐 09:00 - Museu Regional de Malanje (1.5h)',
+                    '🕐 11:00 - Visita ao centro histórico',
+                    '🕐 13:00 - Almoço típico',
+                    '🕐 15:00 - Celebração da Rainha Ginga',
+                    '',
+                    '📅 Dia 2:',
+                    '🕐 08:00 - Pedras Negras de Pungo Andongo (2h)',
+                    '🕐 11:00 - Feira de artesanato',
+                    '🕐 13:00 - Almoço',
+                    '🕐 15:00 - Apresentação cultural',
+                    '',
+                    '📅 Dia 3:',
+                    '🕐 08:00 - Quedas de Kalandula (3h)',
+                    '🕐 12:00 - Almoço com vista',
+                    '🕐 14:00 - Retorno'
+                ],
+                atracoes: ['Museu Regional de Malanje', 'Pedras Negras de Pungo Andongo', 'Quedas de Kalandula'],
+                hospedagem: 'Hotel Malanje Palace',
+                restaurantes: ['Restaurante Típico Malanje'],
+                comentarios: [
+                    { usuario: 'Carla Mendes', texto: 'Roteiro cultural incrível!', data: '2025-06-10' },
+                    { usuario: 'Rui Santos', texto: 'A história de Malanje é fascinante.', data: '2025-05-28' }
+                ],
+                favorito: false,
+                popular: false
+            }, {
+                id: 4,
+                nome: 'Aventura em Família',
+                tipo: 'familia',
+                duracao: 2,
+                nivel: 'facil',
+                precoCategoria: 'medio',
+                descricao: 'Roteiro perfeito para viajar com crianças e toda a família.',
+                descricaoCompleta: 'Um roteiro pensado para a diversão de toda a família. Com atividades leves e educativas, inclui visitas ao Museu, às Pedras Negras, à Foz do Amor e à Nascente do Amor.',
+                distancia: 150,
+                tempoEstimado: '14 horas',
+                custoAproximado: '15000 Kz',
+                avaliacao: 4.9,
+                reviews: 112,
+                imagem: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1440589473619-3cde28941638?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=400&h=300&fit=crop'
+                ],
+                itinerario: [
+                    '📅 Dia 1:',
+                    '🕐 09:00 - Museu Regional (1.5h)',
+                    '🕐 11:00 - Foz do Amor (1.5h)',
+                    '🕐 13:00 - Almoço em família',
+                    '🕐 15:00 - Nascente do Amor (1h)',
+                    '',
+                    '📅 Dia 2:',
+                    '🕐 08:00 - Pedras Negras (2h)',
+                    '🕐 11:00 - Piquenique na natureza',
+                    '🕐 14:00 - Quedas de Kalandula (2h)',
+                    '🕐 17:00 - Retorno'
+                ],
+                atracoes: ['Museu Regional de Malanje', 'Foz do Amor', 'Nascente do Amor', 'Pedras Negras de Pungo Andongo',
+                    'Quedas de Kalandula'
+                ],
+                hospedagem: 'Hotel Malanje Palace',
+                restaurantes: ['Restaurante Típico Malanje'],
+                comentarios: [
+                    { usuario: 'Familia Silva', texto: 'Nossos filhos amaram!', data: '2025-07-05' },
+                    { usuario: 'Ana e João', texto: 'Perfeito para famílias.', data: '2025-06-15' }
+                ],
+                favorito: false,
+                popular: true
+            }, {
+                id: 5,
+                nome: 'Romântico em Malanje',
+                tipo: 'romantico',
+                duracao: 1,
+                nivel: 'facil',
+                precoCategoria: 'alto',
+                descricao: 'Um roteiro especial para casais apaixonados.',
+                descricaoCompleta: 'Um dia inteiro dedicado ao romance. Comece com um banho nas águas cristalinas da Nascente do Amor, visite a Foz do Amor para fotos inesquecíveis, almoce em um restaurante típico e termine com o pôr do sol nas Quedas de Kalandula.',
+                distancia: 90,
+                tempoEstimado: '10 horas',
+                custoAproximado: '25000 Kz',
+                avaliacao: 4.9,
+                reviews: 89,
+                imagem: 'https://images.unsplash.com/photo-1440589473619-3cde28941638?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1440589473619-3cde28941638?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=400&h=300&fit=crop'
+                ],
+                itinerario: [
+                    '🕐 07:00 - Nascente do Amor - Banho nas águas',
+                    '🕐 09:00 - Foz do Amor - Fotos e passeio',
+                    '🕐 11:30 - Almoço romântico',
+                    '🕐 14:00 - Quedas de Kalandula - Pôr do sol',
+                    '🕐 17:30 - Jantar especial'
+                ],
+                atracoes: ['Nascente do Amor', 'Foz do Amor', 'Quedas de Kalandula'],
+                hospedagem: 'Hotel Malanje Palace',
+                restaurantes: ['Restaurante Típico Malanje'],
+                comentarios: [
+                    { usuario: 'Casal Pereira', texto: 'O dia mais romântico!', data: '2025-07-20' },
+                    { usuario: 'Ana e Pedro', texto: 'Perfeito para casais.', data: '2025-06-30' }
+                ],
+                favorito: false,
+                popular: false
+            }, {
+                id: 6,
+                nome: 'Ecoturismo Sustentável',
+                tipo: 'ecoturismo',
+                duracao: 3,
+                nivel: 'moderado',
+                precoCategoria: 'medio',
+                descricao: 'Explore a natureza de forma sustentável e consciente.',
+                descricaoCompleta: 'Um roteiro focado em ecoturismo e sustentabilidade. Inclui caminhadas ecológicas, observação de aves, visita ao Parque Nacional da Cangandala e atividades de conservação ambiental.',
+                distancia: 250,
+                tempoEstimado: '18 horas',
+                custoAproximado: '19000 Kz',
+                avaliacao: 4.8,
+                reviews: 67,
+                imagem: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1440589473619-3cde28941638?q=80&w=400&h=300&fit=crop'
+                ],
+                itinerario: [
+                    '📅 Dia 1:',
+                    '🕐 08:00 - Caminhada no Parque Cangandala',
+                    '🕐 12:00 - Almoço sustentável',
+                    '🕐 14:00 - Observação de aves',
+                    '',
+                    '📅 Dia 2:',
+                    '🕐 06:00 - Observação de fauna',
+                    '🕐 10:00 - Atividades de conservação',
+                    '🕐 13:00 - Almoço',
+                    '🕐 15:00 - Trilha ecológica',
+                    '',
+                    '📅 Dia 3:',
+                    '🕐 08:00 - Nascente do Amor',
+                    '🕐 10:00 - Foz do Amor',
+                    '🕐 13:00 - Almoço',
+                    '🕐 15:00 - Retorno'
+                ],
+                atracoes: ['Parque Nacional da Cangandala', 'Nascente do Amor', 'Foz do Amor'],
+                hospedagem: 'Hotel Malanje Palace',
+                restaurantes: ['Restaurante Típico Malanje'],
+                comentarios: [
+                    { usuario: 'EcoViajante', texto: 'Experiência transformadora!', data: '2025-06-05' },
+                    { usuario: 'Natureza Viva', texto: 'Parabéns pela iniciativa sustentável.', data: '2025-05-15' }
+                ],
+                favorito: false,
+                popular: false
+            }, {
+                id: 7,
+                nome: 'Roteiro Econômico',
+                tipo: 'economico',
+                duracao: 2,
+                nivel: 'facil',
+                precoCategoria: 'baixo',
+                descricao: 'Descubra Malanje gastando pouco. Perfeito para mochileiros.',
+                descricaoCompleta: 'Um roteiro pensado para quem quer conhecer Malanje com orçamento reduzido. Inclui atrações gratuitas ou de baixo custo, hospedagem econômica e alimentação acessível.',
+                distancia: 130,
+                tempoEstimado: '12 horas',
+                custoAproximado: '8000 Kz',
+                avaliacao: 4.6,
+                reviews: 54,
+                imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1440589473619-3cde28941638?q=80&w=400&h=300&fit=crop'
+                ],
+                itinerario: [
+                    '📅 Dia 1:',
+                    '🕐 09:00 - Museu Regional (1.5h) - 1000 Kz',
+                    '🕐 11:00 - Centro da cidade (gratuito)',
+                    '🕐 13:00 - Almoço econômico',
+                    '🕐 15:00 - Feira de artesanato (gratuito)',
+                    '',
+                    '📅 Dia 2:',
+                    '🕐 08:00 - Barragem de Kapanda (1.5h) - 1000 Kz',
+                    '🕐 10:00 - Nascente do Amor (1h) - 1500 Kz',
+                    '🕐 13:00 - Almoço',
+                    '🕐 15:00 - Foz do Amor (1.5h) - 2000 Kz'
+                ],
+                atracoes: ['Museu Regional de Malanje', 'Barragem de Kapanda', 'Nascente do Amor', 'Foz do Amor'],
+                hospedagem: 'Pousada Econômica Malanje',
+                restaurantes: ['Comida de Rua', 'Restaurante Popular'],
+                comentarios: [
+                    { usuario: 'Mochileiro', texto: 'Custo-benefício excelente!', data: '2025-06-25' },
+                    { usuario: 'Viajante Econômico', texto: 'Recomendo para quem quer economizar.', data: '2025-05-30' }
+                ],
+                favorito: false,
+                popular: false
+            }];
+
+            // ============================================================
+            // ESTADO
+            // ============================================================
+
+            let roteirosFiltrados = [...roteiros];
+            let roteirosFavoritos = JSON.parse(localStorage.getItem('roteirosFavoritos') || '[]');
+            let selectedRoteiro = null;
+
+            // ============================================================
+            // INICIALIZAR MAPA MINIATURA
+            // ============================================================
+
+            let mapMini = null;
+            let mapMiniInitialized = false;
+
+            function initMapMini() {
+                if (mapMiniInitialized) return;
+
+                const container = document.getElementById('mapMini');
+                if (!container) return;
+
+                mapMini = L.map('mapMini', {
+                    zoomControl: false,
+                    attributionControl: false,
+                    dragging: false,
+                    touchZoom: false,
+                    scrollWheelZoom: false,
+                    doubleClickZoom: false,
+                    boxZoom: false,
+                    keyboard: false
+                }).setView([-9.5333, 16.3500], 8);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                }).addTo(mapMini);
+
+                mapMiniInitialized = true;
+                atualizarMapaMini();
+            }
+
+            function atualizarMapaMini() {
+                if (!mapMiniInitialized) return;
+
+                mapMini.eachLayer(function(layer) {
+                    if (layer instanceof L.Marker) {
+                        mapMini.removeLayer(layer);
+                    }
+                });
+
+                const cores = {
+                    'natureza': '#4CAF50',
+                    'cultura': '#FF9800',
+                    'ecoturismo': '#2196F3',
+                    'familia': '#9C27B0',
+                    'romantico': '#E91E63',
+                    'economico': '#F44336'
+                };
+
+                roteirosFiltrados.forEach(r => {
+                    const cor = cores[r.tipo] || '#6c757d';
+                    const lat = -9.4 + (Math.random() * 0.3);
+                    const lng = 16.1 + (Math.random() * 0.3);
+                    L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            html: `<div style="
+                                background: ${cor};
+                                color: #fff;
+                                border-radius: 50%;
+                                width: 12px;
+                                height: 12px;
+                                border: 2px solid rgba(255,255,255,0.5);
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                            "></div>`,
+                            className: 'custom-marker',
+                            iconSize: [12, 12],
+                            iconAnchor: [6, 6]
+                        })
+                    }).addTo(mapMini);
+                });
+            }
+
+            // ============================================================
+            // RENDERIZAR ROTEIROS
+            // ============================================================
+
+            function renderizarRoteiros(lista) {
+                const container = $('#gridRoteiros');
+                container.empty();
+
+                if (lista.length === 0) {
+                    container.html(`
+                        <div class="col-12">
+                            <div style="text-align:center;padding:60px;color:rgba(255,255,255,0.4);">
+                                <i class="bi bi-signpost" style="font-size:3rem;display:block;margin-bottom:15px;"></i>
+                                <h5>${t('semRoteiros')}</h5>
+                                <p style="font-size:0.9rem;">${t('semRoteirosMsg')}</p>
+                            </div>
+                        </div>
+                    `);
+                    return;
+                }
+
+                const cores = {
+                    'natureza': '#4CAF50',
+                    'cultura': '#FF9800',
+                    'ecoturismo': '#2196F3',
+                    'familia': '#9C27B0',
+                    'romantico': '#E91E63',
+                    'economico': '#F44336'
+                };
+
+                const icones = {
+                    'natureza': '🌿',
+                    'cultura': '🏛️',
+                    'ecoturismo': '🦋',
+                    'familia': '👨‍👩‍👧‍👦',
+                    'romantico': '💕',
+                    'economico': '💰'
+                };
+
+                const niveis = {
+                    'facil': '🟢 Fácil',
+                    'moderado': '🟡 Moderado',
+                    'avancado': '🔴 Avançado'
+                };
+
+                const duracaoTexto = {
+                    1: '1 Dia',
+                    2: '2 Dias',
+                    3: '3 Dias',
+                    4: '4-5 Dias'
+                };
+
+                lista.forEach(r => {
+                    const cor = cores[r.tipo] || '#6c757d';
+                    const icone = icones[r.tipo] || '📋';
+                    const isFavorito = roteirosFavoritos.includes(r.id);
+
+                    container.append(`
+                        <div class="col-md-6 col-lg-4 mb-4 fade-in">
+                            <div class="roteiro-card" onclick="abrirDetalhes(${r.id})">
+                                <img src="${r.imagem}" class="roteiro-imagem" alt="${r.nome}">
+                                <div class="roteiro-badges">
+                                    <span class="badge-duracao">${duracaoTexto[r.duracao]}</span>
+                                    <span class="badge-tipo">${icone} ${r.tipo}</span>
+                                </div>
+                                <div class="badge-avaliacao">⭐ ${r.avaliacao}</div>
+                                <div class="badge-nivel">${niveis[r.nivel]}</div>
+                                <div class="roteiro-body">
+                                    <div class="roteiro-nome">${r.nome}</div>
+                                    <div class="roteiro-desc">${r.descricao}</div>
+                                    <div class="roteiro-info">
+                                        <span class="item">📏 ${r.distancia} km</span>
+                                        <span class="item">⏱️ ${r.tempoEstimado}</span>
+                                        <span class="item">💰 ${r.custoAproximado}</span>
+                                    </div>
+                                    <div class="roteiro-actions">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); abrirDetalhes(${r.id})">
+                                            <i class="bi bi-eye"></i> Detalhes
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); usarRoteiro(${r.id})">
+                                            <i class="bi bi-check-circle"></i> Usar
+                                        </button>
+                                        <button class="btn btn-outline-warning btn-sm" onclick="event.stopPropagation(); toggleFavoritoRoteiro(${r.id})">
+                                            <i class="bi ${isFavorito ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+
+                $('#contadorRoteiros').text(`${lista.length} ${t('contador')}`);
+                atualizarMapaMini();
+            }
+
+            // ============================================================
+            // RENDERIZAR POPULARES
+            // ============================================================
+
+            function renderizarPopulares() {
+                const container = $('#gridPopulares');
+                container.empty();
+
+                const populares = roteiros.filter(r => r.popular);
+
+                const duracaoTexto = {
+                    1: '1 Dia',
+                    2: '2 Dias',
+                    3: '3 Dias',
+                    4: '4-5 Dias'
+                };
+
+                const niveis = {
+                    'facil': '🟢 Fácil',
+                    'moderado': '🟡 Moderado',
+                    'avancado': '🔴 Avançado'
+                };
+
+                populares.forEach(r => {
+                    const isFavorito = roteirosFavoritos.includes(r.id);
+
+                    container.append(`
+                        <div class="col-md-6 col-lg-4 mb-4 fade-in">
+                            <div class="roteiro-card" onclick="abrirDetalhes(${r.id})" style="border-color:rgba(255,193,7,0.3);">
+                                <img src="${r.imagem}" class="roteiro-imagem" alt="${r.nome}">
+                                <div class="roteiro-badges">
+                                    <span class="badge-duracao" style="background:rgba(255,193,7,0.85);color:#1a1a2e;">⭐ Popular</span>
+                                    <span class="badge-duracao">${duracaoTexto[r.duracao]}</span>
+                                    <span class="badge-tipo">${r.tipo}</span>
+                                </div>
+                                <div class="badge-avaliacao">⭐ ${r.avaliacao}</div>
+                                <div class="badge-nivel">${niveis[r.nivel]}</div>
+                                <div class="roteiro-body">
+                                    <div class="roteiro-nome">${r.nome}</div>
+                                    <div class="roteiro-desc">${r.descricao}</div>
+                                    <div class="roteiro-info">
+                                        <span class="item">📏 ${r.distancia} km</span>
+                                        <span class="item">⏱️ ${r.tempoEstimado}</span>
+                                        <span class="item">💰 ${r.custoAproximado}</span>
+                                    </div>
+                                    <div class="roteiro-actions">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); abrirDetalhes(${r.id})">
+                                            <i class="bi bi-eye"></i> Detalhes
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); usarRoteiro(${r.id})">
+                                            <i class="bi bi-check-circle"></i> Usar
+                                        </button>
+                                        <button class="btn btn-outline-warning btn-sm" onclick="event.stopPropagation(); toggleFavoritoRoteiro(${r.id})">
+                                            <i class="bi ${isFavorito ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
+            // ============================================================
+            // FUNÇÕES DE INTERAÇÃO
+            // ============================================================
+
+            window.abrirDetalhes = function(id) {
+                const roteiro = roteiros.find(r => r.id === id);
+                if (!roteiro) return;
+                selectedRoteiro = roteiro;
+
+                const duracaoTexto = {
+                    1: '1 Dia',
+                    2: '2 Dias',
+                    3: '3 Dias',
+                    4: '4-5 Dias'
+                };
+
+                const niveis = {
+                    'facil': '🟢 Fácil',
+                    'moderado': '🟡 Moderado',
+                    'avancado': '🔴 Avançado'
+                };
+
+                const isFavorito = roteirosFavoritos.includes(roteiro.id);
+
+                $('#detalhesTitulo').html(`<i class="bi bi-signpost-2"></i> ${roteiro.nome}`);
+
+                const conteudo = `
+                    <div class="row">
+                        <div class="col-md-12">
+                            <img src="${roteiro.imagem}" class="modal-detalhe-imagem" alt="${roteiro.nome}">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="badge" style="background:${roteiro.tipo === 'natureza' ? '#4CAF50' : roteiro.tipo === 'cultura' ? '#FF9800' : roteiro.tipo === 'ecoturismo' ? '#2196F3' : roteiro.tipo === 'familia' ? '#9C27B0' : roteiro.tipo === 'romantico' ? '#E91E63' : '#F44336'};">${roteiro.tipo.toUpperCase()}</span>
+                                    <span class="badge bg-primary">${duracaoTexto[roteiro.duracao]}</span>
+                                    <span class="badge bg-secondary">${niveis[roteiro.nivel]}</span>
+                                    ${roteiro.popular ? '<span class="badge bg-warning text-dark">⭐ Popular</span>' : ''}
+                                </div>
+                                <button class="btn btn-sm ${isFavorito ? 'btn-danger' : 'btn-outline-danger'}" onclick="toggleFavoritoRoteiro(${roteiro.id}); abrirDetalhes(${roteiro.id})">
+                                    <i class="bi ${isFavorito ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                                    ${isFavorito ? ' Favorito' : ' Favoritar'}
+                                </button>
+                            </div>
+                            <h4>${roteiro.nome}</h4>
+                            <div style="color:#ffc107;font-size:1rem;">⭐ ${roteiro.avaliacao} (${roteiro.reviews} avaliações)</div>
+                            <p style="color:rgba(255,255,255,0.7);margin-top:10px;">${roteiro.descricaoCompleta}</p>
+
+                            <div class="roteiro-detalhe-info">
+                                <div class="item">
+                                    <span class="label">📏 Distância</span>
+                                    <span class="value">${roteiro.distancia} km</span>
+                                </div>
+                                <div class="item">
+                                    <span class="label">⏱️ Tempo Estimado</span>
+                                    <span class="value">${roteiro.tempoEstimado}</span>
+                                </div>
+                                <div class="item">
+                                    <span class="label">💰 Custo Aprox.</span>
+                                    <span class="value">${roteiro.custoAproximado}</span>
+                                </div>
+                                <div class="item">
+                                    <span class="label">🏷️ Tipo</span>
+                                    <span class="value">${roteiro.tipo}</span>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <h6><i class="bi bi-clock"></i> Itinerário</h6>
+                            <ul style="color:rgba(255,255,255,0.7);">
+                                ${roteiro.itinerario.map(p => `<li>${p}</li>`).join('')}
+                            </ul>
+
+                            <hr>
+                            <h6><i class="bi bi-pin-map"></i> Atrações Incluídas</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                ${roteiro.atracoes.map(a => `<span class="badge" style="background:rgba(255,255,255,0.1);padding:5px 12px;">${a}</span>`).join('')}
+                            </div>
+
+                            <hr>
+                            <h6><i class="bi bi-building"></i> Hospedagem Sugerida</h6>
+                            <p style="color:rgba(255,255,255,0.7);">🏨 ${roteiro.hospedagem}</p>
+
+                            <h6><i class="bi bi-utensils"></i> Restaurantes Sugeridos</h6>
+                            <p style="color:rgba(255,255,255,0.7);">${roteiro.restaurantes.join(', ')}</p>
+
+                            <hr>
+                            <h6><i class="bi bi-images"></i> Galeria</h6>
+                            <div class="modal-detalhe-galeria">
+                                ${roteiro.galeria.map(img => `<img src="${img}" alt="${roteiro.nome}" onclick="alert('📷 Abrindo imagem em tamanho completo...')">`).join('')}
+                            </div>
+
+                            <hr>
+                            <h6><i class="bi bi-chat"></i> Comentários</h6>
+                            ${roteiro.comentarios.map(c => `
+                                <div class="comentario-item">
+                                    <div class="usuario">👤 ${c.usuario} <span style="color:#ffc107;">⭐⭐⭐⭐⭐</span></div>
+                                    <div class="texto">"${c.texto}"</div>
+                                    <div class="data">📅 ${c.data}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                $('#detalhesConteudo').html(conteudo);
+                $('#detalhesModal').modal('show');
+            };
+
+            window.usarRoteiro = function(id) {
+                const roteiro = roteiros.find(r => r.id === id);
+                if (!roteiro) return;
+                alert(t('roteiroSelecionado', {
+                    nome: roteiro.nome,
+                    duracao: roteiro.duracao,
+                    atracoes: roteiro.atracoes.length,
+                    custo: roteiro.custoAproximado
+                }));
+            };
+
+            window.toggleFavoritoRoteiro = function(id) {
+                const index = roteirosFavoritos.indexOf(id);
+                if (index > -1) {
+                    roteirosFavoritos.splice(index, 1);
+                } else {
+                    roteirosFavoritos.push(id);
+                }
+                localStorage.setItem('roteirosFavoritos', JSON.stringify(roteirosFavoritos));
+                aplicarFiltros();
+                const roteiro = roteiros.find(r => r.id === id);
+                if (roteiro) {
+                    roteiro.favorito = roteirosFavoritos.includes(id);
+                }
+            };
+
+            // ============================================================
+            // FILTROS
+            // ============================================================
+
+            function aplicarFiltros() {
+                const tipo = $('#filtroTipoRoteiro').val();
+                const nivel = $('#filtroNivel').val();
+                const preco = $('#filtroPrecoRoteiro').val();
+                const duracao = $('#filtroDuracao').val();
+                const filtroRapido = $('.filtro-rapido-btn.active').data('filtro');
+
+                roteirosFiltrados = roteiros.filter(r => {
+                    if (tipo !== 'todos' && r.tipo !== tipo) return false;
+                    if (nivel !== 'todos' && r.nivel !== nivel) return false;
+                    if (preco !== 'todos' && r.precoCategoria !== preco) return false;
+                    if (duracao !== 'todos') {
+                        if (duracao === '4' && r.duracao < 4) return false;
+                        if (duracao !== '4' && r.duracao != duracao) return false;
+                    }
+                    if (filtroRapido === '1dia' && r.duracao !== 1) return false;
+                    if (filtroRapido === '2dias' && r.duracao !== 2) return false;
+                    if (filtroRapido === '3dias' && r.duracao !== 3) return false;
+                    if (filtroRapido === '4dias' && r.duracao < 4) return false;
+                    if (filtroRapido === 'personalizado') return false;
+                    return true;
+                });
+
+                if ($('#populares-tab').hasClass('active')) {
+                    roteirosFiltrados = roteirosFiltrados.filter(r => r.popular);
+                }
+
+                renderizarRoteiros(roteirosFiltrados);
+                renderizarPopulares();
+                atualizarMapaMini();
+            }
+
+            // ============================================================
+            // COMPARAR ROTEIROS
+            // ============================================================
+
+            function preencherComparar() {
+                const select1 = $('#compararRoteiro1');
+                const select2 = $('#compararRoteiro2');
+                select1.empty().append('<option value="">Selecione...</option>');
+                select2.empty().append('<option value="">Selecione...</option>');
+
+                roteiros.forEach(r => {
+                    select1.append(`<option value="${r.id}">${r.nome}</option>`);
+                    select2.append(`<option value="${r.id}">${r.nome}</option>`);
+                });
+            }
+
+            $('#btnCompararConfirm').click(function() {
+                const id1 = parseInt($('#compararRoteiro1').val());
+                const id2 = parseInt($('#compararRoteiro2').val());
+
+                if (!id1 || !id2) {
+                    alert(t('selecioneDois'));
+                    return;
+                }
+
+                if (id1 === id2) {
+                    alert(t('selecioneDiferentes'));
+                    return;
+                }
+
+                const r1 = roteiros.find(r => r.id === id1);
+                const r2 = roteiros.find(r => r.id === id2);
+
+                if (!r1 || !r2) return;
+
+                const duracaoTexto = {
+                    1: '1 Dia',
+                    2: '2 Dias',
+                    3: '3 Dias',
+                    4: '4-5 Dias'
+                };
+
+                const niveis = {
+                    'facil': '🟢 Fácil',
+                    'moderado': '🟡 Moderado',
+                    'avancado': '🔴 Avançado'
+                };
+
+                const resultado = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:15px;">
+                                <h5>${r1.nome}</h5>
+                                <img src="${r1.imagem}" style="width:100%;height:100px;object-fit:cover;border-radius:6px;margin-bottom:8px;">
+                                <div><strong>⭐ Avaliação:</strong> ${r1.avaliacao}</div>
+                                <div><strong>📅 Duração:</strong> ${duracaoTexto[r1.duracao]}</div>
+                                <div><strong>📏 Distância:</strong> ${r1.distancia} km</div>
+                                <div><strong>💰 Custo:</strong> ${r1.custoAproximado}</div>
+                                <div><strong>🏷️ Tipo:</strong> ${r1.tipo}</div>
+                                <div><strong>📊 Nível:</strong> ${niveis[r1.nivel]}</div>
+                                <div><strong>📍 Atrações:</strong> ${r1.atracoes.length}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:15px;">
+                                <h5>${r2.nome}</h5>
+                                <img src="${r2.imagem}" style="width:100%;height:100px;object-fit:cover;border-radius:6px;margin-bottom:8px;">
+                                <div><strong>⭐ Avaliação:</strong> ${r2.avaliacao}</div>
+                                <div><strong>📅 Duração:</strong> ${duracaoTexto[r2.duracao]}</div>
+                                <div><strong>📏 Distância:</strong> ${r2.distancia} km</div>
+                                <div><strong>💰 Custo:</strong> ${r2.custoAproximado}</div>
+                                <div><strong>🏷️ Tipo:</strong> ${r2.tipo}</div>
+                                <div><strong>📊 Nível:</strong> ${niveis[r2.nivel]}</div>
+                                <div><strong>📍 Atrações:</strong> ${r2.atracoes.length}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <span style="color:rgba(255,255,255,0.5);font-size:0.85rem;">
+                            💡 ${r1.avaliacao > r2.avaliacao ? `"${r1.nome}" tem melhor avaliação` : r2.avaliacao > r1.avaliacao ? `"${r2.nome}" tem melhor avaliação` : 'Ambos têm a mesma avaliação'}
+                        </span>
+                    </div>
+                `;
+
+                $('#compararResultado').show().html(resultado);
+            });
+
+            // ============================================================
+            // EVENTOS DOS BOTÕES
+            // ============================================================
+
+            $('.filtro-rapido-btn').click(function() {
+                $('.filtro-rapido-btn').removeClass('active');
+                $(this).addClass('active');
+                aplicarFiltros();
+            });
+
+            $('#btnAplicarFiltros').click(function() {
+                aplicarFiltros();
+                $('#roteiros-tab').tab('show');
+            });
+
+            $('#btnLimparFiltros').click(function() {
+                $('#filtroTipoRoteiro').val('todos');
+                $('#filtroNivel').val('todos');
+                $('#filtroPrecoRoteiro').val('todos');
+                $('#filtroDuracao').val('todos');
+                $('.filtro-rapido-btn').removeClass('active');
+                $('.filtro-rapido-btn[data-filtro="todos"]').addClass('active');
+                aplicarFiltros();
+            });
+
+            $('#btnFavoritosRoteiros').click(function() {
+                if (roteirosFavoritos.length === 0) {
+                    alert(t('favoritosVazio'));
+                    return;
+                }
+                const favs = roteiros.filter(r => roteirosFavoritos.includes(r.id));
+                roteirosFiltrados = favs;
+                renderizarRoteiros(roteirosFiltrados);
+                $('#roteiros-tab').tab('show');
+                alert(t('favoritosTitulo', { count: favs.length }));
+            });
+
+            $('#btnUsarRoteiro').click(function() {
+                if (roteirosFiltrados.length === 0) {
+                    alert(t('nenhumDisponivel'));
+                    return;
+                }
+                usarRoteiro(roteirosFiltrados[0].id);
+            });
+
+            $('#btnCompararRoteiros').click(function() {
+                preencherComparar();
+                $('#compararResultado').hide();
+                $('#compararModal').modal('show');
+            });
+
+            $('#btnDownloadPDF').click(function() {
+                if (roteirosFiltrados.length === 0) {
+                    alert(t('nenhumDisponivel'));
+                    return;
+                }
+                alert(t('pdfGerado', { count: roteirosFiltrados.length }));
+            });
+
+            $('#btnAtualizar').click(function() {
+                aplicarFiltros();
+                alert(t('atualizado', {
+                    total: roteiros.length,
+                    favoritos: roteirosFavoritos.length
+                }));
+            });
+
+            $('#btnVoltar').click(function() {
+                if (confirm(t('voltarConfirm'))) {
+                    alert(t('voltarMsg'));
+                }
+            });
+
+            $('#btnVerMapaCompleto').click(function() {
+                alert(t('mapaCompleto', { count: roteirosFiltrados.length }));
+            });
+
+            $('#btnDashboard').click(function(e) {
+                e.preventDefault();
+                alert(t('dashboardMsg'));
+            });
+
+            $('#btnUsarRoteiroModal').click(function() {
+                if (selectedRoteiro) {
+                    usarRoteiro(selectedRoteiro.id);
+                    $('#detalhesModal').modal('hide');
+                }
+            });
+
+            $('#btnAdicionarPlaneador').click(function() {
+                if (selectedRoteiro) {
+                    alert(t('adicionadoPlaneador', {
+                        nome: selectedRoteiro.nome,
+                        duracao: selectedRoteiro.duracao,
+                        atracoes: selectedRoteiro.atracoes.length
+                    }));
+                    $('#detalhesModal').modal('hide');
+                }
+            });
+
+            $('#btnVerPlaneador').click(function() {
+                alert(t('planeadorMsg'));
+            });
+
+            $('#btnCriarRoteiroPersonalizado').click(function() {
+                const nome = $('#novoRoteiroNome').val();
+                const duracao = $('#novoRoteiroDuracao').val();
+                const tipo = $('#novoRoteiroTipo').val();
+                const nivel = $('#novoRoteiroNivel').val();
+
+                if (!nome) {
+                    alert(t('erroNome'));
+                    return;
+                }
+
+                alert(t('personalizadoCriado', {
+                    nome: nome,
+                    duracao: duracao,
+                    tipo: tipo,
+                    nivel: nivel
+                }));
+
+                $('#novoRoteiroNome').val('');
+            });
+
+            // Tema
+            let isDarkTheme = true;
+
+            function toggleTheme() {
+                isDarkTheme = !isDarkTheme;
+                if (isDarkTheme) {
+                    $('body').removeClass('light-theme');
+                    $('#themeIcon').removeClass('bi-sun-fill').addClass('bi-moon-stars');
+                } else {
+                    $('body').addClass('light-theme');
+                    $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+                }
+                localStorage.setItem('sicami-theme-roteiros', isDarkTheme ? 'dark' : 'light');
+            }
+
+            const savedTheme = localStorage.getItem('sicami-theme-roteiros');
+            if (savedTheme === 'light') {
+                isDarkTheme = false;
+                $('body').addClass('light-theme');
+                $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+            }
+            $('#themeToggle').click(toggleTheme);
+
+            // Data/Hora
+            function updateDateTime() {
+                const now = new Date();
+                $('#dateTimeDisplay').text(
+                    now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR')
+                );
+            }
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+
+            // ============================================================
+            // INICIALIZAÇÃO
+            // ============================================================
+
+            setTimeout(initMapMini, 500);
+            applyTranslations();
+            aplicarFiltros();
+
+            console.log('✅ Roteiros de Malanje carregado!');
+            console.log(`📋 ${roteiros.length} roteiros disponíveis`);
+            console.log(`❤️ ${roteirosFavoritos.length} favoritos`);
+            console.log(`🌐 Idioma atual: ${currentLang}`);
+
+        });
+    </script>
+</body>
+</html>

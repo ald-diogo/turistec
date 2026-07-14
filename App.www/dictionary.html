@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de Línguas Locais - SICAMI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        /* Estilo geral - mantido do original */
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-image: url('images/dicionario.png');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Tabs - Glassmorphism */
+        .nav-tabs .nav-link {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 18px;
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            margin-right: 5px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: #fff;
+            border-bottom: 3px solid #0d6efd;
+            font-weight: bold;
+            box-shadow: 0 -2px 20px rgba(13, 110, 253, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-content {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 0 8px 8px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Cards - Glassmorphism */
+        .indicator-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 15px 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .indicator-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .indicator-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+            font-family: 'Times New Roman', Times, serif;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .indicator-card .label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .indicator-card .label i {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Cards de categoria - Glassmorphism */
+        .category-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+            color: #fff;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-card .category-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .category-card .category-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .category-card .category-count {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .category-card.active-category {
+            background: rgba(13, 110, 253, 0.3);
+            border-color: rgba(13, 110, 253, 0.5);
+        }
+
+        /* Cards de expressão - Glassmorphism */
+        .expression-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+
+        .expression-card:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateX(5px);
+        }
+
+        .expression-card .portuguese {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .expression-card .kimbundu {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #6ee7ff;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .expression-card .phonetic {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+
+        .expression-card .translation-english {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .expression-card .action-buttons .btn {
+            margin: 2px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .expression-card .action-buttons .btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Pesquisa - Glassmorphism */
+        .search-section {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .search-section h6 {
+            color: #fff;
+        }
+
+        .search-section .form-control,
+        .search-section .form-select {
+            font-family: 'Times New Roman', Times, serif;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .search-section .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-section .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(13, 110, 253, 0.5);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+
+        .search-section .btn-outline-secondary {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .search-section .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Botões - Glassmorphism */
+        .btn-primary {
+            background: rgba(13, 110, 253, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-primary:hover {
+            background: rgba(13, 110, 253, 0.8);
+        }
+
+        .btn-success {
+            background: rgba(25, 135, 84, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-success:hover {
+            background: rgba(25, 135, 84, 0.8);
+        }
+
+        .btn-warning {
+            background: rgba(255, 193, 7, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-warning:hover {
+            background: rgba(255, 193, 7, 0.8);
+        }
+
+        .btn-danger {
+            background: rgba(220, 53, 69, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-danger:hover {
+            background: rgba(220, 53, 69, 0.8);
+        }
+
+        .btn-info {
+            background: rgba(13, 202, 240, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-info:hover {
+            background: rgba(13, 202, 240, 0.8);
+        }
+
+        .btn-outline-secondary {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Título */
+        .page-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .page-title .badge {
+            background: rgba(13, 110, 253, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Notificação */
+        .notification-badge {
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* Animação de entrada */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Favoritos */
+        .favorite-btn.active {
+            color: #ffc107 !important;
+        }
+
+        .favorite-btn {
+            color: rgba(255, 255, 255, 0.3) !important;
+            transition: all 0.3s ease;
+        }
+
+        .favorite-btn:hover {
+            color: #ffc107 !important;
+            transform: scale(1.2);
+        }
+
+        /* Modal - Glassmorphism */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal .btn-close {
+            filter: invert(1);
+        }
+
+        /* #currentDateTime */
+        #currentDateTime {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .indicator-card .number {
+                font-size: 1.5rem;
+            }
+            .tab-content {
+                padding: 15px;
+            }
+            .page-title {
+                font-size: 1.5rem;
+            }
+            .expression-card .kimbundu {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Scroll personalizado */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Área de expressões - altura máxima com scroll */
+        .expressions-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .bg-primary {
+            background: rgba(13, 110, 253, 0.4) !important;
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Cabeçalho -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <h2 class="page-title">
+                        <i class="bi bi-translate text-primary"></i> 
+                        Guia de Línguas Locais
+                        <span class="badge bg-primary ms-2 notification-badge">KIMBUNDU</span>
+                    </h2>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-info text-dark" id="currentDateTime">
+                            <i class="bi bi-clock"></i> 
+                            <span id="dateTimeDisplay">Carregando...</span>
+                        </span>
+                        <button class="btn btn-outline-danger" id="btnFavoritos">
+                            <i class="bi bi-star"></i> Favoritos
+                        </button>
+                        <button class="btn btn-outline-success" id="btnDownloadOffline">
+                            <i class="bi bi-download"></i> Offline
+                        </button>
+                        <div class="input-group" style="width: 250px;">
+                            <input type="text" id="quickSearch" class="form-control" placeholder="🔍 Pesquisar...">
+                            <button class="btn btn-outline-primary" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel de Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-md-2 col-6">
+                <div class="indicator-card fade-in">
+                    <div class="number" id="totalExpressions">0</div>
+                    <div class="label"><i class="bi bi-book"></i> Total de Expressões</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="indicator-card success fade-in">
+                    <div class="number" id="favoritesCount">0</div>
+                    <div class="label"><i class="bi bi-star-fill"></i> Favoritos</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="indicator-card info fade-in">
+                    <div class="number" id="categoriesCount">0</div>
+                    <div class="label"><i class="bi bi-tags"></i> Categorias</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="indicator-card warning fade-in">
+                    <div class="number" id="searchedToday">0</div>
+                    <div class="label"><i class="bi bi-search"></i> Pesquisas Hoje</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="indicator-card danger fade-in">
+                    <div class="number" id="offlineStatus">✓</div>
+                    <div class="label"><i class="bi bi-wifi-off"></i> Offline</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="indicator-card success fade-in">
+                    <div class="number" id="pronunciations">0</div>
+                    <div class="label"><i class="bi bi-volume-up"></i> Áudios</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="dicionario-tab" data-bs-toggle="tab" data-bs-target="#dicionario" type="button" role="tab">
+                    <i class="bi bi-book"></i> Dicionário
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="favoritos-tab" data-bs-toggle="tab" data-bs-target="#favoritos" type="button" role="tab">
+                    <i class="bi bi-star"></i> Favoritos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="cultura-tab" data-bs-toggle="tab" data-bs-target="#cultura" type="button" role="tab">
+                    <i class="bi bi-info-circle"></i> Curiosidades
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <!-- Aba Dicionário -->
+            <div class="tab-pane fade show active" id="dicionario" role="tabpanel">
+                <div class="row">
+                    <!-- Coluna Esquerda - Categorias -->
+                    <div class="col-md-3">
+                        <!-- Pesquisa Rápida -->
+                        <div class="search-section">
+                            <h6><i class="bi bi-search"></i> Pesquisar Expressão</h6>
+                            <div class="input-group mb-3">
+                                <input type="text" id="searchExpression" class="form-control" placeholder="Palavra ou frase...">
+                                <button class="btn btn-outline-secondary" type="button" id="btnSearchExpr">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                            <div id="searchResults" class="list-group" style="display: none; max-height: 200px; overflow-y: auto;">
+                                <!-- Resultados da pesquisa -->
+                            </div>
+                            <small class="text-muted"><i class="bi bi-clock-history"></i> Pesquisas recentes: </small>
+                            <span class="badge bg-light text-dark">Bom dia</span>
+                            <span class="badge bg-light text-dark">Obrigado</span>
+                            <span class="badge bg-light text-dark">Água</span>
+                        </div>
+
+                        <!-- Categorias -->
+                        <h6 class="text-white mb-2"><i class="bi bi-tags"></i> Categorias</h6>
+                        <div id="categoriesList">
+                            <!-- Categorias via JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Coluna Direita - Expressões -->
+                    <div class="col-md-9">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="text-white" id="categoryTitle"><i class="bi bi-grid"></i> Todas as Expressões</h5>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary" id="btnVerTodos">
+                                    <i class="bi bi-grid"></i> Ver Todos
+                                </button>
+                            </div>
+                        </div>
+                        <div class="expressions-container" id="expressionsContainer">
+                            <!-- Expressões via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Favoritos -->
+            <div class="tab-pane fade" id="favoritos" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <h5 class="text-white mb-3"><i class="bi bi-star-fill text-warning"></i> Minhas Expressões Favoritas</h5>
+                        <div id="favoritesContainer">
+                            <!-- Favoritos via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Curiosidades -->
+            <div class="tab-pane fade" id="cultura" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="info-card">
+                            <h5 class="card-title"><i class="bi bi-info-circle text-info"></i> Sobre a Língua Kimbundu</h5>
+                            <div class="content text-white">
+                                <p><strong>Origem:</strong> O Kimbundu é uma das línguas bantu mais faladas em Angola, principalmente na região norte e centro, incluindo a província de Malanje.</p>
+                                <p><strong>Falantes:</strong> Estima-se que cerca de 3 milhões de pessoas falem Kimbundu como língua materna.</p>
+                                <p><strong>Importância Cultural:</strong> O Kimbundu é uma das línguas nacionais de Angola e desempenha um papel fundamental na preservação da cultura e tradições locais.</p>
+                                <p><strong>Curiosidade:</strong> Muitas palavras do Kimbundu foram incorporadas ao português falado em Angola, como "moleque" (mu'leke), "quilombo" (kilombo) e "banana" (mbanana).</p>
+                            </div>
+                        </div>
+                        <div class="info-card mt-3">
+                            <h5 class="card-title"><i class="bi bi-lightbulb text-warning"></i> Dica para Turistas</h5>
+                            <div class="content text-white">
+                                <p>Aprender algumas palavras em Kimbundu demonstra respeito pela cultura local e facilita a interação com as comunidades. Os habitantes locais apreciam muito quando os visitantes tentam comunicar na sua língua.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-card">
+                            <h5 class="card-title"><i class="bi bi-film text-primary"></i> Vídeo</h5>
+                            <div class="content text-center text-white">
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 40px 20px;">
+                                    <i class="bi bi-play-circle" style="font-size: 3rem; color: rgba(255,255,255,0.5);"></i>
+                                    <p class="mt-2">Pronúncia por falantes nativos</p>
+                                    <small class="text-muted">(Em breve)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Favoritos -->
+    <div class="modal fade" id="favoritesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-star-fill text-warning"></i> Expressões Favoritas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="favoritesModalBody">
+                    <!-- Conteúdo dos favoritos -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pronúncia -->
+    <div class="modal fade" id="pronunciationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-volume-up text-info"></i> Pronúncia</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center" id="pronunciationModalBody">
+                    <div style="font-size: 2rem;" id="pronunciationText">Kiaxi</div>
+                    <div style="font-size: 1.2rem; color: rgba(255,255,255,0.7);" id="pronunciationPhonetic">[ki-á-shi]</div>
+                    <div class="mt-3">
+                        <button class="btn btn-outline-primary" id="btnPlayAudio">
+                            <i class="bi bi-play-fill"></i> Ouvir Pronúncia
+                        </button>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">Áudio disponível em breve</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Dados das expressões
+            const expressionsData = [
+                // Cumprimentos
+                { id: 1, categoria: 'Cumprimentos', portugues: 'Olá', kimbundu: 'M\'Bote', fonetica: '[m\'bo-tê]', ingles: 'Hello', favorito: false },
+                { id: 2, categoria: 'Cumprimentos', portugues: 'Bom dia', kimbundu: 'Kiaxi', fonetica: '[ki-á-shi]', ingles: 'Good morning', favorito: false },
+                { id: 3, categoria: 'Cumprimentos', portugues: 'Boa tarde', kimbundu: 'Dilolo dia', fonetica: '[di-lo-lo dí-a]', ingles: 'Good afternoon', favorito: false },
+                { id: 4, categoria: 'Cumprimentos', portugues: 'Boa noite', kimbundu: 'Utuku uambote', fonetica: '[u-tu-ku u-am-bô-te]', ingles: 'Good evening/night', favorito: false },
+                { id: 5, categoria: 'Cumprimentos', portugues: 'Como está?', kimbundu: 'Wamoxi?', fonetica: '[wa-mo-chí?]', ingles: 'How are you?', favorito: false },
+                { id: 6, categoria: 'Cumprimentos', portugues: 'Estou bem', kimbundu: 'Ndili bwino', fonetica: '[n-dí-li bwi-no]', ingles: 'I\'m fine', favorito: false },
+                { id: 7, categoria: 'Cumprimentos', portugues: 'Obrigado', kimbundu: 'Matondo', fonetica: '[ma-ton-do]', ingles: 'Thank you', favorito: false },
+                { id: 8, categoria: 'Cumprimentos', portugues: 'De nada', kimbundu: 'Katu', fonetica: '[ka-tu]', ingles: 'You\'re welcome', favorito: false },
+                { id: 9, categoria: 'Cumprimentos', portugues: 'Até logo', kimbundu: 'Tuamonana', fonetica: '[tu-a-mo-na-na]', ingles: 'See you later', favorito: false },
+                // Alimentação
+                { id: 10, categoria: 'Alimentação', portugues: 'Água', kimbundu: 'Maza', fonetica: '[ma-za]', ingles: 'Water', favorito: false },
+                { id: 11, categoria: 'Alimentação', portugues: 'Comida', kimbundu: 'Kudya', fonetica: '[ku-dya]', ingles: 'Food', favorito: false },
+                { id: 12, categoria: 'Alimentação', portugues: 'Tenho fome', kimbundu: 'Ndewa nzala', fonetica: '[n-de-wa n-za-la]', ingles: 'I\'m hungry', favorito: false },
+                { id: 13, categoria: 'Alimentação', portugues: 'Quero comer', kimbundu: 'Nakele kudya', fonetica: '[na-ke-le ku-dya]', ingles: 'I want to eat', favorito: false },
+                { id: 14, categoria: 'Alimentação', portugues: 'Quanto custa?', kimbundu: 'Yali yikadi?', fonetica: '[ya-li yi-ka-di?]', ingles: 'How much does it cost?', favorito: false },
+                // Direções
+                { id: 15, categoria: 'Direções', portugues: 'Onde fica...?', kimbundu: 'Kuipi ku...?', fonetica: '[ku-i-pi ku...?]', ingles: 'Where is...?', favorito: false },
+                { id: 16, categoria: 'Direções', portugues: 'Esquerda', kimbundu: 'Luboko lwa malembe', fonetica: '[lu-bo-ko lwa ma-lem-be]', ingles: 'Left', favorito: false },
+                { id: 17, categoria: 'Direções', portugues: 'Direita', kimbundu: 'Luboko lwa kudya', fonetica: '[lu-bo-ko lwa ku-dya]', ingles: 'Right', favorito: false },
+                { id: 18, categoria: 'Direções', portugues: 'Em frente', kimbundu: 'Kumpala', fonetica: '[kum-pa-la]', ingles: 'Straight ahead', favorito: false },
+                { id: 19, categoria: 'Direções', portugues: 'Longe', kimbundu: 'Kutali', fonetica: '[ku-ta-li]', ingles: 'Far', favorito: false },
+                { id: 20, categoria: 'Direções', portugues: 'Perto', kimbundu: 'Pipi', fonetica: '[pi-pi]', ingles: 'Near', favorito: false },
+                // Turismo
+                { id: 21, categoria: 'Turismo', portugues: 'Hotel', kimbundu: 'Hoteli', fonetica: '[ho-te-li]', ingles: 'Hotel', favorito: false },
+                { id: 22, categoria: 'Turismo', portugues: 'Restaurante', kimbundu: 'Restaurante', fonetica: '[res-tau-ran-te]', ingles: 'Restaurant', favorito: false },
+                { id: 23, categoria: 'Turismo', portugues: 'Guia turístico', kimbundu: 'Mulongi wa vutambi', fonetica: '[mu-lon-gi wa vu-tam-bi]', ingles: 'Tour guide', favorito: false },
+                { id: 24, categoria: 'Turismo', portugues: 'Parque', kimbundu: 'Paki', fonetica: '[pa-ki]', ingles: 'Park', favorito: false },
+                { id: 25, categoria: 'Turismo', portugues: 'Cascata', kimbundu: 'Mbanza ya maza', fonetica: '[m-ban-za ya ma-za]', ingles: 'Waterfall', favorito: false },
+                // Emergência
+                { id: 26, categoria: 'Emergência', portugues: 'Ajude-me', kimbundu: 'Nsadisa', fonetica: '[n-sa-di-sa]', ingles: 'Help me', favorito: false },
+                { id: 27, categoria: 'Emergência', portugues: 'Chame a polícia', kimbundu: 'Binga pulisia', fonetica: '[bin-ga pu-li-si-a]', ingles: 'Call the police', favorito: false },
+                { id: 28, categoria: 'Emergência', portugues: 'Preciso de um médico', kimbundu: 'Nakele munganga', fonetica: '[na-ke-le mun-gan-ga]', ingles: 'I need a doctor', favorito: false },
+                { id: 29, categoria: 'Emergência', portugues: 'Estou perdido', kimbundu: 'Nasili nzila', fonetica: '[na-si-li n-zi-la]', ingles: 'I\'m lost', favorito: false },
+                // Conversação
+                { id: 30, categoria: 'Conversação', portugues: 'Qual é o seu nome?', kimbundu: 'Dina diobe nani?', fonetica: '[di-na di-o-be na-ni?]', ingles: 'What\'s your name?', favorito: false },
+                { id: 31, categoria: 'Conversação', portugues: 'O meu nome é...', kimbundu: 'Dina diami...', fonetica: '[di-na di-a-mi...]', ingles: 'My name is...', favorito: false },
+                { id: 32, categoria: 'Conversação', portugues: 'Eu sou turista', kimbundu: 'Mono mwendji wa vutambi', fonetica: '[mo-no mwen-dji wa vu-tam-bi]', ingles: 'I\'m a tourist', favorito: false },
+                { id: 33, categoria: 'Conversação', portugues: 'Não entendo', kimbundu: 'Kena kuvisisa', fonetica: '[ke-na ku-vi-si-sa]', ingles: 'I don\'t understand', favorito: false },
+                { id: 34, categoria: 'Conversação', portugues: 'Pode repetir?', kimbundu: 'Vutula diaka', fonetica: '[vu-tu-la di-a-ka]', ingles: 'Can you repeat?', favorito: false }
+            ];
+
+            const categories = ['Cumprimentos', 'Alimentação', 'Direções', 'Turismo', 'Emergência', 'Conversação'];
+            let currentCategory = 'Todas';
+            let favorites = JSON.parse(localStorage.getItem('guiaKimbunduFavoritos')) || [];
+            let searchCount = parseInt(localStorage.getItem('guiaKimbunduSearchCount')) || 0;
+            let currentExpressions = [...expressionsData];
+
+            // Atualizar estatísticas
+            function updateStats() {
+                const total = expressionsData.length;
+                const favCount = favorites.length;
+                const catCount = categories.length;
+                const audioCount = 0; // Placeholder
+
+                $('#totalExpressions').text(total);
+                $('#favoritesCount').text(favCount);
+                $('#categoriesCount').text(catCount);
+                $('#searchedToday').text(searchCount);
+                $('#pronunciations').text(audioCount);
+            }
+            updateStats();
+
+            // Data e hora
+            function updateDateTime() {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('pt-BR');
+                const timeStr = now.toLocaleTimeString('pt-BR');
+                $('#dateTimeDisplay').text(`${dateStr} ${timeStr}`);
+            }
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+
+            // Renderizar categorias
+            function renderCategories() {
+                const container = $('#categoriesList');
+                container.empty();
+
+                // Botão "Todos"
+                container.append(`
+                    <div class="category-card ${currentCategory === 'Todas' ? 'active-category' : ''}" data-categoria="Todas">
+                        <div class="category-icon"><i class="bi bi-grid"></i></div>
+                        <div class="category-name">Todas</div>
+                        <div class="category-count">${expressionsData.length} expressões</div>
+                    </div>
+                `);
+
+                categories.forEach(cat => {
+                    const count = expressionsData.filter(e => e.categoria === cat).length;
+                    const iconMap = {
+                        'Cumprimentos': 'bi bi-hand-thumbs-up',
+                        'Alimentação': 'bi bi-cup-straw',
+                        'Direções': 'bi bi-signpost-2',
+                        'Turismo': 'bi bi-compass',
+                        'Emergência': 'bi bi-exclamation-triangle',
+                        'Conversação': 'bi bi-chat'
+                    };
+                    container.append(`
+                        <div class="category-card ${currentCategory === cat ? 'active-category' : ''}" data-categoria="${cat}">
+                            <div class="category-icon"><i class="${iconMap[cat] || 'bi bi-tag'}"></i></div>
+                            <div class="category-name">${cat}</div>
+                            <div class="category-count">${count} expressões</div>
+                        </div>
+                    `);
+                });
+            }
+
+            // Renderizar expressões
+            function renderExpressions(expressions) {
+                const container = $('#expressionsContainer');
+                container.empty();
+
+                if (expressions.length === 0) {
+                    container.html(`
+                        <div class="text-center text-white py-5">
+                            <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.5;"></i>
+                            <p class="mt-3">Nenhuma expressão encontrada</p>
+                        </div>
+                    `);
+                    return;
+                }
+
+                expressions.forEach(expr => {
+                    const isFav = favorites.includes(expr.id);
+                    container.append(`
+                        <div class="expression-card fade-in" data-id="${expr.id}">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <div class="portuguese">${expr.portugues}</div>
+                                    <div class="translation-english"><i class="bi bi-globe"></i> ${expr.ingles}</div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="kimbundu">${expr.kimbundu}</div>
+                                    <div class="phonetic">${expr.fonetica}</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="action-buttons d-flex flex-wrap justify-content-end gap-1">
+                                        <button class="btn btn-sm btn-info btn-pronunciar" data-id="${expr.id}">
+                                            <i class="bi bi-volume-up"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-warning btn-favorito ${isFav ? 'active' : ''}" data-id="${expr.id}">
+                                            <i class="bi ${isFav ? 'bi-star-fill' : 'bi-star'}"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
+            // Renderizar favoritos
+            function renderFavorites() {
+                const container = $('#favoritesContainer');
+                container.empty();
+
+                const favExpressions = expressionsData.filter(e => favorites.includes(e.id));
+
+                if (favExpressions.length === 0) {
+                    container.html(`
+                        <div class="text-center text-white py-5">
+                            <i class="bi bi-star" style="font-size: 3rem; opacity: 0.5;"></i>
+                            <p class="mt-3">Nenhuma expressão favorita ainda</p>
+                            <p class="text-muted">Marque uma expressão como favorita no Dicionário</p>
+                        </div>
+                    `);
+                    return;
+                }
+
+                favExpressions.forEach(expr => {
+                    container.append(`
+                        <div class="expression-card fade-in" data-id="${expr.id}">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <div class="portuguese">${expr.portugues}</div>
+                                    <div class="translation-english"><i class="bi bi-globe"></i> ${expr.ingles}</div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="kimbundu">${expr.kimbundu}</div>
+                                    <div class="phonetic">${expr.fonetica}</div>
+                                    <small class="text-muted">${expr.categoria}</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="action-buttons d-flex flex-wrap justify-content-end gap-1">
+                                        <button class="btn btn-sm btn-info btn-pronunciar" data-id="${expr.id}">
+                                            <i class="bi bi-volume-up"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-remover-fav" data-id="${expr.id}">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
+            // Selecionar categoria
+            function selectCategory(category) {
+                currentCategory = category;
+                renderCategories();
+
+                if (category === 'Todas') {
+                    currentExpressions = [...expressionsData];
+                    $('#categoryTitle').html('<i class="bi bi-grid"></i> Todas as Expressões');
+                } else {
+                    currentExpressions = expressionsData.filter(e => e.categoria === category);
+                    $('#categoryTitle').html(`<i class="bi bi-tag"></i> ${category}`);
+                }
+
+                renderExpressions(currentExpressions);
+            }
+
+            // Pesquisar expressões
+            function searchExpressions(term) {
+                if (term.length < 2) {
+                    $('#searchResults').hide();
+                    return;
+                }
+
+                const results = expressionsData.filter(e =>
+                    e.portugues.toLowerCase().includes(term) ||
+                    e.kimbundu.toLowerCase().includes(term) ||
+                    e.ingles.toLowerCase().includes(term) ||
+                    e.categoria.toLowerCase().includes(term)
+                );
+
+                if (results.length === 0) {
+                    $('#searchResults').html('<div class="list-group-item text-white text-center">Nenhum resultado encontrado</div>').show();
+                    return;
+                }
+
+                let html = '';
+                results.slice(0, 10).forEach(e => {
+                    html += `
+                        <div class="list-group-item suggestion-item" data-id="${e.id}">
+                            <strong>${e.portugues}</strong> → ${e.kimbundu}
+                            <br><small class="text-muted">${e.categoria}</small>
+                        </div>
+                    `;
+                });
+                if (results.length > 10) {
+                    html += `<div class="list-group-item text-muted text-center">+ ${results.length - 10} resultados</div>`;
+                }
+                $('#searchResults').html(html).show();
+
+                // Incrementar contador de pesquisas
+                searchCount++;
+                localStorage.setItem('guiaKimbunduSearchCount', searchCount);
+                $('#searchedToday').text(searchCount);
+            }
+
+            // Alternar favorito
+            function toggleFavorite(id) {
+                const index = favorites.indexOf(id);
+                if (index > -1) {
+                    favorites.splice(index, 1);
+                } else {
+                    favorites.push(id);
+                }
+                localStorage.setItem('guiaKimbunduFavoritos', JSON.stringify(favorites));
+                
+                // Atualizar UI
+                const expr = expressionsData.find(e => e.id === id);
+                if (expr) {
+                    expr.favorito = !expr.favorito;
+                }
+                
+                updateStats();
+                renderExpressions(currentExpressions);
+                renderFavorites();
+            }
+
+            // Evento de clique nas categorias
+            $(document).on('click', '.category-card', function() {
+                const category = $(this).data('categoria');
+                selectCategory(category);
+            });
+
+            // Evento de pesquisa
+            $('#searchExpression').on('input', function() {
+                const term = $(this).val().toLowerCase();
+                searchExpressions(term);
+            });
+
+            $('#btnSearchExpr').click(function() {
+                const term = $('#searchExpression').val().toLowerCase();
+                if (term.length < 2) {
+                    alert('Digite pelo menos 2 caracteres para pesquisar.');
+                    return;
+                }
+                searchExpressions(term);
+            });
+
+            // Evento de seleção de resultado de pesquisa
+            $(document).on('click', '.suggestion-item', function() {
+                const id = parseInt($(this).data('id'));
+                const expr = expressionsData.find(e => e.id === id);
+                if (expr) {
+                    $('#searchExpression').val(expr.portugues);
+                    $('#searchResults').hide();
+                    // Selecionar a categoria da expressão
+                    selectCategory(expr.categoria);
+                    // Scroll até a expressão
+                    setTimeout(() => {
+                        const card = $(`.expression-card[data-id="${id}"]`);
+                        if (card.length) {
+                            $('.expressions-container').animate({
+                                scrollTop: card.offset().top - $('.expressions-container').offset().top + $('.expressions-container').scrollTop()
+                            }, 300);
+                            card.addClass('border border-primary');
+                            setTimeout(() => card.removeClass('border border-primary'), 2000);
+                        }
+                    }, 300);
+                }
+            });
+
+            // Evento de favoritar
+            $(document).on('click', '.btn-favorito', function(e) {
+                e.stopPropagation();
+                const id = parseInt($(this).data('id'));
+                toggleFavorite(id);
+            });
+
+            // Evento de remover favorito
+            $(document).on('click', '.btn-remover-fav', function(e) {
+                e.stopPropagation();
+                const id = parseInt($(this).data('id'));
+                toggleFavorite(id);
+            });
+
+            // Evento de pronunciar
+            $(document).on('click', '.btn-pronunciar', function(e) {
+                e.stopPropagation();
+                const id = parseInt($(this).data('id'));
+                const expr = expressionsData.find(e => e.id === id);
+                if (expr) {
+                    $('#pronunciationText').text(expr.kimbundu);
+                    $('#pronunciationPhonetic').text(expr.fonetica);
+                    $('#pronunciationModal').modal('show');
+                }
+            });
+
+            // Botão "Ver Todos"
+            $('#btnVerTodos').click(function() {
+                selectCategory('Todas');
+            });
+
+            // Botão Favoritos (abrir modal)
+            $('#btnFavoritos').click(function() {
+                const favExpressions = expressionsData.filter(e => favorites.includes(e.id));
+                if (favExpressions.length === 0) {
+                    alert('Você ainda não tem expressões favoritas.');
+                    return;
+                }
+                
+                let html = '';
+                favExpressions.forEach(e => {
+                    html += `
+                        <div class="expression-card" data-id="${e.id}">
+                            <div class="row align-items-center">
+                                <div class="col-md-5">
+                                    <div class="portuguese">${e.portugues}</div>
+                                    <div class="translation-english"><i class="bi bi-globe"></i> ${e.ingles}</div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="kimbundu">${e.kimbundu}</div>
+                                    <div class="phonetic">${e.fonetica}</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-sm btn-danger btn-remover-fav" data-id="${e.id}">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                $('#favoritesModalBody').html(html);
+                $('#favoritesModal').modal('show');
+            });
+
+            // Offline
+            $('#btnDownloadOffline').click(function() {
+                alert('📥 Download do Guia Offline iniciado!\n\nO guia estará disponível para consulta sem internet.');
+            });
+
+            // Botão "Ver Todos" na aba Favoritos
+            $(document).on('click', '.btn-remover-fav', function(e) {
+                e.stopPropagation();
+                const id = parseInt($(this).data('id'));
+                toggleFavorite(id);
+                // Atualizar modal se estiver aberto
+                if ($('#favoritesModal').is(':visible')) {
+                    const favExpressions = expressionsData.filter(e => favorites.includes(e.id));
+                    let html = '';
+                    favExpressions.forEach(e => {
+                        html += `
+                            <div class="expression-card" data-id="${e.id}">
+                                <div class="row align-items-center">
+                                    <div class="col-md-5">
+                                        <div class="portuguese">${e.portugues}</div>
+                                        <div class="translation-english"><i class="bi bi-globe"></i> ${e.ingles}</div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="kimbundu">${e.kimbundu}</div>
+                                        <div class="phonetic">${e.fonetica}</div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-sm btn-danger btn-remover-fav" data-id="${e.id}">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    $('#favoritesModalBody').html(html);
+                    if (favExpressions.length === 0) {
+                        $('#favoritesModal').modal('hide');
+                    }
+                }
+            });
+
+            // Fechar resultados ao clicar fora
+            $(document).click(function(e) {
+                if (!$(e.target).closest('.search-section').length) {
+                    $('#searchResults').hide();
+                }
+            });
+
+            // Inicializar
+            renderCategories();
+            selectCategory('Todas');
+            renderFavorites();
+
+            console.log('✅ Guia de Línguas Locais - Kimbundu carregado com sucesso!');
+            console.log(`📚 ${expressionsData.length} expressões disponíveis em ${categories.length} categorias`);
+        });
+    </script>
+</body>
+</html>

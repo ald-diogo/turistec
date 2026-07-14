@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Meteorologia de Malanje - Sistema de Apoio ao Turismo</title>
+    <!-- Bootstrap 5 + Icons + Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js para gráficos interativos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e0f2fe 0%, #d9f0ec 100%);
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Inter', sans-serif;
+            padding: 2rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Modal estilo glassmorphism + tema africano */
+        .modal-malanje {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            border: none;
+            box-shadow: 0 30px 50px rgba(0, 32, 64, 0.25), 0 0 0 1px rgba(78, 159, 120, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .modal-header-custom {
+            border-bottom: 2px solid rgba(0, 150, 136, 0.3);
+            background: linear-gradient(135deg, #0b3b3f, #1c6e5e);
+            border-radius: 2rem 2rem 0 0;
+            color: white;
+            padding: 1.2rem 1.8rem;
+        }
+
+        .modal-body-custom {
+            padding: 1.8rem;
+            max-height: 80vh;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .card-glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(6px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(72, 187, 150, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+
+        .card-glass:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.2);
+            background: rgba(255,255,240,0.85);
+        }
+
+        .clima-card {
+            text-align: center;
+            padding: 0.8rem;
+            border-radius: 1.2rem;
+        }
+
+        .hover-scale {
+            transition: all 0.2s;
+        }
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+
+        .badge-weather {
+            font-size: 0.75rem;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 40px;
+        }
+
+        .map-municipio {
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(210, 240, 220, 0.7);
+            border-left: 4px solid #2b7a62;
+        }
+        .map-municipio:hover {
+            background: #c8e6df;
+            transform: translateX(6px);
+        }
+
+        .tooltip-custom {
+            position: relative;
+            display: inline-block;
+        }
+
+        .table-responsive::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .btn-close-white {
+            filter: brightness(0) invert(1);
+        }
+
+        .animated-icon {
+            animation: floatSoft 3s infinite ease-in-out;
+        }
+
+        @keyframes floatSoft {
+            0% { transform: translateY(0px);}
+            50% { transform: translateY(-5px);}
+            100% { transform: translateY(0px);}
+        }
+
+        .alert-animated {
+            animation: pulseWarning 0.6s ease;
+        }
+        @keyframes pulseWarning {
+            0% { opacity: 0.6; transform: scale(0.98);}
+            100% { opacity: 1; transform: scale(1);}
+        }
+
+        @media (max-width: 768px) {
+            .modal-body-custom { padding: 1rem; }
+            .card-glass { margin-bottom: 1rem; }
+        }
+
+        /* estilo para tooltips de mapa */
+        .mun-tooltip {
+            visibility: hidden;
+            background-color: #1e2a32;
+            color: #fff;
+            text-align: center;
+            border-radius: 20px;
+            padding: 4px 10px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .map-municipio:hover .mun-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Botão para abrir o modal (simulação) -->
+<div class="text-center">
+    <button class="btn btn-success btn-lg shadow-lg rounded-pill px-5 py-3" data-bs-toggle="modal" data-bs-target="#weatherModalMalanje" style="background: #0f5b4b; border: none;">
+        <i class="fas fa-cloud-sun me-2"></i> Abrir Painel Meteorológico de Malanje
+    </button>
+</div>
+
+<!-- MODAL PRINCIPAL -->
+<div class="modal fade" id="weatherModalMalanje" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-labelledby="modalMalanjeTitle" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-md-down modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-malanje">
+            <!-- Cabeçalho com animação e ícone -->
+            <div class="modal-header-custom d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fas fa-cloud-sun-rain fa-3x animated-icon" style="color: #ffd966;"></i>
+                    <div>
+                        <h4 class="modal-title fw-bold" id="modalMalanjeTitle">🌍 Meteorologia da Província de Malanje</h4>
+                        <p class="mb-0 opacity-75 small">Informações climáticas em tempo real para todos os municípios da província</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body-custom">
+                <!-- 1. RESUMO GERAL com cartões animados -->
+                <div class="row g-3 mb-5" id="resumoGeral">
+                    <!-- preenchido via js com dados simulados em tempo real -->
+                </div>
+
+                <!-- 2. MAPA INTERATIVO (Municípios estilo lista / grid) -->
+                <div class="card-glass p-3 mb-5">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-map-marked-alt me-2 text-success"></i> Mapa Climático Interativo</h5>
+                    <p class="small text-muted">Clique em cada município para ver detalhes meteorológicos instantâneos.</p>
+                    <div class="row row-cols-2 row-cols-md-4 g-2" id="mapaMunicipios"></div>
+                </div>
+
+                <!-- 3. TABELA METEOROLÓGICA com pesquisa, ordenação, paginação -->
+                <div class="card-glass p-3 mb-5">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-2"><i class="fas fa-table-list me-2"></i>Condições por Município</h5>
+                        <div class="input-group w-auto">
+                            <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                            <input type="text" id="searchMunicipio" class="form-control form-control-sm" placeholder="Pesquisar município...">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="weatherTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th onclick="sortTable(0)" style="cursor:pointer;">Município <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortTable(1)" style="cursor:pointer;">Temperatura <i class="fas fa-sort"></i></th>
+                                    <th>Estado</th>
+                                    <th onclick="sortTable(3)" style="cursor:pointer;">Humidade <i class="fas fa-sort"></i></th>
+                                    <th>Vento (km/h)</th>
+                                    <th>Prob. Chuva</th>
+                                    <th>Atualização</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                    <!-- Paginação simplificada -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span id="pageInfo" class="small"></span>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary" id="prevPageBtn"><i class="fas fa-chevron-left"></i></button>
+                            <button class="btn btn-sm btn-outline-secondary ms-2" id="nextPageBtn"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. PREVISÃO 7 DIAS + RECOMENDAÇÕES TURÍSTICAS INTELIGENTES -->
+                <div class="row g-4 mb-5">
+                    <div class="col-md-7">
+                        <div class="card-glass p-3 h-100">
+                            <h5 class="fw-bold"><i class="fas fa-calendar-week me-2"></i>Previsão 7 Dias (Malanje cidade)</h5>
+                            <div id="previsao7dias" class="d-flex flex-column gap-2 mt-3"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="card-glass p-3 h-100" style="background: linear-gradient(145deg, #eef7f2, #d4efe4);">
+                            <h5 class="fw-bold"><i class="fas fa-umbrella-beach me-2"></i>Recomendações Turísticas Inteligentes</h5>
+                            <div id="recomendacoesTurismo" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. GRÁFICOS ESTATÍSTICOS -->
+                <div class="card-glass p-3 mb-5">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-chart-line me-2"></i>Estatísticas Climáticas da Província</h5>
+                    <div class="row">
+                        <div class="col-lg-6 mb-3">
+                            <canvas id="tempChart" width="400" height="250" style="max-height: 250px;"></canvas>
+                            <p class="text-center small text-muted">Evolução da Temperatura (média últimos dias)</p>
+                        </div>
+                        <div class="col-lg-6 mb-3">
+                            <canvas id="humidityChart" width="400" height="250" style="max-height: 250px;"></canvas>
+                            <p class="text-center small text-muted">Humidade por Município (%)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. ALERTAS METEOROLÓGICOS -->
+                <div class="mt-3" id="alertasContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // **********************************************
+    // Dados MOCK (simulando tempo real)
+    // **********************************************
+    const municipios = [
+        "Malanje", "Cacuso", "Calandula", "Cambundi-Catembo", "Cangandala", "Caombo", "Cuaba Nzogo",
+        "Kiwaba Nzoji", "Luquembo", "Marimba", "Massango", "Mucari", "Quela", "Quirima"
+    ];
+
+    // Gerar dados meteorológicos realistas
+    function gerarClima(mun) {
+        const condicoes = ["Ensolarado", "Parcialmente Nublado", "Nublado", "Chuva Leve", "Trovoada", "Ventoso"];
+        let idx = Math.floor(Math.random() * condicoes.length);
+        let cond = condicoes[idx];
+        let tempBase = 22;
+        if (cond === "Ensolarado") tempBase = 28 + Math.random() * 4;
+        else if (cond === "Parcialmente Nublado") tempBase = 24 + Math.random() * 3;
+        else if (cond === "Nublado") tempBase = 20 + Math.random() * 3;
+        else if (cond === "Chuva Leve") tempBase = 21 + Math.random() * 2;
+        else if (cond === "Trovoada") tempBase = 23 + Math.random() * 2;
+        else tempBase = 24;
+        
+        let temp = Math.round(tempBase * 10) / 10;
+        let humidade = Math.floor(45 + Math.random() * 45);
+        let vento = Math.floor(5 + Math.random() * 22);
+        let probChuva = (cond.includes("Chuva") || cond.includes("Trovoada")) ? Math.floor(60 + Math.random() * 35) : Math.floor(Math.random() * 40);
+        let uv = Math.floor(4 + Math.random() * 8);
+        let atualizacao = "Agora " + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        return { municipio: mun, temp, condicao: cond, humidade, vento, probChuva, uv, atualizacao };
+    }
+
+    let datasetMunicipios = municipios.map(m => gerarClima(m));
+    
+    // Atualiza periodicamente alguns dados (simula tempo real)
+    function refreshRandomData() {
+        const indices = [0,3,5,7,10,12];
+        indices.forEach(i => {
+            if(datasetMunicipios[i]) datasetMunicipios[i] = gerarClima(datasetMunicipios[i].municipio);
+        });
+        renderizarTabela();
+        atualizarResumoGeral();
+        atualizarMapa();
+        atualizarAlertas();
+        atualizarRecomendacoes();
+        atualizarGraficos();
+    }
+
+    // 1. RESUMO GERAL
+    function atualizarResumoGeral() {
+        let temps = datasetMunicipios.map(m => m.temp);
+        let hums = datasetMunicipios.map(m => m.humidade);
+        let ventos = datasetMunicipios.map(m => m.vento);
+        let uvs = datasetMunicipios.map(m => m.uv);
+        let probs = datasetMunicipios.map(m => m.probChuva);
+        let condicoesCount = {};
+        datasetMunicipios.forEach(m => condicoesCount[m.condicao] = (condicoesCount[m.condicao] || 0) + 1);
+        let predominante = Object.keys(condicoesCount).reduce((a,b) => condicoesCount[a] > condicoesCount[b] ? a : b, "Ensolarado");
+        
+        let mediaTemp = (temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1);
+        let mediaHum = Math.round(hums.reduce((a,b)=>a+b,0)/hums.length);
+        let mediaVento = (ventos.reduce((a,b)=>a+b,0)/ventos.length).toFixed(1);
+        let mediaUV = (uvs.reduce((a,b)=>a+b,0)/uvs.length).toFixed(1);
+        let mediaProb = Math.round(probs.reduce((a,b)=>a+b,0)/probs.length);
+        
+        const container = document.getElementById('resumoGeral');
+        container.innerHTML = `
+            <div class="col-md-4 col-lg-2"><div class="clima-card card-glass p-2"><i class="fas fa-thermometer-half fa-2x text-danger"></i><h6 class="mt-2">Temp. Média</h6><h4>${mediaTemp}°C</h4></div></div>
+            <div class="col-md-4 col-lg-2"><div class="clima-card card-glass p-2"><i class="fas fa-tint fa-2x text-info"></i><h6>Humidade Média</h6><h4>${mediaHum}%</h4></div></div>
+            <div class="col-md-4 col-lg-2"><div class="clima-card card-glass p-2"><i class="fas fa-wind fa-2x text-secondary"></i><h6>Vento Médio</h6><h4>${mediaVento} km/h</h4></div></div>
+            <div class="col-md-4 col-lg-2"><div class="clima-card card-glass p-2"><i class="fas fa-sun fa-2x text-warning"></i><h6>Índice UV Médio</h6><h4>${mediaUV}</h4></div></div>
+            <div class="col-md-4 col-lg-2"><div class="clima-card card-glass p-2"><i class="fas fa-cloud-rain fa-2x text-primary"></i><h6>Prob. Chuva Média</h6><h4>${mediaProb}%</h4></div></div>
+            <div class="col-md-4 col-lg-2"><div class="clima-card card-glass p-2"><i class="fas fa-cloud-sun fa-2x text-success"></i><h6>Predominante</h6><h4>${predominante}</h4></div></div>
+        `;
+    }
+
+    // Mapa interativo com tooltip e clique
+    function atualizarMapa() {
+        const mapaDiv = document.getElementById('mapaMunicipios');
+        mapaDiv.innerHTML = datasetMunicipios.map(m => {
+            let corBg = m.condicao === "Ensolarado" ? "#fee9b0" : (m.condicao.includes("Chuva") ? "#b2dfdb" : (m.condicao === "Trovoada" ? "#d4c2ad" : "#c8e6df"));
+            let iconeClima = m.condicao === "Ensolarado" ? "fa-sun" : (m.condicao.includes("Nublado") ? "fa-cloud" : (m.condicao.includes("Chuva") ? "fa-cloud-rain" : "fa-bolt"));
+            return `
+                <div class="col map-municipio position-relative p-2 rounded-3" style="background: ${corBg};" onclick="alertDetalhesMunicipio('${m.municipio}')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong><i class="fas ${iconeClima} me-1"></i> ${m.municipio}</strong>
+                        <span class="badge rounded-pill bg-dark">${m.temp}°C</span>
+                    </div>
+                    <small class="text-muted">${m.condicao} | 💧${m.humidade}%</small>
+                    <span class="mun-tooltip">🌡️ ${m.temp}°C, 🌬️ ${m.vento}km/h, 🌧️${m.probChuva}%</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.alertDetalhesMunicipio = function(nomeMun) {
+        let data = datasetMunicipios.find(m => m.municipio === nomeMun);
+        if(data) alert(`📍 ${data.municipio}\n🌡️ Temperatura: ${data.temp}°C\n☁️ Estado: ${data.condicao}\n💧 Humidade: ${data.humidade}%\n💨 Vento: ${data.vento} km/h\n🌧️ Prob. Chuva: ${data.probChuva}%\n🕒 ${data.atualizacao}`);
+    };
+
+    // Tabela com paginação, pesquisa, ordenação
+    let currentPage = 1;
+    let rowsPerPage = 6;
+    let filteredData = [...datasetMunicipios];
+    let sortColumn = null;
+    let sortAsc = true;
+
+    function filterTable() {
+        let searchTerm = document.getElementById('searchMunicipio').value.toLowerCase();
+        filteredData = datasetMunicipios.filter(m => m.municipio.toLowerCase().includes(searchTerm));
+        if(sortColumn !== null) sortData();
+        currentPage = 1;
+        renderizarTabela();
+    }
+
+    function sortTable(colIndex) {
+        sortColumn = colIndex;
+        sortAsc = !sortAsc;
+        sortData();
+        renderizarTabela();
+    }
+
+    function sortData() {
+        filteredData.sort((a,b) => {
+            let valA, valB;
+            if(sortColumn === 0) { valA = a.municipio; valB = b.municipio; }
+            else if(sortColumn === 1) { valA = a.temp; valB = b.temp; }
+            else if(sortColumn === 3) { valA = a.humidade; valB = b.humidade; }
+            else return 0;
+            if(typeof valA === 'string') return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            return sortAsc ? valA - valB : valB - valA;
+        });
+    }
+
+    function renderizarTabela() {
+        const start = (currentPage-1)*rowsPerPage;
+        const end = start + rowsPerPage;
+        const pageData = filteredData.slice(start, end);
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = pageData.map(m => `
+            <tr>
+                <td><i class="fas fa-map-pin text-success"></i> ${m.municipio}</td>
+                <td><span class="fw-bold">${m.temp}°C</span></td>
+                <td><i class="fas ${m.condicao === "Ensolarado" ? "fa-sun" : (m.condicao.includes("Nublado")?"fa-cloud":"fa-cloud-rain")} me-1"></i> ${m.condicao}</td>
+                <td>${m.humidade}%</td>
+                <td><i class="fas fa-wind"></i> ${m.vento} km/h</td>
+                <td>${m.probChuva}% <i class="fas fa-droplet"></i></td>
+                <td><small>${m.atualizacao}</small></td>
+            </tr>
+        `).join('');
+        document.getElementById('pageInfo').innerText = `Página ${currentPage} de ${Math.ceil(filteredData.length/rowsPerPage) || 1}`;
+        document.getElementById('prevPageBtn').disabled = currentPage === 1;
+        document.getElementById('nextPageBtn').disabled = currentPage >= Math.ceil(filteredData.length/rowsPerPage);
+    }
+
+    document.getElementById('searchMunicipio').addEventListener('input', filterTable);
+    document.getElementById('prevPageBtn').addEventListener('click', () => { if(currentPage>1){currentPage--; renderizarTabela();}});
+    document.getElementById('nextPageBtn').addEventListener('click', () => { if(currentPage < Math.ceil(filteredData.length/rowsPerPage)) {currentPage++; renderizarTabela();}});
+
+    // Previsão 7 dias
+    function gerarPrevisao7dias() {
+        const dias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+        let html = '';
+        for(let i=0;i<7;i++) {
+            let tempMin = 18 + Math.floor(Math.random()*6);
+            let tempMax = tempMin + 6 + Math.floor(Math.random()*6);
+            let estado = ["Sol", "Nuvens", "Chuva leve", "Trovoada"][Math.floor(Math.random()*4)];
+            let prob = Math.floor(Math.random()*70);
+            html += `<div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                        <div style="width:70px"><strong>${dias[i]}</strong></div>
+                        <div><i class="fas ${estado === 'Sol'?'fa-sun':(estado==='Nuvens'?'fa-cloud':'fa-cloud-rain')} me-1"></i> ${estado}</div>
+                        <div>${tempMin}° / ${tempMax}°</div>
+                        <div class="badge bg-info">💧 ${prob}%</div>
+                    </div>`;
+        }
+        document.getElementById('previsao7dias').innerHTML = html;
+    }
+
+    // Recomendações turísticas baseadas no clima atual da capital Malanje
+    function atualizarRecomendacoes() {
+        const climaMalanje = datasetMunicipios.find(m => m.municipio === "Malanje");
+        let cond = climaMalanje?.condicao || "Ensolarado";
+        let chuva = climaMalanje?.probChuva || 0;
+        let sugestoes = [];
+        if(cond.includes("Chuva") || chuva > 50) {
+            sugestoes = ["📌 Quedas de Calandula: Cachoeira exuberante (visibilidade reduzida, levar capa)","📌 Museu de Malanje (opção coberta)","📌 Centro cultural"];
+        } else if(cond === "Ensolarado") {
+            sugestoes = ["🌟 Pedras Negras de Pungo Andongo (ideal para trilhas)","🦒 Parque Nacional da Cangandala (avistamento de palanca negra)","💦 Quedas de Calandula (cenário perfeito)"];
+        } else {
+            sugestoes = ["🏞️ Quedas de Calandula (clima ameno)", "⛰️ Pedras Negras - fotografia única", "🌳 Reserva de Cangandala"];
+        }
+        document.getElementById('recomendacoesTurismo').innerHTML = sugestoes.map(s => `<div class="alert alert-light border-0 rounded-pill shadow-sm"><i class="fas fa-hiking me-2 text-success"></i> ${s}</div>`).join('');
+    }
+
+    // Alertas meteorológicos dinâmicos
+    function atualizarAlertas() {
+        const alertas = [];
+        datasetMunicipios.forEach(m => {
+            if(m.probChuva > 70 && (m.condicao.includes("Chuva")||m.condicao.includes("Trovoada"))) alertas.push(`⚠️ ${m.municipio}: Chuvas intensas (${m.probChuva}%)`);
+            if(m.vento > 25) alertas.push(`💨 ${m.municipio}: Ventos fortes (${m.vento} km/h)`);
+            if(m.temp > 32) alertas.push(`🔥 ${m.municipio}: Temperatura elevada (${m.temp}°C)`);
+            if(m.condicao === "Trovoada") alertas.push(`⛈️ ${m.municipio}: Trovoadas em curso`);
+        });
+        const containerAlertas = document.getElementById('alertasContainer');
+        if(alertas.length === 0) containerAlertas.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle"></i> Sem alertas ativos. Condições estáveis em toda a província.</div>`;
+        else containerAlertas.innerHTML = `<div class="alert alert-danger alert-animated"><i class="fas fa-bell"></i> <strong>Alertas Meteorológicos:</strong> ${alertas.join(' • ')}</div>`;
+    }
+
+    // Gráficos com Chart.js
+    let tempChart, humChart;
+    function atualizarGraficos() {
+        const labels = datasetMunicipios.slice(0,8).map(m=>m.municipio);
+        const temps = datasetMunicipios.slice(0,8).map(m=>m.temp);
+        const hums = datasetMunicipios.slice(0,8).map(m=>m.humidade);
+        const ctxTemp = document.getElementById('tempChart').getContext('2d');
+        const ctxHum = document.getElementById('humidityChart').getContext('2d');
+        if(tempChart) tempChart.destroy();
+        if(humChart) humChart.destroy();
+        tempChart = new Chart(ctxTemp, { type: 'line', data: { labels: labels, datasets: [{ label: 'Temperatura °C', data: temps, borderColor: '#e67e22', backgroundColor: 'rgba(230,126,34,0.1)', tension: 0.3, fill: true }] }, options: { responsive: true, maintainAspectRatio: true } });
+        humChart = new Chart(ctxHum, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Humidade (%)', data: hums, backgroundColor: '#2c9c7c', borderRadius: 8 }] }, options: { responsive: true } });
+    }
+
+    // Inicialização completa
+    function inicializarModal() {
+        atualizarResumoGeral();
+        atualizarMapa();
+        renderizarTabela();
+        gerarPrevisao7dias();
+        atualizarRecomendacoes();
+        atualizarAlertas();
+        atualizarGraficos();
+        filteredData = [...datasetMunicipios];
+        sortColumn = null;
+        currentPage = 1;
+        renderizarTabela();
+        setInterval(() => {
+            refreshRandomData();
+        }, 25000);
+    }
+
+    // Evento quando modal é aberto (garantir sincronia)
+    document.getElementById('weatherModalMalanje').addEventListener('shown.bs.modal', function () {
+        inicializarModal();
+    });
+    window.sortTable = sortTable;
+    // inicialização se já estiver visível (fallback)
+    setTimeout(() => { if(document.querySelector('.modal.show')) inicializarModal(); }, 200);
+</script>
+</body>
+</html>

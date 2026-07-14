@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planeie a Sua Viagem para Angola e Malanje</title>
+    <!-- Bootstrap 5 + Icons + Leaflet -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* ===== RESET E BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-image: url('images/travel-online.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+            color: #fff;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.50);
+            z-index: 0;
+        }
+        .container-fluid,
+        .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ===== GLASSMORPHISM GLOBAL ===== */
+        .glass-card,
+        .card,
+        .nav-tabs .nav-link,
+        .tab-content,
+        .info-card,
+        .indicator-card,
+        .comprovativo-preview,
+        .search-section,
+        .modal-content,
+        .report-card,
+        .banner-glass,
+        .assistant-glass,
+        .footer-glass {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.30);
+            border-radius: 24px;
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover,
+        .card:hover,
+        .report-card:hover {
+            background: rgba(255, 255, 255, 0.20);
+            transform: translateY(-6px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.40);
+        }
+
+        /* ===== BANNER PRINCIPAL ===== */
+        .banner-hero {
+            background: rgba(0, 0, 0, 0.30);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 32px;
+            padding: 3.5rem 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.60);
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .banner-hero h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.70);
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .banner-hero h1 span {
+            color: #f7d44a;
+        }
+        .banner-hero p {
+            font-size: 1.4rem;
+            max-width: 750px;
+            margin: 1rem auto;
+            opacity: 0.95;
+            font-weight: 400;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .btn-hero {
+            background: rgba(255, 215, 0, 0.20);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 215, 0, 0.50);
+            color: #fff;
+            font-weight: 600;
+            padding: 14px 32px;
+            border-radius: 60px;
+            margin: 6px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.30);
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .btn-hero:hover {
+            background: rgba(255, 215, 0, 0.45);
+            transform: scale(1.05);
+            color: #000;
+            border-color: #ffd700;
+        }
+        .btn-hero i {
+            margin-right: 10px;
+        }
+
+        /* ===== TÍTULOS DAS SECÇÕES ===== */
+        .section-title {
+            font-size: 2.6rem;
+            font-weight: 700;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.50);
+            margin-bottom: 2rem;
+            border-left: 8px solid #f7d44a;
+            padding-left: 24px;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .section-sub {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        /* ===== CARDS ===== */
+        .card-company,
+        .card-agency,
+        .card-hotel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 1.8rem 1rem;
+            height: 100%;
+            transition: all 0.25s ease;
+            color: #fff;
+            text-align: center;
+        }
+        .card-company:hover,
+        .card-agency:hover,
+        .card-hotel:hover {
+            background: rgba(255, 255, 255, 0.20);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.50);
+        }
+        .card-company img,
+        .card-agency img {
+            max-height: 70px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.30));
+        }
+        .star-rating {
+            color: #f7d44a;
+            letter-spacing: 2px;
+        }
+        .btn-outline-light {
+            border-color: rgba(255, 255, 255, 0.30);
+            color: #fff;
+            border-radius: 40px;
+            padding: 8px 20px;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .btn-outline-light:hover {
+            background: rgba(255, 255, 255, 0.20);
+            color: #fff;
+        }
+
+        /* ===== MAPA ===== */
+        #map {
+            height: 420px;
+            border-radius: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.20);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.40);
+        }
+
+        /* ===== SIMULADOR ===== */
+        .simulator-card {
+            background: rgba(0, 0, 0, 0.30);
+            backdrop-filter: blur(14px);
+            border-radius: 28px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .sim-result {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 1.2rem;
+            text-align: center;
+        }
+        .sim-result .value {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #f7d44a;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        /* ===== ASSISTENTE ===== */
+        .assistant-glass {
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(16px);
+            border-radius: 30px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }
+        .assistant-glass .chat-msg {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 14px 20px;
+            margin-bottom: 14px;
+            border-left: 6px solid #f7d44a;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        /* ===== GALERIA ===== */
+        .parallax-gallery {
+            display: flex;
+            gap: 18px;
+            overflow-x: auto;
+            padding: 10px 0 20px;
+            scroll-behavior: smooth;
+        }
+        .parallax-gallery .item {
+            min-width: 280px;
+            height: 210px;
+            border-radius: 24px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.50);
+            transition: all 0.3s;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            flex-shrink: 0;
+        }
+        .parallax-gallery .item:hover {
+            transform: scale(1.04);
+        }
+
+        /* ===== ESTATÍSTICAS ===== */
+        .stat-number {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #f7d44a;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.50);
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        /* ===== CTA FINAL ===== */
+        .cta-final {
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 3rem 2rem;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.30);
+        }
+        .cta-final h2 {
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .cta-final p {
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 768px) {
+            .banner-hero h1 {
+                font-size: 2.4rem;
+            }
+            .section-title {
+                font-size: 1.8rem;
+            }
+            .stat-number {
+                font-size: 2.2rem;
+            }
+            .parallax-gallery .item {
+                min-width: 180px;
+                height: 150px;
+            }
+        }
+        @media (max-width: 576px) {
+            .btn-hero {
+                width: 100%;
+                margin: 6px 0;
+            }
+        }
+
+        /* ===== TABS PRINCIPAL ===== */
+        .main-tabs .nav-link {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            margin-right: 8px;
+            padding: 12px 28px;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+        }
+        .main-tabs .nav-link.active {
+            background: rgba(255, 215, 0, 0.30);
+            border-color: #f7d44a;
+            color: #fff;
+        }
+        .main-tabs .nav-link:hover {
+            background: rgba(255, 215, 0, 0.20);
+        }
+        .main-tabs .tab-content {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            margin-top: 1.5rem;
+        }
+
+        /* ===== SUB-TABS ===== */
+        .sub-tabs .nav-link {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 20px;
+            margin-right: 6px;
+            padding: 8px 18px;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .sub-tabs .nav-link.active {
+            background: rgba(255, 215, 0, 0.25);
+            border-color: #f7d44a;
+            color: #fff;
+        }
+        .sub-tabs .nav-link:hover {
+            background: rgba(255, 215, 0, 0.15);
+        }
+        .sub-tabs .tab-pane {
+            padding-top: 1.2rem;
+        }
+        .sub-tabs .tab-pane h5 {
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 700;
+        }
+        .sub-tabs .tab-pane p {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.05rem;
+        }
+        
+        .img-fluid12{
+            width: 100px;
+            height: 100px;
+        }
+
+        /* ===== DROPDOWN IDIOMA ===== */
+        .idioma-dropdown {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        .idioma-dropdown .dropdown-toggle {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .idioma-dropdown .dropdown-toggle:hover {
+            background: rgba(255, 215, 0, 0.25);
+            border-color: #f7d44a;
+        }
+        .idioma-dropdown .dropdown-menu {
+            background: rgba(0, 0, 0, 0.70);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 8px;
+            min-width: 160px;
+        }
+        .idioma-dropdown .dropdown-item {
+            color: #fff;
+            border-radius: 12px;
+            padding: 10px 16px;
+            transition: all 0.2s;
+            font-family: 'Times New Roman', Times, serif;
+            cursor: pointer;
+        }
+        .idioma-dropdown .dropdown-item:hover {
+            background: rgba(255, 215, 0, 0.20);
+            color: #f7d44a;
+        }
+        .idioma-dropdown .dropdown-item i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        .idioma-dropdown .dropdown-item.active {
+            background: rgba(255, 215, 0, 0.25);
+            color: #f7d44a;
+        }
+        @media (max-width: 768px) {
+            .idioma-dropdown {
+                top: 10px;
+                right: 10px;
+            }
+            .idioma-dropdown .dropdown-toggle {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== DROPDOWN IDIOMA ===== -->
+    <div class="idioma-dropdown">
+        <div class="dropdown">
+            <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-translate"></i> Idioma
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item active" onclick="mudarIdioma('pt')"><i class="bi bi-flag-fill" style="color:#009c3b;"></i> Português</a></li>
+                <li><a class="dropdown-item" onclick="mudarIdioma('en')"><i class="bi bi-flag-fill" style="color:#00247d;"></i> English</a></li>
+                <li><a class="dropdown-item" onclick="mudarIdioma('es')"><i class="bi bi-flag-fill" style="color:#c60b1e;"></i> Español</a></li>
+                <li><a class="dropdown-item" onclick="mudarIdioma('fr')"><i class="bi bi-flag-fill" style="color:#002395;"></i> Français</a></li>
+                <li><a class="dropdown-item" onclick="mudarIdioma('de')"><i class="bi bi-flag-fill" style="color:#000000;"></i> Deutsch</a></li>
+                <li><a class="dropdown-item" onclick="mudarIdioma('it')"><i class="bi bi-flag-fill" style="color:#009246;"></i> Italiano</a></li>
+                <li><a class="dropdown-item" onclick="mudarIdioma('zh')"><i class="bi bi-flag-fill" style="color:#de2910;"></i> 中文</a></li>
+                <li><a class="dropdown-item" onclick="mudarIdioma('ja')"><i class="bi bi-flag-fill" style="color:#bc002d;"></i> 日本語</a></li>
+                <li><a class="dropdown-item" onclick="mudarIdioma('ru')"><i class="bi bi-flag-fill" style="color:#0039a6;"></i> Русский</a></li>
+                <li><a class="dropdown-item" onclick="mudarIdioma('ar')"><i class="bi bi-flag-fill" style="color:#006233;"></i> العربية</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container-fluid py-4">
+
+        <!-- ========== BANNER PRINCIPAL ========== -->
+        <div class="banner-hero">
+            <h1>🌍 Descubra Angola, <span>Explore Malanje</span></h1>
+            <p>Transforme o seu interesse por Malanje numa experiência inesquecível. Planeie a sua viagem através de parceiros e plataformas reconhecidas mundialmente.</p>
+            <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+                <button class="btn-hero" onclick="document.getElementById('mainTabs').scrollIntoView({behavior:'smooth'})"><i class="bi bi-airplane"></i> Planear Viagem</button>
+                <button class="btn-hero" onclick="document.getElementById('mainTabs').scrollIntoView({behavior:'smooth'})"><i class="bi bi-binoculars"></i> Explorar Atrações</button>
+                <button class="btn-hero" onclick="document.getElementById('mainTabs').scrollIntoView({behavior:'smooth'})"><i class="bi bi-building"></i> Procurar Hotéis</button>
+                <button class="btn-hero" onclick="document.getElementById('assistente').scrollIntoView({behavior:'smooth'})"><i class="bi bi-robot"></i> Assistente Virtual</button>
+            </div>
+        </div>
+
+        <!-- ========== TABS PRINCIPAL ========== -->
+        <section id="mainTabs" class="my-5 main-tabs">
+            <h2 class="section-title"><i class="bi bi-grid-3x3-gap-fill me-2"></i> Planeie a Sua Viagem</h2>
+            <p class="section-sub">Navegue por todas as seções para organizar a sua viagem a Malanje.</p>
+
+            <ul class="nav nav-tabs" id="mainTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab-companhias" data-bs-toggle="tab" data-bs-target="#panel-companhias" type="button" role="tab"><i class="bi bi-airplane-fill me-1"></i> Companhias Aéreas</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-agencias" data-bs-toggle="tab" data-bs-target="#panel-agencias" type="button" role="tab"><i class="bi bi-briefcase-fill me-1"></i> Agências de Viagens</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-hoteis" data-bs-toggle="tab" data-bs-target="#panel-hoteis" type="button" role="tab"><i class="bi bi-building-fill me-1"></i> Hotéis</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-atracoes" data-bs-toggle="tab" data-bs-target="#panel-atracoes" type="button" role="tab"><i class="bi bi-binoculars-fill me-1"></i> Atrações</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-mapa" data-bs-toggle="tab" data-bs-target="#panel-mapa" type="button" role="tab"><i class="bi bi-map-fill me-1"></i> Mapa</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-info" data-bs-toggle="tab" data-bs-target="#panel-info" type="button" role="tab"><i class="bi bi-info-circle-fill me-1"></i> Informações</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-simulador" data-bs-toggle="tab" data-bs-target="#panel-simulador" type="button" role="tab"><i class="bi bi-calculator-fill me-1"></i> Simulador</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-galeria" data-bs-toggle="tab" data-bs-target="#panel-galeria" type="button" role="tab"><i class="bi bi-images me-1"></i> Galeria</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-estatisticas" data-bs-toggle="tab" data-bs-target="#panel-estatisticas" type="button" role="tab"><i class="bi bi-graph-up me-1"></i> Estatísticas</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-avaliacoes" data-bs-toggle="tab" data-bs-target="#panel-avaliacoes" type="button" role="tab"><i class="bi bi-chat-quote me-1"></i> Avaliações</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="mainTabContent">
+
+                <!-- ===== PANEL 1: COMPANHIAS AÉREAS ===== -->
+                <div class="tab-pane fade show active" id="panel-companhias" role="tabpanel">
+                    <h4 class="mb-3"><i class="bi bi-airplane-fill me-2"></i> Companhias Aéreas que Voam para Angola</h4>
+                    <p class="section-sub">Conecte-se com o mundo através das melhores companhias aéreas com voos regulares para Angola.</p>
+                    <div class="row g-4">
+                        <!-- TAAG -->
+                        <div class="col-md-3 col-6">
+                            <div class="card-company">
+                                <img src="images/tag-rbg.png" alt="TAAG" class="img-fluid" />
+                                <h5>TAAG Angola</h5>
+                                <p class="small opacity-75">Linha aérea nacional com rotas para Europa, África e Américas.</p>
+                                <div class="star-rating">★★★★☆</div>
+                                <a href="https://www.taag.com/" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-globe2"></i> Site Oficial</a>
+                            </div>
+                        </div>
+                        <!-- TAP -->
+                        <div class="col-md-3 col-6">
+                            <div class="card-company">
+                                <img src="images/Tap-rbg.png" alt="TAP" class="img-fluid" />
+                                <h5>TAP Air Portugal</h5>
+                                <p class="small opacity-75">Conexões diretas de Lisboa a Luanda e outras cidades angolanas.</p>
+                                <div class="star-rating">★★★★★</div>
+                                <a href="https://www.flytap.com/" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-globe2"></i> Site Oficial</a>
+                            </div>
+                        </div>
+                        <!-- Emirates -->
+                        <div class="col-md-3 col-6">
+                            <div class="card-company">
+                                <img src="images/emirates-rbg.png" alt="Emirates" class="img-fluid" />
+                                <h5>Emirates</h5>
+                                <p class="small opacity-75">Voos de luxo com conexão via Dubai para Luanda.</p>
+                                <div class="star-rating">★★★★★</div>
+                                <a href="https://www.emirates.com/" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-globe2"></i> Site Oficial</a>
+                            </div>
+                        </div>
+                        <!-- Ethiopian -->
+                        <div class="col-md-3 col-6">
+                            <div class="card-company">
+                                <img src="images/A3-removebg-preview.png" alt="Ethiopian" class="img-fluid" />
+                                <h5>Ethiopian Airlines</h5>
+                                <p class="small opacity-75">Malha extensa na África com voos para Luanda e conexões.</p>
+                                <div class="star-rating">★★★★☆</div>
+                                <a href="https://www.ethiopianairlines.com/" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-globe2"></i> Site Oficial</a>
+                            </div>
+                        </div>
+                        <!-- Qatar Airways -->
+                        <div class="col-md-3 col-6">
+                            <div class="card-company">
+                                <img src="images/A6-removebg-preview.png" alt="Qatar" class="img-fluid" />
+                                <h5>Qatar Airways</h5>
+                                <p class="small opacity-75">Voos premiados com conexão via Doha para Luanda.</p>
+                                <div class="star-rating">★★★★★</div>
+                                <a href="https://www.qatarairways.com/" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-globe2"></i> Site Oficial</a>
+                            </div>
+                        </div>
+                        <!-- Turkish -->
+                        <div class="col-md-3 col-6">
+                            <div class="card-company">
+                                <img src="images/A9-removebg-preview.png" alt="Turkish" class="img-fluid" />
+                                <h5>Turkish Airlines</h5>
+                                <p class="small opacity-75">Conexões via Istambul para Luanda com excelente serviço.</p>
+                                <div class="star-rating">★★★★★</div>
+                                <a href="https://www.turkishairlines.com/" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-globe2"></i> Site Oficial</a>
+                            </div>
+                        </div>
+                        <!-- Air France -->
+                        <div class="col-md-3 col-6">
+                            <div class="card-company">
+                                <img src="images/A2-removebg-preview.png" alt="Air France" class="img-fluid" />
+                                <h5>Air France</h5>
+                                <p class="small opacity-75">Voos para Luanda via Paris com conforto europeu.</p>
+                                <div class="star-rating">★★★★☆</div>
+                                <a href="https://www.airfrance.com/" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-globe2"></i> Site Oficial</a>
+                            </div>
+                        </div>
+                        <!-- Lufthansa -->
+                        <div class="col-md-3 col-6">
+                            <div class="card-company">
+                                <img src="images/A4-removebg-preview.png" alt="Lufthansa" class="img-fluid" />
+                                <h5>Lufthansa</h5>
+                                <p class="small opacity-75">Conexões via Frankfurt para Luanda com excelência alemã.</p>
+                                <div class="star-rating">★★★★★</div>
+                                <a href="https://www.lufthansa.com/" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-globe2"></i> Site Oficial</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PANEL 2: AGÊNCIAS ===== -->
+                <div class="tab-pane fade" id="panel-agencias" role="tabpanel">
+                    <h4 class="mb-3"><i class="bi bi-briefcase-fill me-2"></i> Agências de Viagens e Operadores Turísticos</h4>
+                    <p class="section-sub">Pacotes personalizados, roteiros incríveis e todo o suporte para a sua viagem.</p>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card-agency">
+                                <i class="bi bi-building fs-1"></i>
+                                <h5 class="mt-2">Best Travel Angola</h5>
+                                <p class="small">Pacotes completos para Malanje, Kalandula e Pungo Andongo.</p>
+                                <p><i class="bi bi-telephone"></i> +244 923 456 789</p>
+                                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                                    <button class="btn btn-outline-light btn-sm" onclick="alert('Orçamento solicitado com sucesso!')"><i class="bi bi-envelope"></i> Orçamento</button>
+                                    <a href="https://www.besttravel.pt/" target="_blank" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-up-right"></i> Plataforma</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-agency">
+                                <i class="bi bi-compass fs-1"></i>
+                                <h5 class="mt-2">Cosmos Viagens</h5>
+                                <p class="small">Especialistas em turismo de natureza e cultura em Malanje.</p>
+                                <p><i class="bi bi-telephone"></i> +244 923 456 790</p>
+                                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                                    <button class="btn btn-outline-light btn-sm" onclick="alert('Orçamento solicitado com sucesso!')"><i class="bi bi-envelope"></i> Orçamento</button>
+                                    <a href="https://www.cosmos-angola.com/" target="_blank" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-up-right"></i> Plataforma</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-agency">
+                                <i class="bi bi-globe2 fs-1"></i>
+                                <h5 class="mt-2">TravelGest Angola</h5>
+                                <p class="small">Operador turístico com roteiros personalizados para toda Angola.</p>
+                                <p><i class="bi bi-telephone"></i> +244 923 456 791</p>
+                                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                                    <button class="btn btn-outline-light btn-sm" onclick="alert('Orçamento solicitado com sucesso!')"><i class="bi bi-envelope"></i> Orçamento</button>
+                                    <a href="https://www.travelgest.co.ao/" target="_blank" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-up-right"></i> Plataforma</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-agency">
+                                <i class="bi bi-tree fs-1"></i>
+                                <h5 class="mt-2">Clube Turismo</h5>
+                                <p class="small">Pacotes turísticos com foco em experiências autênticas.</p>
+                                <p><i class="bi bi-telephone"></i> +244 923 456 792</p>
+                                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                                    <button class="btn btn-outline-light btn-sm" onclick="alert('Orçamento solicitado com sucesso!')"><i class="bi bi-envelope"></i> Orçamento</button>
+                                    <a href="https://www.clubeturismo.pt/" target="_blank" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-up-right"></i> Plataforma</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-agency">
+                                <i class="bi bi-sun fs-1"></i>
+                                <h5 class="mt-2">Angola Travel</h5>
+                                <p class="small">Portal oficial de turismo de Angola com informações úteis.</p>
+                                <p><i class="bi bi-telephone"></i> +244 923 456 793</p>
+                                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                                    <button class="btn btn-outline-light btn-sm" onclick="alert('Orçamento solicitado com sucesso!')"><i class="bi bi-envelope"></i> Orçamento</button>
+                                    <a href="https://www.angola.travel/" target="_blank" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-up-right"></i> Plataforma</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-agency">
+                                <i class="bi bi-map fs-1"></i>
+                                <h5 class="mt-2">Discover Malanje</h5>
+                                <p class="small">Guia local com roteiros personalizados para Malanje.</p>
+                                <p><i class="bi bi-telephone"></i> +244 923 456 794</p>
+                                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                                    <button class="btn btn-outline-light btn-sm" onclick="alert('Orçamento solicitado com sucesso!')"><i class="bi bi-envelope"></i> Orçamento</button>
+                                    <a href="https://www.discovermalanje.com/" target="_blank" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-up-right"></i> Plataforma</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PANEL 3: HOTÉIS ===== -->
+                <div class="tab-pane fade" id="panel-hoteis" role="tabpanel">
+                    <h4 class="mb-3"><i class="bi bi-building-fill me-2"></i> Reserve o Seu Hotel</h4>
+                    <p class="section-sub">As melhores plataformas para encontrar alojamento em Malanje.</p>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card-hotel">
+                                <img src="images/BOOKING-removebg-preview.png" alt="TAAG" class="img-fluid12" />
+                                <i class="bi bi-hotel fs-1"></i>
+                                <h5>Booking.com</h5>
+                                <p>+150 hotéis em Malanje</p>
+                                <div class="star-rating">★★★★★</div>
+                                <a href="https://www.booking.com/city/ao/malanje.html" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-search"></i> Pesquisar Hotéis</a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-hotel">
+                                <img src="images/AIRBAND-removebg-preview.png" alt="TAAG" class="img-fluid12" />
+                                <i class="bi bi-hotel fs-1"></i>
+                                <h5>Airbnb</h5>
+                                <p>+60 acomodações únicas</p>
+                                <div class="star-rating">★★★★☆</div>
+                                <a href="https://www.airbnb.com/s/Malanje--Angola" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-search"></i> Pesquisar Hotéis</a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-hotel">
+                                <img src="images/EXPEDIA-removebg-preview.png" alt="TAAG" class="img-fluid12" />
+                                <i class="bi bi-hotel fs-1"></i>
+                                <h5>Expedia</h5>
+                                <p>+80 hotéis e resorts</p>
+                                <div class="star-rating">★★★★☆</div>
+                                <a href="https://www.expedia.com/Hotels-in-Malanje.d1735696.Hotels" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-search"></i> Pesquisar Hotéis</a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-hotel">
+                                <img src="images/HOTELS.COM-removebg-preview.png" alt="TAAG" class="img-fluid12" />
+                                <i class="bi bi-hotel fs-1"></i>
+                                <h5>Hotels.com</h5>
+                                <p>+100 hotéis disponíveis</p>
+                                <div class="star-rating">★★★★☆</div>
+                                <a href="https://www.hotels.com/de/Malanje-Angola-Hotels.html" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-search"></i> Pesquisar Hotéis</a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-hotel">
+                                <img src="images/AGODA-removebg-preview.png" alt="TAAG" class="img-fluid12" />
+                                <i class="bi bi-hotel fs-1"></i>
+                                <h5>Agoda</h5>
+                                <p>+70 opções de alojamento</p>
+                                <div class="star-rating">★★★★☆</div>
+                                <a href="https://www.agoda.com/city/malanje-ao.html" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-search"></i> Pesquisar Hotéis</a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-hotel">
+                                <img src="images/HOTEIS.COM-removebg-preview.png" alt="TAAG" class="img-fluid12" />
+                                <i class="bi bi-hotel fs-1"></i>
+                                <h5>Hoteis.com</h5>
+                                <p>+90 hotéis em Malanje</p>
+                                <div class="star-rating">★★★★☆</div>
+                                <a href="https://www.hoteis.com/de/Malanje-Angola-Hotels.html" target="_blank" class="btn btn-outline-light mt-2 w-100"><i class="bi bi-search"></i> Pesquisar Hotéis</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PANEL 4: ATRAÇÕES ===== -->
+                <div class="tab-pane fade" id="panel-atracoes" role="tabpanel">
+                    <h4 class="mb-3"><i class="bi bi-binoculars-fill me-2"></i> Atrações Turísticas de Malanje</h4>
+                    <!-- Sub-tabs para atrações -->
+                    <ul class="nav nav-tabs sub-tabs" id="atracoesTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="kalandula-tab" data-bs-toggle="tab" data-bs-target="#kalandula" type="button" role="tab">Quedas Kalandula</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pedras-tab" data-bs-toggle="tab" data-bs-target="#pedras" type="button" role="tab">Pedras Negras</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="cangandala-tab" data-bs-toggle="tab" data-bs-target="#cangandala" type="button" role="tab">Parque Cangandala</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="palacio-tab" data-bs-toggle="tab" data-bs-target="#palacio" type="button" role="tab">Palácio Njinga</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="atracoesTabContent">
+                        <div class="tab-pane fade show active" id="kalandula" role="tabpanel">
+                            <h5>🌊 Quedas de Kalandula</h5>
+                            <p>Uma das maiores quedas de água de África, com cerca de 100 metros de altura. Localizada no município de Kalandula, a 85 km de Malanje. Um espetáculo natural imperdível.</p>
+                            <a href="https://www.google.com/maps/search/Quedas+de+Kalandula/" target="_blank" class="btn btn-outline-light"><i class="bi bi-geo-alt"></i> Traçar Rota</a>
+                        </div>
+                        <div class="tab-pane fade" id="pedras" role="tabpanel">
+                            <h5>⛰️ Pedras Negras de Pungo Andongo</h5>
+                            <p>Formações rochosas imponentes com mais de 100 metros de altura. Localizadas no município de Pungo Andongo, a cerca de 120 km de Malanje. Perfeitas para caminhadas e fotografia.</p>
+                            <a href="https://www.google.com/maps/search/Pedras+Negras+de+Pungo+Andongo/" target="_blank" class="btn btn-outline-light"><i class="bi bi-geo-alt"></i> Traçar Rota</a>
+                        </div>
+                        <div class="tab-pane fade" id="cangandala" role="tabpanel">
+                            <h5>🌳 Parque Nacional da Cangandala</h5>
+                            <p>O mais pequeno parque nacional de Angola, lar da rara palanca-negra-gigante. Localizado a cerca de 60 km de Malanje, é um destino ideal para observação da fauna selvagem.</p>
+                            <a href="https://www.google.com/maps/search/Parque+Nacional+da+Cangandala/" target="_blank" class="btn btn-outline-light"><i class="bi bi-geo-alt"></i> Traçar Rota</a>
+                        </div>
+                        <div class="tab-pane fade" id="palacio" role="tabpanel">
+                            <h5>🏛️ Palácio da Rainha Njinga</h5>
+                            <p>Residência histórica da Rainha Njinga, no município de Cacuso. Um local de grande importância histórica e cultural para o povo angolano.</p>
+                            <a href="https://www.google.com/maps/search/Palácio+da+Rainha+Njinga/" target="_blank" class="btn btn-outline-light"><i class="bi bi-geo-alt"></i> Traçar Rota</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PANEL 5: MAPA ===== -->
+                <div class="tab-pane fade" id="panel-mapa" role="tabpanel">
+                    <h4 class="mb-3"><i class="bi bi-map-fill me-2"></i> Mapa Interativo</h4>
+                    <p class="section-sub">Localize os principais pontos turísticos, aeroportos e rotas terrestres.</p>
+                    <div id="map"></div>
+                    <div class="row g-3 mt-3 text-center">
+                        <div class="col-3"><i class="bi bi-geo-alt-fill text-warning"></i> Quedas Kalandula</div>
+                        <div class="col-3"><i class="bi bi-geo-alt-fill text-warning"></i> Pedras Negras</div>
+                        <div class="col-3"><i class="bi bi-geo-alt-fill text-warning"></i> Parque Cangandala</div>
+                        <div class="col-3"><i class="bi bi-geo-alt-fill text-warning"></i> Palácio Njinga</div>
+                    </div>
+                </div>
+
+                <!-- ===== PANEL 6: INFORMAÇÕES ===== -->
+                <div class="tab-pane fade" id="panel-info" role="tabpanel">
+                    <h4 class="mb-3"><i class="bi bi-info-circle-fill me-2"></i> Informações Úteis para o Turista</h4>
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6"><div class="glass-card p-3 text-center"><i class="bi bi-passport fs-2"></i><br>Passaporte</div></div>
+                        <div class="col-md-3 col-6"><div class="glass-card p-3 text-center"><i class="bi bi-file-check fs-2"></i><br>Visto</div></div>
+                        <div class="col-md-3 col-6"><div class="glass-card p-3 text-center"><i class="bi bi-currency-dollar fs-2"></i><br>Kwanza (AOA)</div></div>
+                        <div class="col-md-3 col-6"><div class="glass-card p-3 text-center"><i class="bi bi-chat fs-2"></i><br>Português</div></div>
+                        <div class="col-md-3 col-6"><div class="glass-card p-3 text-center"><i class="bi bi-sun fs-2"></i><br>Clima Tropical</div></div>
+                        <div class="col-md-3 col-6"><div class="glass-card p-3 text-center"><i class="bi bi-shield-check fs-2"></i><br>Segurança</div></div>
+                        <div class="col-md-3 col-6"><div class="glass-card p-3 text-center"><i class="bi bi-heart-pulse fs-2"></i><br>Vacinas</div></div>
+                        <div class="col-md-3 col-6"><div class="glass-card p-3 text-center"><i class="bi bi-telephone-fill fs-2"></i><br>Emergência 113</div></div>
+                    </div>
+                </div>
+
+                <!-- ===== PANEL 7: SIMULADOR ===== -->
+                <div class="tab-pane fade" id="panel-simulador" role="tabpanel">
+                    <h4 class="mb-3"><i class="bi bi-calculator-fill me-2"></i> Simulador de Custos de Viagem</h4>
+                    <div class="simulator-card">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Passagem (USD)</label>
+                                <input type="number" class="form-control bg-transparent text-white border-light" id="custoPassagem" value="800" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Hotel / noite (USD)</label>
+                                <input type="number" class="form-control bg-transparent text-white border-light" id="custoHotel" value="120" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Alimentação / dia (USD)</label>
+                                <input type="number" class="form-control bg-transparent text-white border-light" id="custoAlimentacao" value="50" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Nº de dias</label>
+                                <input type="number" class="form-control bg-transparent text-white border-light" id="diasViagem" value="5" />
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-warning w-100" onclick="calcularSimulador()"><i class="bi bi-calculator"></i> Calcular Custo Estimado</button>
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-3" id="resultadoSimulador">
+                            <div class="col-md-4"><div class="sim-result"><span class="value" id="custoMin">~1.200</span><br>Mínimo</div></div>
+                            <div class="col-md-4"><div class="sim-result"><span class="value" id="custoMedio">~1.850</span><br>Médio</div></div>
+                            <div class="col-md-4"><div class="sim-result"><span class="value" id="custoPremium">~2.900</span><br>Premium</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PANEL 8: GALERIA ===== -->
+                <div class="tab-pane fade" id="panel-galeria" role="tabpanel">
+                    <h4 class="mb-3"><i class="bi bi-images me-2"></i> Galeria 360°</h4>
+                    <div class="parallax-gallery">
+                        <div class="item" 
+                             style="background-image:url('images/mufete.png');"></div>
+                        <div class="item" style="background-image:url('images/pungo-an-dongo.png');"></div>
+                        <div class="item" 
+                             style="background-image:url('images/parque-cangandala.png');"></div>
+                        <div class="item" style="background-image:url('images/musseje.png');"></div>
+                        <div class="item" style="background-image:url('images/quedas.png');"></div>
+                        <div class="item" style="background-image:url('images/mufete.png');"></div>
+                    </div>
+                </div>
+
+                <!-- ===== PANEL 9: ESTATÍSTICAS ===== -->
+                <div class="tab-pane fade" id="panel-estatisticas" role="tabpanel">
+                    <h4 class="mb-3"><i class="bi bi-graph-up me-2"></i> Por que visitar Malanje?</h4>
+                    <div class="row g-4 text-center">
+                        <div class="col-md-3 col-6"><div class="glass-card p-3"><span class="stat-number" id="statPontos">18</span><br>Pontos Turísticos</div></div>
+                        <div class="col-md-3 col-6"><div class="glass-card p-3"><span class="stat-number" id="statVisitantes">12.4k</span><br>Visitantes/ano</div></div>
+                        <div class="col-md-3 col-6"><div class="glass-card p-3"><span class="stat-number" id="statSatisfacao">96%</span><br>Satisfação</div></div>
+                        <div class="col-md-3 col-6"><div class="glass-card p-3"><span class="stat-number" id="statHoteis">45</span><br>Hotéis disponíveis</div></div>
+                    </div>
+                </div>
+
+                <!-- ===== PANEL 10: AVALIAÇÕES ===== -->
+                <div class="tab-pane fade" id="panel-avaliacoes" role="tabpanel">
+                    <h4 class="mb-3"><i class="bi bi-chat-quote me-2"></i> O que os turistas dizem</h4>
+                    <div class="row g-3">
+                        <div class="col-md-4"><div class="glass-card p-3"><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><br><strong>Maria</strong> <small class="opacity-75">"As Quedas de Kalandula são de tirar o fôlego!"</small></div></div>
+                        <div class="col-md-4"><div class="glass-card p-3"><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-half text-warning"></i><br><strong>João</strong> <small class="opacity-75">"Cultura rica e natureza exuberante."</small></div></div>
+                        <div class="col-md-4"><div class="glass-card p-3"><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><br><strong>Ana</strong> <small class="opacity-75">"Hospitalidade incrível, voltarei!"</small></div></div>
+                    </div>
+                </div>
+
+            </div><!-- /mainTabContent -->
+        </section>
+
+        <!-- ========== ASSISTENTE VIRTUAL ========== -->
+        <section id="assistente" class="my-5">
+            <h2 class="section-title"><i class="bi bi-robot me-2"></i> Assistente Virtual - Malanje</h2>
+            <div class="assistant-glass">
+                <div class="chat-msg"><strong>🤖 Assistente:</strong> Olá! Sou o seu guia virtual sobre Malanje. Pergunte-me algo!</div>
+                <div class="d-flex gap-2 flex-wrap mb-3">
+                    <button class="btn btn-outline-light btn-sm" onclick="perguntaAssistente('Qual a melhor época para visitar Malanje?')">🌦️ Melhor época</button>
+                    <button class="btn btn-outline-light btn-sm" onclick="perguntaAssistente('Como chegar às Quedas de Kalandula?')">💧 Kalandula</button>
+                    <button class="btn btn-outline-light btn-sm" onclick="perguntaAssistente('Onde posso ficar hospedado?')">🏨 Hospedagem</button>
+                    <button class="btn btn-outline-light btn-sm" onclick="perguntaAssistente('Quais os principais pontos turísticos?')">🏞️ Pontos turísticos</button>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="perguntaAssistente" class="form-control bg-transparent text-white border-light" placeholder="Faça uma pergunta..." />
+                    <button class="btn btn-warning" onclick="enviarPerguntaAssistente()"><i class="bi bi-send"></i></button>
+                </div>
+                <div id="respostaAssistente" class="mt-3 p-3 rounded" style="background:rgba(255,255,255,0.05);"></div>
+            </div>
+        </section>
+
+        <!-- ========== CTA FINAL ========== -->
+        <section class="cta-final my-5">
+            <h2 class="display-5 fw-bold">🌅 Está pronto para descobrir Malanje?</h2>
+            <p class="fs-4">Transforme o seu sonho em realidade. Reserve já!</p>
+            <div class="d-flex flex-wrap justify-content-center gap-3 mt-3">
+                <button class="btn btn-warning btn-lg" onclick="alert('Redirecionando para reserva...')"><i class="bi bi-ticket"></i> Reservar Viagem</button>
+                <button class="btn btn-outline-light btn-lg" onclick="document.getElementById('mainTabs').scrollIntoView({behavior:'smooth'})"><i class="bi bi-building"></i> Procurar Hotel</button>
+                <button class="btn btn-outline-light btn-lg" onclick="document.getElementById('mainTabs').scrollIntoView({behavior:'smooth'})"><i class="bi bi-briefcase"></i> Contactar Agência</button>
+                <button class="btn btn-outline-light btn-lg" onclick="document.getElementById('mainTabs').scrollIntoView({behavior:'smooth'})"><i class="bi bi-map"></i> Ver Mapa</button>
+                <button class="btn btn-outline-light btn-lg" onclick="document.getElementById('assistente').scrollIntoView({behavior:'smooth'})"><i class="bi bi-robot"></i> Assistente</button>
+            </div>
+        </section>
+
+        <!-- ========== RODAPÉ ========== -->
+        <footer class="footer-glass text-center p-4 mt-4" style="background:rgba(0,0,0,0.35); backdrop-filter:blur(12px); border-radius:30px;">
+            <p class="mb-0">© 2026 Planeie a Sua Viagem para Angola e Malanje. Desenvolvido com ❤️ e Glassmorphism.</p>
+            <small class="opacity-75">Plataforma oficial de apoio ao turismo em Malanje.</small>
+        </footer>
+
+    </div><!-- /container-fluid -->
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script>
+        // ===== MAPA INTERATIVO =====
+        document.addEventListener('DOMContentLoaded', function() {
+            var map = L.map('map').setView([-9.5, 16.0], 8);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+            const pontos = [
+                { nome: 'Quedas de Kalandula', lat: -9.0764, lon: 15.9833 },
+                { nome: 'Pedras Negras de Pungo Andongo', lat: -9.6500, lon: 15.6000 },
+                { nome: 'Parque Nacional da Cangandala', lat: -9.8000, lon: 16.1000 },
+                { nome: 'Palácio da Rainha Njinga', lat: -9.5333, lon: 16.3500 }
+            ];
+            pontos.forEach(p => {
+                L.marker([p.lat, p.lon]).addTo(map).bindPopup(`<b>${p.nome}</b>`);
+            });
+        });
+
+        // ===== SIMULADOR =====
+        function calcularSimulador() {
+            const passagem = parseFloat(document.getElementById('custoPassagem').value) || 800;
+            const hotel = parseFloat(document.getElementById('custoHotel').value) || 120;
+            const alimentacao = parseFloat(document.getElementById('custoAlimentacao').value) || 50;
+            const dias = parseInt(document.getElementById('diasViagem').value) || 5;
+            const totalBase = passagem + (hotel * dias) + (alimentacao * dias);
+            const min = Math.round(totalBase * 0.85);
+            const medio = Math.round(totalBase);
+            const premium = Math.round(totalBase * 1.45);
+            document.getElementById('custoMin').innerText = '~' + min;
+            document.getElementById('custoMedio').innerText = '~' + medio;
+            document.getElementById('custoPremium').innerText = '~' + premium;
+        }
+        window.calcularSimulador = calcularSimulador;
+        document.addEventListener('DOMContentLoaded', calcularSimulador);
+
+        // ===== ASSISTENTE VIRTUAL =====
+        function perguntaAssistente(pergunta) {
+            document.getElementById('perguntaAssistente').value = pergunta;
+            enviarPerguntaAssistente();
+        }
+        window.perguntaAssistente = perguntaAssistente;
+
+        function enviarPerguntaAssistente() {
+            const input = document.getElementById('perguntaAssistente');
+            const pergunta = input.value.trim();
+            if (!pergunta) return;
+            const respostas = {
+                'época': 'A melhor época para visitar Malanje é de Maio a Setembro (estação seca), com temperaturas agradáveis e céu limpo.',
+                'kalandula': 'Para chegar às Quedas de Kalandula, saia de Malanje pela EN 230 e siga por cerca de 85 km até ao município de Kalandula. O trajeto dura cerca de 2 horas.',
+                'hospedado': 'Em Malanje existe uma boa oferta de hotéis, pousadas e alojamentos. Recomendamos o Hotel Malanje, o Palácio Hotel e opções no Booking.com e Airbnb.',
+                'turísticos': 'Os principais pontos turísticos são: Quedas de Kalandula, Pedras Negras de Pungo Andongo, Parque Nacional da Cangandala e o Palácio da Rainha Njinga.'
+            };
+            let resposta = 'Desculpe, não entendi. Pode reformular? Tente perguntar sobre: época, Kalandula, hospedagem ou pontos turísticos.';
+            const lower = pergunta.toLowerCase();
+            if (lower.includes('época') || lower.includes('melhor')) resposta = respostas['época'];
+            else if (lower.includes('kalandula') || lower.includes('queda')) resposta = respostas['kalandula'];
+            else if (lower.includes('hosped') || lower.includes('hotel') || lower.includes('ficar')) resposta = respostas['hospedado'];
+            else if (lower.includes('pontos') || lower.includes('turísticos') || lower.includes('visitar')) resposta = respostas['turísticos'];
+            document.getElementById('respostaAssistente').innerHTML =
+                `<div class="chat-msg"><strong>🤖 Assistente:</strong> ${resposta}</div>`;
+            input.value = '';
+        }
+        window.enviarPerguntaAssistente = enviarPerguntaAssistente;
+
+        // ===== ESTATÍSTICAS ANIMADAS =====
+        function animateStats() {
+            const stats = [
+                { id: 'statPontos', target: 18 },
+                { id: 'statVisitantes', target: 12400 },
+                { id: 'statSatisfacao', target: 96 },
+                { id: 'statHoteis', target: 45 }
+            ];
+            stats.forEach(stat => {
+                const el = document.getElementById(stat.id);
+                if (!el) return;
+                let current = 0;
+                const step = Math.ceil(stat.target / 30);
+                const interval = setInterval(() => {
+                    current += step;
+                    if (current >= stat.target) { current = stat.target;
+                        clearInterval(interval); }
+                    if (stat.id === 'statVisitantes') el.innerText = (current / 1000).toFixed(1) + 'k';
+                    else if (stat.id === 'statSatisfacao') el.innerText = current + '%';
+                    else el.innerText = current;
+                }, 50);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', animateStats);
+
+        // ===== FUNÇÃO PARA ALTERAR IDIOMA =====
+        function mudarIdioma(idioma) {
+            // Remove active de todos os itens
+            document.querySelectorAll('.idioma-dropdown .dropdown-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            // Adiciona active ao item clicado
+            const items = document.querySelectorAll('.idioma-dropdown .dropdown-item');
+            const idiomas = ['pt', 'en', 'es', 'fr', 'de', 'it', 'zh', 'ja', 'ru', 'ar'];
+            const index = idiomas.indexOf(idioma);
+            if (index !== -1) {
+                items[index].classList.add('active');
+            }
+            
+            // Atualiza o texto do dropdown
+            const nomesIdiomas = {
+                'pt': 'Português',
+                'en': 'English',
+                'es': 'Español',
+                'fr': 'Français',
+                'de': 'Deutsch',
+                'it': 'Italiano',
+                'zh': '中文',
+                'ja': '日本語',
+                'ru': 'Русский',
+                'ar': 'العربية'
+            };
+            const btnToggle = document.querySelector('.idioma-dropdown .dropdown-toggle');
+            if (btnToggle) {
+                btnToggle.innerHTML = `<i class="bi bi-translate"></i> ${nomesIdiomas[idioma] || 'Idioma'}`;
+            }
+
+            // SIMULAÇÃO DE TRADUÇÃO - Aqui você pode implementar a tradução real
+            const traducoes = {
+                'pt': {
+                    'title': 'Planeie a Sua Viagem para Angola e Malanje',
+                    'banner_title': '🌍 Descubra Angola, <span>Explore Malanje</span>',
+                    'banner_sub': 'Transforme o seu interesse por Malanje numa experiência inesquecível. Planeie a sua viagem através de parceiros e plataformas reconhecidas mundialmente.',
+                    'btn_plan': 'Planear Viagem',
+                    'btn_explore': 'Explorar Atrações',
+                    'btn_hotels': 'Procurar Hotéis',
+                    'btn_assistant': 'Assistente Virtual',
+                    'section_plan': 'Planeie a Sua Viagem',
+                    'section_plan_sub': 'Navegue por todas as seções para organizar a sua viagem a Malanje.',
+                    'tab_airlines': 'Companhias Aéreas',
+                    'tab_agencies': 'Agências de Viagens',
+                    'tab_hotels': 'Hotéis',
+                    'tab_attractions': 'Atrações',
+                    'tab_map': 'Mapa',
+                    'tab_info': 'Informações',
+                    'tab_simulator': 'Simulador',
+                    'tab_gallery': 'Galeria',
+                    'tab_stats': 'Estatísticas',
+                    'tab_reviews': 'Avaliações',
+                    'footer': '© 2026 Planeie a Sua Viagem para Angola e Malanje. Desenvolvido com ❤️ e Glassmorphism.',
+                    'footer_sub': 'Plataforma oficial de apoio ao turismo em Malanje.'
+                },
+                'en': {
+                    'title': 'Plan Your Trip to Angola and Malanje',
+                    'banner_title': '🌍 Discover Angola, <span>Explore Malanje</span>',
+                    'banner_sub': 'Turn your interest in Malanje into an unforgettable experience. Plan your trip through world-renowned partners and platforms.',
+                    'btn_plan': 'Plan Trip',
+                    'btn_explore': 'Explore Attractions',
+                    'btn_hotels': 'Find Hotels',
+                    'btn_assistant': 'Virtual Assistant',
+                    'section_plan': 'Plan Your Trip',
+                    'section_plan_sub': 'Browse all sections to organize your trip to Malanje.',
+                    'tab_airlines': 'Airlines',
+                    'tab_agencies': 'Travel Agencies',
+                    'tab_hotels': 'Hotels',
+                    'tab_attractions': 'Attractions',
+                    'tab_map': 'Map',
+                    'tab_info': 'Information',
+                    'tab_simulator': 'Simulator',
+                    'tab_gallery': 'Gallery',
+                    'tab_stats': 'Statistics',
+                    'tab_reviews': 'Reviews',
+                    'footer': '© 2026 Plan Your Trip to Angola and Malanje. Developed with ❤️ and Glassmorphism.',
+                    'footer_sub': 'Official platform supporting tourism in Malanje.'
+                },
+                'es': {
+                    'title': 'Planifica tu Viaje a Angola y Malanje',
+                    'banner_title': '🌍 Descubre Angola, <span>Explora Malanje</span>',
+                    'banner_sub': 'Convierte tu interés por Malanje en una experiencia inolvidable. Planifica tu viaje a través de socios y plataformas reconocidas mundialmente.',
+                    'btn_plan': 'Planificar Viaje',
+                    'btn_explore': 'Explorar Atracciones',
+                    'btn_hotels': 'Buscar Hoteles',
+                    'btn_assistant': 'Asistente Virtual',
+                    'section_plan': 'Planifica tu Viaje',
+                    'section_plan_sub': 'Navega por todas las secciones para organizar tu viaje a Malanje.',
+                    'tab_airlines': 'Aerolíneas',
+                    'tab_agencies': 'Agencias de Viajes',
+                    'tab_hotels': 'Hoteles',
+                    'tab_attractions': 'Atracciones',
+                    'tab_map': 'Mapa',
+                    'tab_info': 'Información',
+                    'tab_simulator': 'Simulador',
+                    'tab_gallery': 'Galería',
+                    'tab_stats': 'Estadísticas',
+                    'tab_reviews': 'Reseñas',
+                    'footer': '© 2026 Planifica tu Viaje a Angola y Malanje. Desarrollado con ❤️ y Glassmorphism.',
+                    'footer_sub': 'Plataforma oficial de apoyo al turismo en Malanje.'
+                },
+                'fr': {
+                    'title': 'Planifiez Votre Voyage en Angola et à Malanje',
+                    'banner_title': '🌍 Découvrez l\'Angola, <span>Explorez Malanje</span>',
+                    'banner_sub': 'Transformez votre intérêt pour Malanje en une expérience inoubliable. Planifiez votre voyage à travers des partenaires et plateformes reconnus mondialement.',
+                    'btn_plan': 'Planifier Voyage',
+                    'btn_explore': 'Explorer Attractions',
+                    'btn_hotels': 'Trouver Hôtels',
+                    'btn_assistant': 'Assistant Virtuel',
+                    'section_plan': 'Planifiez Votre Voyage',
+                    'section_plan_sub': 'Parcourez toutes les sections pour organiser votre voyage à Malanje.',
+                    'tab_airlines': 'Compagnies Aériennes',
+                    'tab_agencies': 'Agences de Voyages',
+                    'tab_hotels': 'Hôtels',
+                    'tab_attractions': 'Attractions',
+                    'tab_map': 'Carte',
+                    'tab_info': 'Informations',
+                    'tab_simulator': 'Simulateur',
+                    'tab_gallery': 'Galerie',
+                    'tab_stats': 'Statistiques',
+                    'tab_reviews': 'Avis',
+                    'footer': '© 2026 Planifiez Votre Voyage en Angola et à Malanje. Développé avec ❤️ et Glassmorphism.',
+                    'footer_sub': 'Plateforme officielle de soutien au tourisme à Malanje.'
+                },
+                'de': {
+                    'title': 'Planen Sie Ihre Reise nach Angola und Malanje',
+                    'banner_title': '🌍 Entdecken Sie Angola, <span>Erkunden Sie Malanje</span>',
+                    'banner_sub': 'Verwandeln Sie Ihr Interesse an Malanje in ein unvergessliches Erlebnis. Planen Sie Ihre Reise durch weltweit anerkannte Partner und Plattformen.',
+                    'btn_plan': 'Reise Planen',
+                    'btn_explore': 'Sehenswürdigkeiten Entdecken',
+                    'btn_hotels': 'Hotels Finden',
+                    'btn_assistant': 'Virtueller Assistent',
+                    'section_plan': 'Planen Sie Ihre Reise',
+                    'section_plan_sub': 'Durchstöbern Sie alle Abschnitte, um Ihre Reise nach Malanje zu organisieren.',
+                    'tab_airlines': 'Fluggesellschaften',
+                    'tab_agencies': 'Reisebüros',
+                    'tab_hotels': 'Hotels',
+                    'tab_attractions': 'Sehenswürdigkeiten',
+                    'tab_map': 'Karte',
+                    'tab_info': 'Informationen',
+                    'tab_simulator': 'Simulator',
+                    'tab_gallery': 'Galerie',
+                    'tab_stats': 'Statistiken',
+                    'tab_reviews': 'Bewertungen',
+                    'footer': '© 2026 Planen Sie Ihre Reise nach Angola und Malanje. Entwickelt mit ❤️ und Glassmorphism.',
+                    'footer_sub': 'Offizielle Plattform zur Unterstützung des Tourismus in Malanje.'
+                },
+                'it': {
+                    'title': 'Pianifica il Tuo Viaggio in Angola e Malanje',
+                    'banner_title': '🌍 Scopri l\'Angola, <span>Esplora Malanje</span>',
+                    'banner_sub': 'Trasforma il tuo interesse per Malanje in un\'esperienza indimenticabile. Pianifica il tuo viaggio attraverso partner e piattaforme riconosciute a livello mondiale.',
+                    'btn_plan': 'Pianifica Viaggio',
+                    'btn_explore': 'Esplora Attrazioni',
+                    'btn_hotels': 'Cerca Hotel',
+                    'btn_assistant': 'Assistente Virtuale',
+                    'section_plan': 'Pianifica il Tuo Viaggio',
+                    'section_plan_sub': 'Naviga attraverso tutte le sezioni per organizzare il tuo viaggio a Malanje.',
+                    'tab_airlines': 'Compagnie Aeree',
+                    'tab_agencies': 'Agenzie di Viaggio',
+                    'tab_hotels': 'Hotel',
+                    'tab_attractions': 'Attrazioni',
+                    'tab_map': 'Mappa',
+                    'tab_info': 'Informazioni',
+                    'tab_simulator': 'Simulatore',
+                    'tab_gallery': 'Galleria',
+                    'tab_stats': 'Statistiche',
+                    'tab_reviews': 'Recensioni',
+                    'footer': '© 2026 Pianifica il Tuo Viaggio in Angola e Malanje. Sviluppato con ❤️ e Glassmorphism.',
+                    'footer_sub': 'Piattaforma ufficiale di supporto al turismo a Malanje.'
+                }
+            };
+
+            // Aplica as traduções se existirem para o idioma selecionado
+            const traducao = traducoes[idioma];
+            if (traducao) {
+                document.title = traducao.title;
+                const bannerTitle = document.querySelector('.banner-hero h1');
+                if (bannerTitle) bannerTitle.innerHTML = traducao.banner_title;
+                const bannerSub = document.querySelector('.banner-hero p');
+                if (bannerSub) bannerSub.textContent = traducao.banner_sub;
+                
+                const botoes = document.querySelectorAll('.banner-hero .btn-hero');
+                if (botoes.length >= 4) {
+                    botoes[0].innerHTML = `<i class="bi bi-airplane"></i> ${traducao.btn_plan}`;
+                    botoes[1].innerHTML = `<i class="bi bi-binoculars"></i> ${traducao.btn_explore}`;
+                    botoes[2].innerHTML = `<i class="bi bi-building"></i> ${traducao.btn_hotels}`;
+                    botoes[3].innerHTML = `<i class="bi bi-robot"></i> ${traducao.btn_assistant}`;
+                }
+                
+                const sectionTitle = document.querySelector('#mainTabs .section-title');
+                if (sectionTitle) sectionTitle.innerHTML = `<i class="bi bi-grid-3x3-gap-fill me-2"></i> ${traducao.section_plan}`;
+                const sectionSub = document.querySelector('#mainTabs .section-sub');
+                if (sectionSub) sectionSub.textContent = traducao.section_plan_sub;
+                
+                const tabs = document.querySelectorAll('.main-tabs .nav-link');
+                const tabTexts = [
+                    traducao.tab_airlines,
+                    traducao.tab_agencies,
+                    traducao.tab_hotels,
+                    traducao.tab_attractions,
+                    traducao.tab_map,
+                    traducao.tab_info,
+                    traducao.tab_simulator,
+                    traducao.tab_gallery,
+                    traducao.tab_stats,
+                    traducao.tab_reviews
+                ];
+                tabs.forEach((tab, index) => {
+                    if (index < tabTexts.length) {
+                        const icon = tab.querySelector('i');
+                        if (icon) {
+                            tab.innerHTML = icon.outerHTML + ' ' + tabTexts[index];
+                        }
+                    }
+                });
+
+                const footer = document.querySelector('.footer-glass p');
+                if (footer) footer.textContent = traducao.footer;
+                const footerSub = document.querySelector('.footer-glass small');
+                if (footerSub) footerSub.textContent = traducao.footer_sub;
+            }
+
+            // Feedback visual
+            console.log(`Idioma alterado para: ${idioma}`);
+        }
+        window.mudarIdioma = mudarIdioma;
+    </script>
+</body>
+</html>

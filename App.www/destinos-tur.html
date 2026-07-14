@@ -1,0 +1,2837 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destinos de Malanje</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* ============================================================
+                   ESTILO GERAL - GLASSMORPHISM
+                   ============================================================ */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-image: url('images/destinos-tur.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.40);
+            z-index: 0;
+            transition: all 0.3s ease;
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================================
+                   TEMA CLARO
+                   ============================================================ */
+        body.light-theme::before {
+            background: rgba(255, 255, 255, 0.88);
+        }
+
+        body.light-theme .page-title,
+        body.light-theme .page-title .badge,
+        body.light-theme .info-card .card-title,
+        body.light-theme .nav-tabs .nav-link,
+        body.light-theme .filter-section h6,
+        body.light-theme .activity-table th,
+        body.light-theme .activity-table td,
+        body.light-theme .modal-content,
+        body.light-theme .modal .form-label,
+        body.light-theme .tab-content,
+        body.light-theme .chart-container h6,
+        body.light-theme .destino-card .destino-nome,
+        body.light-theme .destino-card .destino-desc,
+        body.light-theme .resumo-item label,
+        body.light-theme .resumo-item span,
+        body.light-theme .hero-title,
+        body.light-theme .hero-subtitle,
+        body.light-theme .filtro-rapido-btn,
+        body.light-theme .rotulo-categoria {
+            color: #1a1a2e !important;
+        }
+
+        body.light-theme .nav-tabs .nav-link {
+            background: rgba(255, 255, 255, 0.5);
+            color: #1a1a2e !important;
+        }
+
+        body.light-theme .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.8);
+            color: #0d6efd !important;
+        }
+
+        body.light-theme .tab-content,
+        body.light-theme .info-card,
+        body.light-theme .filter-section,
+        body.light-theme .chart-container,
+        body.light-theme .activity-table,
+        body.light-theme .destino-card,
+        body.light-theme .map-container,
+        body.light-theme .modal-content,
+        body.light-theme .hero-section {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(15px);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .filter-section .form-control,
+        body.light-theme .filter-section .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-theme .filter-section .form-control::placeholder {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-theme #currentDateTime {
+            background: rgba(255, 255, 255, 0.8);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .quick-actions .btn-outline-secondary {
+            background: rgba(108, 117, 125, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .quick-actions .btn-outline-dark {
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-theme .page-title .badge {
+            background: rgba(13, 110, 253, 0.15) !important;
+            color: #0d6efd !important;
+        }
+
+        body.light-theme .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .lang-toggle-btn {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .dashboard-btn {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .filtro-rapido-btn {
+            background: rgba(0, 0, 0, 0.05) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-theme .filtro-rapido-btn:hover {
+            background: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-theme .filtro-rapido-btn.active {
+            background: rgba(13, 110, 253, 0.15) !important;
+            border-color: #0d6efd !important;
+            color: #0d6efd !important;
+        }
+
+        body.light-theme .destino-card .favorito-btn {
+            color: #dc3545;
+        }
+
+        body.light-theme .destino-card .badge-imperdivel {
+            background: rgba(220, 53, 69, 0.15) !important;
+            color: #dc3545 !important;
+        }
+
+        /* ============================================================
+                   HERO SECTION
+                   ============================================================ */
+        .hero-section {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 40px 30px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            min-height: 200px;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=1932') center/cover no-repeat;
+            opacity: 0.3;
+            z-index: 0;
+        }
+
+        .hero-section>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            color: #fff;
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .hero-search {
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-radius: 50px;
+            padding: 12px 20px;
+        }
+
+        .hero-search::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .hero-search:focus {
+            background: rgba(255, 255, 255, 0.20);
+            border-color: rgba(13, 110, 253, 0.3);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.10);
+            color: #fff;
+        }
+
+        .filtros-rapidos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .filtro-rapido-btn {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filtro-rapido-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .filtro-rapido-btn.active {
+            background: rgba(13, 110, 253, 0.25);
+            border-color: rgba(13, 110, 253, 0.4);
+            color: #fff;
+        }
+
+        /* ============================================================
+                   DESTINO CARDS
+                   ============================================================ */
+        .destino-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .destino-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.20);
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .destino-card .destino-imagem {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .destino-card:hover .destino-imagem {
+            transform: scale(1.03);
+        }
+
+        .destino-card .destino-badges {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .destino-card .badge-imperdivel {
+            background: rgba(220, 53, 69, 0.85);
+            backdrop-filter: blur(5px);
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .destino-card .badge-categoria {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        .destino-card .favorito-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .destino-card .favorito-btn:hover {
+            background: rgba(220, 53, 69, 0.3);
+            color: #dc3545;
+            transform: scale(1.1);
+        }
+
+        .destino-card .favorito-btn.favorito {
+            color: #dc3545;
+            background: rgba(220, 53, 69, 0.2);
+        }
+
+        .destino-card .destino-body {
+            padding: 15px 18px 18px;
+        }
+
+        .destino-card .destino-nome {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.15rem;
+            margin-bottom: 4px;
+        }
+
+        .destino-card .destino-desc {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .destino-card .destino-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .destino-card .destino-info .avaliacao {
+            color: #ffc107;
+        }
+
+        .destino-card .destino-info .distancia {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .destino-card .destino-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .destino-card .destino-actions .btn {
+            font-size: 0.75rem;
+            padding: 4px 14px;
+            border-radius: 20px;
+        }
+
+        /* ============================================================
+                   MAPA MINIATURA
+                   ============================================================ */
+        .map-mini-container {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #mapMini {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .leaflet-control-zoom {
+            display: none !important;
+        }
+
+        /* ============================================================
+                   NAVEGAÇÃO - TABS
+                   ============================================================ */
+        .nav-tabs .nav-link {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 17px;
+            color: #fff;
+            border: none;
+            padding: 12px 22px;
+            margin-right: 5px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(15px);
+            color: #fff;
+            border-bottom: 3px solid #0d6efd;
+            font-weight: bold;
+            box-shadow: 0 -2px 20px rgba(13, 110, 253, 0.25);
+        }
+
+        .tab-content {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(15px);
+            border-radius: 0 8px 8px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        /* ============================================================
+                   FILTROS
+                   ============================================================ */
+        .filter-section {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            transition: all 0.3s ease;
+        }
+
+        .filter-section h6 {
+            color: #fff;
+        }
+
+        .filter-section .form-control,
+        .filter-section .form-select {
+            font-family: 'Times New Roman', Times, serif;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff;
+        }
+
+        .filter-section .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .filter-section .form-control:focus,
+        .filter-section .form-select:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(13, 110, 253, 0.4);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.10);
+            color: #fff;
+        }
+
+        .filter-section .form-select option {
+            background: #2c3e50;
+            color: #fff;
+        }
+
+        /* ============================================================
+                   INFO CARD
+                   ============================================================ */
+        .info-card {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            transition: all 0.3s ease;
+        }
+
+        .info-card .card-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* ============================================================
+                   ROTEIROS RECOMENDADOS
+                   ============================================================ */
+        .roteiro-card {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(5px);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .roteiro-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.10);
+        }
+
+        .roteiro-card .roteiro-titulo {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .roteiro-card .roteiro-desc {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+        }
+
+        .roteiro-card .roteiro-duracao {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+        }
+
+        /* ============================================================
+                   QUICK ACTIONS
+                   ============================================================ */
+        .quick-actions .btn {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 3px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        .quick-actions .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .quick-actions .btn-primary {
+            background: rgba(13, 110, 253, 0.5);
+        }
+        .quick-actions .btn-success {
+            background: rgba(25, 135, 84, 0.5);
+        }
+        .quick-actions .btn-info {
+            background: rgba(13, 202, 240, 0.5);
+        }
+        .quick-actions .btn-warning {
+            background: rgba(255, 193, 7, 0.5);
+        }
+        .quick-actions .btn-danger {
+            background: rgba(220, 53, 69, 0.5);
+        }
+        .quick-actions .btn-outline-secondary {
+            background: rgba(108, 117, 125, 0.20);
+            color: #fff;
+        }
+        .quick-actions .btn-outline-dark {
+            background: rgba(33, 37, 41, 0.20);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ============================================================
+                   HEADER
+                   ============================================================ */
+        .page-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.20);
+        }
+
+        .page-title .bi {
+            animation: bounce 2s infinite;
+        }
+
+        .page-title .badge {
+            background: rgba(13, 110, 253, 0.35);
+            backdrop-filter: blur(5px);
+        }
+
+        @keyframes bounce {
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-8px);
+            }
+            60% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .theme-toggle-btn,
+        .lang-toggle-btn {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: rotate(30deg);
+        }
+
+        .lang-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: scale(1.1);
+        }
+
+        .dashboard-btn {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .dashboard-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        #currentDateTime {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: rgba(13, 110, 253, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-primary:hover {
+            background: rgba(13, 110, 253, 0.7);
+        }
+
+        /* ============================================================
+                   MODAIS VERDADEIROS
+                   ============================================================ */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .modal .btn-close {
+            filter: invert(1);
+        }
+
+        .modal .form-label {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .modal-detalhe-imagem {
+            width: 100%;
+            max-height: 350px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .modal-detalhe-galeria {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .modal-detalhe-galeria img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-detalhe-galeria img:hover {
+            transform: scale(1.05);
+        }
+
+        .modal .avaliacao-usuario {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+        }
+
+        .modal .avaliacao-usuario .usuario {
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .modal .avaliacao-usuario .comentario {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .modal .avaliacao-usuario .data {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.7rem;
+        }
+
+        /* ============================================================
+                   MODAL ALERTA PERSONALIZADO
+                   ============================================================ */
+        .modal-alerta .modal-content {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+        }
+
+        .modal-alerta .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 20px 24px 12px;
+        }
+
+        .modal-alerta .modal-body {
+            padding: 16px 24px 24px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .modal-alerta .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 24px 20px;
+        }
+
+        .modal-alerta .btn-close {
+            filter: invert(1);
+        }
+
+        .modal-alerta .btn {
+            border-radius: 50px;
+            padding: 8px 28px;
+            font-weight: 500;
+        }
+
+        .modal-alerta .btn-primary {
+            background: rgba(13, 110, 253, 0.6);
+            border: 1px solid rgba(13, 110, 253, 0.3);
+        }
+
+        .modal-alerta .btn-primary:hover {
+            background: rgba(13, 110, 253, 0.8);
+        }
+
+        .modal-alerta .btn-secondary {
+            background: rgba(108, 117, 125, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .modal-alerta .btn-secondary:hover {
+            background: rgba(108, 117, 125, 0.5);
+        }
+
+        .modal-alerta .btn-success {
+            background: rgba(25, 135, 84, 0.5);
+            border: 1px solid rgba(25, 135, 84, 0.3);
+        }
+
+        .modal-alerta .btn-success:hover {
+            background: rgba(25, 135, 84, 0.7);
+        }
+
+        .modal-alerta .btn-danger {
+            background: rgba(220, 53, 69, 0.5);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .modal-alerta .btn-danger:hover {
+            background: rgba(220, 53, 69, 0.7);
+        }
+
+        .modal-alerta .btn-warning {
+            background: rgba(255, 193, 7, 0.4);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+            color: #fff;
+        }
+
+        .modal-alerta .btn-warning:hover {
+            background: rgba(255, 193, 7, 0.6);
+            color: #fff;
+        }
+
+        .modal-alerta .btn-info {
+            background: rgba(13, 202, 240, 0.4);
+            border: 1px solid rgba(13, 202, 240, 0.2);
+            color: #fff;
+        }
+
+        .modal-alerta .btn-info:hover {
+            background: rgba(13, 202, 240, 0.6);
+            color: #fff;
+        }
+
+        .modal-alerta .icone-alerta {
+            font-size: 3rem;
+            display: block;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .modal-alerta .titulo-alerta {
+            font-weight: bold;
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .modal-alerta .mensagem-alerta {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ============================================================
+                   RESPONSIVIDADE
+                   ============================================================ */
+        @media (max-width: 768px) {
+            .tab-content {
+                padding: 15px;
+            }
+            .page-title {
+                font-size: 1.3rem;
+            }
+            .header-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .nav-tabs .nav-link {
+                font-size: 14px;
+                padding: 10px 14px;
+            }
+            .hero-title {
+                font-size: 1.6rem;
+            }
+            .hero-section {
+                padding: 25px 20px;
+            }
+            .destino-card .destino-imagem {
+                height: 160px;
+            }
+            .modal-detalhe-galeria {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .modal-detalhe-galeria img {
+                height: 60px;
+            }
+            .filtros-rapidos {
+                gap: 5px;
+            }
+            .filtro-rapido-btn {
+                font-size: 0.75rem;
+                padding: 4px 12px;
+            }
+            .map-mini-container {
+                height: 150px;
+            }
+        }
+
+        /* ============================================================
+                   ANIMAÇÕES
+                   ============================================================ */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .zoom-in {
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+
+        <!-- ============================================================
+        CABEÇALHO
+        ============================================================ -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap header-actions">
+                    <h2 class="page-title">
+                        <i class="bi bi-compass text-success"></i>
+                        <span id="tituloPagina">Destinos de Malanje</span>
+                        <span class="badge bg-success ms-2 pulse-icon">EXPLORE</span>
+                    </h2>
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="#" class="dashboard-btn" id="btnDashboard">
+                            <i class="bi bi-grid-3x3-gap-fill"></i> <span id="textoDashboard">Dashboard</span>
+                        </a>
+                        <button class="lang-toggle-btn" id="langToggle" title="Alterar idioma">
+                            <i class="bi bi-globe2" id="langIcon"></i>
+                        </button>
+                        <button class="theme-toggle-btn" id="themeToggle">
+                            <i class="bi bi-moon-stars" id="themeIcon"></i>
+                        </button>
+                        <span class="badge bg-info text-dark" id="currentDateTime">
+                            <i class="bi bi-clock"></i>
+                            <span id="dateTimeDisplay">Carregando...</span>
+                        </span>
+                        <button class="btn btn-outline-danger" id="btnFavoritos">
+                            <i class="bi bi-heart"></i> <span id="textoFavoritos">Favoritos</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        HERO SECTION
+        ============================================================ -->
+        <div class="hero-section">
+            <div class="row">
+                <div class="col-md-8">
+                    <h1 class="hero-title" id="heroTitulo">Descubra Malanje</h1>
+                    <p class="hero-subtitle" id="heroSubtitulo">A Província das Maravilhas Naturais</p>
+                    <div style="max-width:500px;margin-top:15px;">
+                        <input type="text" id="heroSearch" class="form-control hero-search" placeholder="🔍 Procure atrações, locais ou atividades...">
+                    </div>
+                    <div class="filtros-rapidos">
+                        <button class="filtro-rapido-btn active" data-filtro="todos" id="filtroTodos">Todos</button>
+                        <button class="filtro-rapido-btn" data-filtro="natureza" id="filtroNatureza">🌿 Natureza</button>
+                        <button class="filtro-rapido-btn" data-filtro="cultura" id="filtroCultura">🏛️ Cultura</button>
+                        <button class="filtro-rapido-btn" data-filtro="aventura" id="filtroAventura">🧗 Aventura</button>
+                        <button class="filtro-rapido-btn" data-filtro="hospedagem" id="filtroHospedagem">🏨 Hospedagem</button>
+                        <button class="filtro-rapido-btn" data-filtro="gastronomia" id="filtroGastronomia">🍽️ Gastronomia</button>
+                    </div>
+                </div>
+                <div class="col-md-4 d-none d-md-block">
+                    <div class="map-mini-container" id="mapMiniContainer">
+                        <div id="mapMini"></div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button class="btn btn-sm btn-outline-primary" id="btnVerMapaCompleto">
+                            <i class="bi bi-arrows-expand"></i> <span id="textoVerMapa">Ver tudo no Mapa</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        FILTROS AVANÇADOS
+        ============================================================ -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-12 mb-2">
+                    <h6><i class="bi bi-funnel"></i> <span id="textoFiltrosAvancados">Filtros Avançados</span></h6>
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroCategoria" class="form-select">
+                        <option value="todas" id="opTodasCategorias">Todas as Categorias</option>
+                        <option value="natureza">🌿 Natureza</option>
+                        <option value="cultura">🏛️ Cultura</option>
+                        <option value="aventura">🧗 Aventura</option>
+                        <option value="hospedagem">🏨 Hospedagem</option>
+                        <option value="gastronomia">🍽️ Gastronomia</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroDistancia" class="form-select">
+                        <option value="0" id="opTodasDistancias">Todas as Distâncias</option>
+                        <option value="30">Até 30 km</option>
+                        <option value="60">Até 60 km</option>
+                        <option value="100">Até 100 km</option>
+                        <option value="150">Até 150 km</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroAvaliacao" class="form-select">
+                        <option value="0" id="opTodasAvaliacoes">Todas as Avaliações</option>
+                        <option value="4">4+ Estrelas</option>
+                        <option value="3">3+ Estrelas</option>
+                        <option value="2">2+ Estrelas</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroPreco" class="form-select">
+                        <option value="todos" id="opTodosPrecos">Todos os Preços</option>
+                        <option value="gratis" id="opGratis">Grátis</option>
+                        <option value="barato" id="opBarato">Barato</option>
+                        <option value="medio" id="opMedio">Médio</option>
+                        <option value="caro" id="opCaro">Caro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-outline-primary btn-sm" id="btnAplicarFiltros">
+                            <i class="bi bi-check"></i> <span id="textoAplicarFiltros">Aplicar Filtros</span>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" id="btnLimparFiltros">
+                            <i class="bi bi-x"></i> <span id="textoLimparFiltros">Limpar Filtros</span>
+                        </button>
+                        <div class="ms-auto">
+                            <span style="color:rgba(255,255,255,0.4);font-size:0.85rem;" id="contadorDestinos">0 destinos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        TABS - DESTINOS E ROTEIROS
+        ============================================================ -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="destinos-tab" data-bs-toggle="tab" data-bs-target="#destinos" type="button" role="tab">
+                    <i class="bi bi-grid-3x3-gap"></i> <span id="tabDestinos">Todos os Destinos</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="roteiros-tab" data-bs-toggle="tab" data-bs-target="#roteiros" type="button" role="tab">
+                    <i class="bi bi-route"></i> <span id="tabRoteiros">Roteiros Recomendados</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="destaques-tab" data-bs-toggle="tab" data-bs-target="#destaques" type="button" role="tab">
+                    <i class="bi bi-star"></i> <span id="tabDestaques">Destaques</span>
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+
+            <!-- ============================================================
+            TODOS OS DESTINOS
+            ============================================================ -->
+            <div class="tab-pane fade show active" id="destinos" role="tabpanel">
+                <div class="row" id="gridDestinos">
+                    <!-- Renderizado via JavaScript -->
+                </div>
+            </div>
+
+            <!-- ============================================================
+            ROTEIROS RECOMENDADOS
+            ============================================================ -->
+            <div class="tab-pane fade" id="roteiros" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="roteiro-card" onclick="verRoteiro(1)">
+                            <div class="roteiro-titulo" id="roteiro1Titulo">🌄 Roteiro 1 Dia</div>
+                            <div class="roteiro-desc" id="roteiro1Desc">O essencial de Malanje em um dia</div>
+                            <div class="roteiro-duracao" id="roteiro1Duracao">⏱️ 1 dia • 3 atrações</div>
+                            <span class="badge bg-primary mt-2" id="roteiro1Badge">Popular</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="roteiro-card" onclick="verRoteiro(2)">
+                            <div class="roteiro-titulo" id="roteiro2Titulo">🌿 Roteiro Ecoturismo</div>
+                            <div class="roteiro-desc" id="roteiro2Desc">Natureza e conservação</div>
+                            <div class="roteiro-duracao" id="roteiro2Duracao">⏱️ 2 dias • 5 atrações</div>
+                            <span class="badge bg-success mt-2" id="roteiro2Badge">Recomendado</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="roteiro-card" onclick="verRoteiro(3)">
+                            <div class="roteiro-titulo" id="roteiro3Titulo">👨‍👩‍👧‍👦 Roteiro em Família</div>
+                            <div class="roteiro-desc" id="roteiro3Desc">Perfeito para viajar com crianças</div>
+                            <div class="roteiro-duracao" id="roteiro3Duracao">⏱️ 2 dias • 4 atrações</div>
+                            <span class="badge bg-info mt-2" id="roteiro3Badge">Família</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="roteiro-card" onclick="verRoteiro(4)">
+                            <div class="roteiro-titulo" id="roteiro4Titulo">💕 Roteiro Romântico</div>
+                            <div class="roteiro-desc" id="roteiro4Desc">Momentos especiais a dois</div>
+                            <div class="roteiro-duracao" id="roteiro4Duracao">⏱️ 1 dia • 3 atrações</div>
+                            <span class="badge bg-danger mt-2" id="roteiro4Badge">Romântico</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-info-circle"></i> <span id="textoRoteirosPersonalizados">Roteiros Personalizados</span></h6>
+                            <p style="color:rgba(255,255,255,0.6);">
+                                <span id="textoRoteirosInfo">Não encontrou o que procurava? Crie seu próprio roteiro no</span>
+                                <a href="planear.html" style="color:#0d6efd;" onclick="abrirModalAlerta('info', 'Planeador de Viagem', '🔗 Redirecionando para o Planeador de Viagem...')"> <span id="textoPlaneadorLink">Planeador de Viagem</span></a>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+            DESTAQUES
+            ============================================================ -->
+            <div class="tab-pane fade" id="destaques" role="tabpanel">
+                <div class="row" id="gridDestaques">
+                    <!-- Renderizado via JavaScript -->
+                </div>
+            </div>
+
+        </div><!-- /tab-content -->
+
+        <!-- ============================================================
+        AÇÕES RÁPIDAS
+        ============================================================ -->
+        <div class="quick-actions mt-4 d-flex flex-wrap gap-2">
+            <button class="btn btn-success" id="btnPlaneador">
+                <i class="bi bi-calendar-plus"></i> <span id="textoCriarRoteiro">Criar Roteiro</span>
+            </button>
+            <button class="btn btn-info" id="btnMapa">
+                <i class="bi bi-map"></i> <span id="textoVerMapaAcao">Ver no Mapa</span>
+            </button>
+            <button class="btn btn-warning" id="btnComparar">
+                <i class="bi bi-arrow-left-right"></i> <span id="textoComparar">Comparar Destinos</span>
+            </button>
+            <button class="btn btn-outline-primary" id="btnAtualizar">
+                <i class="bi bi-arrow-repeat"></i> <span id="textoAtualizar">Atualizar</span>
+            </button>
+            <button class="btn btn-outline-dark" id="btnVoltar">
+                <i class="bi bi-arrow-left"></i> <span id="textoVoltar">Voltar</span>
+            </button>
+        </div>
+
+    </div><!-- /container-fluid -->
+
+    <!-- ============================================================
+    MODAL - DETALHES DO DESTINO
+    ============================================================ -->
+    <div class="modal fade" id="detalhesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detalhesTitulo"><i class="bi bi-pin-map"></i> Destino</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalhesConteudo">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" id="btnFecharDetalhes">Fechar</button>
+                    <button type="button" class="btn btn-outline-primary" id="btnAdicionarRoteiro">
+                        <i class="bi bi-plus-circle"></i> <span id="textoAdicionarRoteiro">Adicionar ao Roteiro</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-success" id="btnVerMapaDetalhe">
+                        <i class="bi bi-map"></i> <span id="textoVerMapaDetalhe">Ver no Mapa</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL - ROTEIRO DETALHADO
+    ============================================================ -->
+    <div class="modal fade" id="roteiroDetalheModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-route"></i> <span id="tituloRoteiroDetalhe">Roteiro Detalhado</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="roteiroDetalheConteudo">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnFecharRoteiro">Fechar</button>
+                    <button type="button" class="btn btn-success" id="btnUsarRoteiro">
+                        <span id="textoUsarRoteiro">Usar este Roteiro</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL - COMPARAR DESTINOS
+    ============================================================ -->
+    <div class="modal fade" id="compararModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-arrow-left-right"></i> <span id="tituloComparar">Comparar Destinos</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="compararConteudo">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label" id="labelDestino1">Destino 1</label>
+                            <select class="form-select" id="compararDestino1">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" id="labelDestino2">Destino 2</label>
+                            <select class="form-select" id="compararDestino2">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="compararResultado" class="mt-3" style="display:none;">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" id="btnCancelarComparar">Cancelar</button>
+                    <button type="button" class="btn btn-outline-warning" id="btnCompararConfirm">
+                        <span id="textoCompararConfirm">Comparar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL ALERTA PERSONALIZADO
+    ============================================================ -->
+    <div class="modal fade modal-alerta" id="modalAlerta" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alertaTitulo"><i class="bi bi-info-circle"></i> Alerta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="alertaMensagem">
+                    <div class="icone-alerta" id="alertaIcone">ℹ️</div>
+                    <div class="titulo-alerta" id="alertaSubtitulo">Informação</div>
+                    <div class="mensagem-alerta" id="alertaTexto">Mensagem aqui.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="alertaBtnOk">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL CONFIRMAÇÃO PERSONALIZADA
+    ============================================================ -->
+    <div class="modal fade modal-alerta" id="modalConfirmacao" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmacaoTitulo"><i class="bi bi-question-circle"></i> Confirmação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="confirmacaoMensagem">
+                    <div class="icone-alerta" id="confirmacaoIcone">❓</div>
+                    <div class="titulo-alerta" id="confirmacaoSubtitulo">Confirmar ação</div>
+                    <div class="mensagem-alerta" id="confirmacaoTexto">Deseja realmente realizar esta ação?</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="confirmacaoBtnNao">Não</button>
+                    <button type="button" class="btn btn-primary" id="confirmacaoBtnSim">Sim</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js">
+    </script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script>
+        $(document).ready(function() {
+
+            // ============================================================
+            // BANCO DE DADOS - DESTINOS DE MALANJE
+            // ============================================================
+
+            const destinos = [{
+                id: 1,
+                nome: 'Quedas de Kalandula',
+                categoria: 'natureza',
+                lat: -9.0833,
+                lng: 16.1667,
+                descricao: 'Uma das maiores quedas d\'água de Angola, com 105 metros de altura e 400 metros de largura.',
+                descricaoCompleta: 'As Quedas de Kalandula são uma das maiores atrações turísticas de Angola. Localizadas no rio Lucala, afluente do rio Kwanza, as quedas têm 105 metros de altura e 400 metros de largura. A força da água cria um espetáculo visual impressionante, especialmente durante a época das chuvas, quando o volume de água aumenta consideravelmente. A região ao redor é rica em vegetação e oferece trilhas para caminhadas com vistas panorâmicas.',
+                avaliacao: 4.9,
+                reviews: 65,
+                distancia: 85,
+                duracaoVisita: '3 horas',
+                preco: '5000 Kz',
+                precoCategoria: 'medio',
+                horario: '08:00 - 17:00',
+                melhorEpoca: 'Época das chuvas (Nov-Mar)',
+                imagem: 'images/kalandula.png',
+                galeria: [
+                    'images/kalandula.png',
+                    'images/calandula.png',
+                    'images/quedas.png'
+                ],
+                imperdivel: true,
+                maisVisitado: true,
+                favorito: false
+            }, {
+                id: 2,
+                nome: 'Pedras Negras de Pungo Andongo',
+                categoria: 'natureza',
+                lat: -9.3833,
+                lng: 15.7667,
+                descricao: 'Formações rochosas impressionantes em meio à savana. Vista panorâmica única.',
+                descricaoCompleta: 'As Pedras Negras de Pungo Andongo são formações rochosas de origem vulcânica que se destacam na paisagem da savana. Com mais de 100 metros de altura em alguns pontos, estas rochas escuras contrastam com o verde da vegetação ao redor. O local oferece trilhas para caminhadas e uma vista panorâmica espetacular da província de Malanje. É um dos locais mais fotografados da região.',
+                avaliacao: 4.8,
+                reviews: 52,
+                distancia: 115,
+                duracaoVisita: '2 horas',
+                preco: '3000 Kz',
+                precoCategoria: 'barato',
+                horario: '06:00 - 18:00',
+                melhorEpoca: 'Todo o ano, evitar dias de chuva intensa',
+                imagem: 'images/pungo-an-dongo.png',
+                galeria: [
+                    'images/pungo-an-dongo.png',
+                    'images/forte.jpg',
+                    'images/pungo-dongo.png'
+                ],
+                imperdivel: true,
+                maisVisitado: false,
+                favorito: false
+            }, {
+                id: 3,
+                nome: 'Parque Nacional da Cangandala',
+                categoria: 'natureza',
+                lat: -9.7667,
+                lng: 16.7500,
+                descricao: 'Área de conservação, lar do antílope sable gigante (Palanca Negra).',
+                descricaoCompleta: 'O Parque Nacional da Cangandala é uma área de conservação de grande importância ecológica. É o lar da Palanca Negra (Hippotragus niger), uma espécie de antílope ameaçada de extinção. O parque oferece oportunidades únicas para ecoturismo, observação de fauna e flora, e safáris fotográficos. Com uma área de aproximadamente 630 km², é o menor parque nacional de Angola, mas um dos mais ricos em biodiversidade.',
+                avaliacao: 4.7,
+                reviews: 38,
+                distancia: 145,
+                duracaoVisita: '4 horas',
+                preco: '2500 Kz',
+                precoCategoria: 'barato',
+                horario: '07:00 - 17:00',
+                melhorEpoca: 'Estação seca (Mai-Set)',
+                imagem: 'images/parque-cangandala.png',
+                galeria: [
+                    'images/palanca-2.png',
+                    'images/parque-cangandala.png',
+                    'images/palancas.png'
+                ],
+                imperdivel: false,
+                maisVisitado: false,
+                favorito: false
+            }, {
+                id: 4,
+                nome: 'Rápidos do Kwanza',
+                categoria: 'aventura',
+                lat: -9.5333,
+                lng: 16.0333,
+                descricao: 'Corredeiras emocionantes para rafting e pesca esportiva.',
+                descricaoCompleta: 'Os Rápidos do Kwanza são um trecho do rio Kwanza com corredeiras de classe II e III, perfeito para rafting e pesca esportiva. O local também é ideal para observação de aves e fotografia de paisagens. A região ao redor é de beleza natural exuberante, com vegetação ripária e formações rochosas. É um destino popular para aventureiros e amantes da natureza.',
+                avaliacao: 4.6,
+                reviews: 45,
+                distancia: 95,
+                duracaoVisita: '2.5 horas',
+                preco: '8000 Kz',
+                precoCategoria: 'medio',
+                horario: '08:00 - 16:00',
+                melhorEpoca: 'Estação seca (Jun-Ago)',
+                imagem: 'images/rapidos.png',
+                galeria: [
+                    'images/kwanza-2.png',
+                    'images/rapidos.png',
+                    'images/kwanza-3.png'
+                ],
+                imperdivel: false,
+                maisVisitado: false,
+                favorito: false
+            }, {
+                id: 5,
+                nome: 'Barragem de Kapanda',
+                categoria: 'natureza',
+                lat: -9.4000,
+                lng: 16.1333,
+                descricao: 'Grande barragem hidroelétrica com vista impressionante.',
+                descricaoCompleta: 'A Barragem de Kapanda é uma das maiores infraestruturas hidroelétricas de Angola, localizada no rio Kwanza. Com 110 metros de altura e 600 metros de comprimento, a barragem é impressionante e oferece uma vista panorâmica espetacular. O local é de grande interesse para turistas que apreciam engenharia e paisagens, além de ser um ponto de parada obrigatório na região.',
+                avaliacao: 4.4,
+                reviews: 30,
+                distancia: 75,
+                duracaoVisita: '1.5 horas',
+                preco: '1000 Kz',
+                precoCategoria: 'barato',
+                horario: '09:00 - 16:00',
+                melhorEpoca: 'Todo o ano',
+                imagem: 'images/capanda.png',
+                galeria: [
+                    'images/capanda-1.png',
+                    'images/capanda.png',
+                    'images/capanda-2.png'
+                ],
+                imperdivel: false,
+                maisVisitado: false,
+                favorito: false
+            }, {
+                id: 6,
+                nome: 'Foz do Amor',
+                categoria: 'natureza',
+                lat: -9.3167,
+                lng: 16.0333,
+                descricao: 'Ponto turístico romântico com paisagem deslumbrante.',
+                descricaoCompleta: 'A Foz do Amor é um dos lugares mais românticos e fotogênicos de Malanje. Situada na confluência de dois rios, a paisagem é de tirar o fôlego, com águas cristalinas e vegetação exuberante. O local é perfeito para piqueniques, fotos de casais e momentos especiais. A lenda local conta que o nome veio de um casal que ali se encontrou pela primeira vez.',
+                avaliacao: 4.5,
+                reviews: 28,
+                distancia: 90,
+                duracaoVisita: '1.5 horas',
+                preco: '2000 Kz',
+                precoCategoria: 'barato',
+                horario: '07:00 - 18:00',
+                melhorEpoca: 'Todo o ano',
+                imagem: 'images/foz-1.png',
+                galeria: [
+                    'images/foz-2.png',
+                    'images/foz-1.png',
+                    'images/foz-3.png'
+                ],
+                imperdivel: false,
+                maisVisitado: false,
+                favorito: false
+            }, {
+                id: 7,
+                nome: 'Nascente do Amor',
+                categoria: 'natureza',
+                lat: -9.2833,
+                lng: 16.0500,
+                descricao: 'Nascente de água cristalina em meio à natureza exuberante.',
+                descricaoCompleta: 'A Nascente do Amor é um local de beleza natural única, onde uma fonte de água cristalina emerge do solo em meio à vegetação exuberante. O local é ideal para trilhas ecológicas, banhos refrescantes e contato com a natureza. O ambiente tranquilo e a água pura atraem visitantes em busca de paz e conexão com a natureza.',
+                avaliacao: 4.3,
+                reviews: 22,
+                distancia: 92,
+                duracaoVisita: '1 hora',
+                preco: '1500 Kz',
+                precoCategoria: 'barato',
+                horario: '06:00 - 17:00',
+                melhorEpoca: 'Estação seca para trilhas',
+                imagem: 'images/foz-amor.png',
+                galeria: [
+                    'images/nascente.png',
+                    'images/foz-amor.png',
+                    'images/foz-amor.png'
+                ],
+                imperdivel: false,
+                maisVisitado: false,
+                favorito: false
+            }, {
+                id: 8,
+                nome: 'Museu Regional de Malanje',
+                categoria: 'cultura',
+                lat: -9.5333,
+                lng: 16.3500,
+                descricao: 'História e cultura da província de Malanje.',
+                descricaoCompleta: 'O Museu Regional de Malanje é um centro de preservação da história e cultura da província. O acervo inclui artefatos pré-coloniais, peças de arte tradicional, fotografias históricas e exposições sobre a cultura dos povos da região. O museu é uma parada essencial para quem deseja entender a rica herança cultural de Malanje.',
+                avaliacao: 4.2,
+                reviews: 35,
+                distancia: 0,
+                duracaoVisita: '1.5 horas',
+                preco: '1000 Kz',
+                precoCategoria: 'barato',
+                horario: '09:00 - 17:00 (Seg-Sex)',
+                melhorEpoca: 'Todo o ano',
+                imagem: 'images/museu-malanje.jpg',
+                galeria: [
+                    'images/museum.jpg',
+                    'images/museum-m.png',
+                    'images/museu-malanje.jpg'
+                ],
+                imperdivel: false,
+                maisVisitado: false,
+                favorito: false
+            }, {
+                id: 9,
+                nome: 'Hotel Malanje Palace',
+                categoria: 'hospedagem',
+                lat: -9.5500,
+                lng: 16.3333,
+                descricao: 'Hotel de luxo com vista panorâmica para a cidade.',
+                descricaoCompleta: 'O Hotel Malanje Palace é o principal hotel de luxo da província, oferecendo conforto e serviços de alta qualidade. Com vista panorâmica para a cidade, o hotel dispõe de restaurante, piscina, spa e quartos espaçosos. É a escolha ideal para viajantes que buscam uma experiência premium em Malanje.',
+                avaliacao: 4.4,
+                reviews: 40,
+                distancia: 2,
+                duracaoVisita: '0 horas',
+                preco: '50000 Kz',
+                precoCategoria: 'caro',
+                horario: '24 horas',
+                melhorEpoca: 'Todo o ano',
+                imagem: 'images/Hotel-Palace.jpg',
+                galeria: [
+                    'images/Hotel-Palace.jpg',
+                    'images/Hotel-Palace.jpg',
+                    'images/Hotel-Palace.jpg'
+                ],
+                imperdivel: false,
+                maisVisitado: false,
+                favorito: false
+            }, {
+                id: 10,
+                nome: 'Restaurante Típico Malanje',
+                categoria: 'gastronomia',
+                lat: -9.5450,
+                lng: 16.3400,
+                descricao: 'Culinária tradicional angolana com pratos típicos.',
+                descricaoCompleta: 'O Restaurante Típico Malanje é o lugar ideal para experimentar a autêntica culinária angolana. Especializado em pratos tradicionais como Muamba de Galinha, Calulu e feijão de óleo de palma, o restaurante oferece uma experiência gastronômica única. O ambiente acolhedor e o atendimento atencioso completam a experiência.',
+                avaliacao: 4.6,
+                reviews: 55,
+                distancia: 1.5,
+                duracaoVisita: '1 hora',
+                preco: '15000 Kz',
+                precoCategoria: 'medio',
+                horario: '11:00 - 22:00',
+                melhorEpoca: 'Todo o ano',
+                imagem: 'images/RESTAURANTE-KALANDULA.png',
+                galeria: [
+                    'images/PORTVGALIA.png',
+                    'images/RESTAURANTE-KALANDULA.png',
+                    'images/RESTAURANTE-KALANDULA.png'
+                ],
+                imperdivel: false,
+                maisVisitado: false,
+                favorito: false
+            }];
+
+            // ============================================================
+            // DICIONÁRIO DE IDIOMAS
+            // ============================================================
+
+            const idiomas = {
+                pt: {
+                    tituloPagina: 'Destinos de Malanje',
+                    dashboard: 'Dashboard',
+                    favoritos: 'Favoritos',
+                    heroTitulo: 'Descubra Malanje',
+                    heroSubtitulo: 'A Província das Maravilhas Naturais',
+                    filtroTodos: 'Todos',
+                    filtroNatureza: '🌿 Natureza',
+                    filtroCultura: '🏛️ Cultura',
+                    filtroAventura: '🧗 Aventura',
+                    filtroHospedagem: '🏨 Hospedagem',
+                    filtroGastronomia: '🍽️ Gastronomia',
+                    verMapa: 'Ver tudo no Mapa',
+                    filtrosAvancados: 'Filtros Avançados',
+                    opTodasCategorias: 'Todas as Categorias',
+                    opTodasDistancias: 'Todas as Distâncias',
+                    opTodasAvaliacoes: 'Todas as Avaliações',
+                    opTodosPrecos: 'Todos os Preços',
+                    opGratis: 'Grátis',
+                    opBarato: 'Barato',
+                    opMedio: 'Médio',
+                    opCaro: 'Caro',
+                    aplicarFiltros: 'Aplicar Filtros',
+                    limparFiltros: 'Limpar Filtros',
+                    tabDestinos: 'Todos os Destinos',
+                    tabRoteiros: 'Roteiros Recomendados',
+                    tabDestaques: 'Destaques',
+                    roteiro1Titulo: '🌄 Roteiro 1 Dia',
+                    roteiro1Desc: 'O essencial de Malanje em um dia',
+                    roteiro1Duracao: '⏱️ 1 dia • 3 atrações',
+                    roteiro1Badge: 'Popular',
+                    roteiro2Titulo: '🌿 Roteiro Ecoturismo',
+                    roteiro2Desc: 'Natureza e conservação',
+                    roteiro2Duracao: '⏱️ 2 dias • 5 atrações',
+                    roteiro2Badge: 'Recomendado',
+                    roteiro3Titulo: '👨‍👩‍👧‍👦 Roteiro em Família',
+                    roteiro3Desc: 'Perfeito para viajar com crianças',
+                    roteiro3Duracao: '⏱️ 2 dias • 4 atrações',
+                    roteiro3Badge: 'Família',
+                    roteiro4Titulo: '💕 Roteiro Romântico',
+                    roteiro4Desc: 'Momentos especiais a dois',
+                    roteiro4Duracao: '⏱️ 1 dia • 3 atrações',
+                    roteiro4Badge: 'Romântico',
+                    roteirosPersonalizados: 'Roteiros Personalizados',
+                    roteirosInfo: 'Não encontrou o que procurava? Crie seu próprio roteiro no',
+                    planeadorLink: 'Planeador de Viagem',
+                    criarRoteiro: 'Criar Roteiro',
+                    verMapaAcao: 'Ver no Mapa',
+                    comparar: 'Comparar Destinos',
+                    atualizar: 'Atualizar',
+                    voltar: 'Voltar',
+                    adicionarRoteiro: 'Adicionar ao Roteiro',
+                    verMapaDetalhe: 'Ver no Mapa',
+                    tituloRoteiroDetalhe: 'Roteiro Detalhado',
+                    usarRoteiro: 'Usar este Roteiro',
+                    tituloComparar: 'Comparar Destinos',
+                    labelDestino1: 'Destino 1',
+                    labelDestino2: 'Destino 2',
+                    compararConfirm: 'Comparar',
+                    cancelarComparar: 'Cancelar',
+                    fecharRoteiro: 'Fechar',
+                    fecharDetalhes: 'Fechar',
+                    textoAlertaOk: 'OK',
+                    textoConfirmarSim: 'Sim',
+                    textoConfirmarNao: 'Não',
+                    // Novas traduções para modais
+                    modalInfoTitulo: 'Informação',
+                    modalConfirmarTitulo: 'Confirmação',
+                    modalSucessoTitulo: 'Sucesso',
+                    modalAvisoTitulo: 'Aviso',
+                    modalErroTitulo: 'Erro',
+                },
+                en: {
+                    tituloPagina: 'Malanje Destinations',
+                    dashboard: 'Dashboard',
+                    favoritos: 'Favorites',
+                    heroTitulo: 'Discover Malanje',
+                    heroSubtitulo: 'The Province of Natural Wonders',
+                    filtroTodos: 'All',
+                    filtroNatureza: '🌿 Nature',
+                    filtroCultura: '🏛️ Culture',
+                    filtroAventura: '🧗 Adventure',
+                    filtroHospedagem: '🏨 Accommodation',
+                    filtroGastronomia: '🍽️ Gastronomy',
+                    verMapa: 'See all on Map',
+                    filtrosAvancados: 'Advanced Filters',
+                    opTodasCategorias: 'All Categories',
+                    opTodasDistancias: 'All Distances',
+                    opTodasAvaliacoes: 'All Ratings',
+                    opTodosPrecos: 'All Prices',
+                    opGratis: 'Free',
+                    opBarato: 'Cheap',
+                    opMedio: 'Medium',
+                    opCaro: 'Expensive',
+                    aplicarFiltros: 'Apply Filters',
+                    limparFiltros: 'Clear Filters',
+                    tabDestinos: 'All Destinations',
+                    tabRoteiros: 'Recommended Itineraries',
+                    tabDestaques: 'Highlights',
+                    roteiro1Titulo: '🌄 1 Day Itinerary',
+                    roteiro1Desc: 'The best of Malanje in one day',
+                    roteiro1Duracao: '⏱️ 1 day • 3 attractions',
+                    roteiro1Badge: 'Popular',
+                    roteiro2Titulo: '🌿 Ecotourism Itinerary',
+                    roteiro2Desc: 'Nature and conservation',
+                    roteiro2Duracao: '⏱️ 2 days • 5 attractions',
+                    roteiro2Badge: 'Recommended',
+                    roteiro3Titulo: '👨‍👩‍👧‍👦 Family Itinerary',
+                    roteiro3Desc: 'Perfect for traveling with kids',
+                    roteiro3Duracao: '⏱️ 2 days • 4 attractions',
+                    roteiro3Badge: 'Family',
+                    roteiro4Titulo: '💕 Romantic Itinerary',
+                    roteiro4Desc: 'Special moments for couples',
+                    roteiro4Duracao: '⏱️ 1 day • 3 attractions',
+                    roteiro4Badge: 'Romantic',
+                    roteirosPersonalizados: 'Custom Itineraries',
+                    roteirosInfo: 'Didn\'t find what you were looking for? Create your own itinerary at',
+                    planeadorLink: 'Trip Planner',
+                    criarRoteiro: 'Create Itinerary',
+                    verMapaAcao: 'View on Map',
+                    comparar: 'Compare Destinations',
+                    atualizar: 'Refresh',
+                    voltar: 'Back',
+                    adicionarRoteiro: 'Add to Itinerary',
+                    verMapaDetalhe: 'View on Map',
+                    tituloRoteiroDetalhe: 'Detailed Itinerary',
+                    usarRoteiro: 'Use This Itinerary',
+                    tituloComparar: 'Compare Destinations',
+                    labelDestino1: 'Destination 1',
+                    labelDestino2: 'Destination 2',
+                    compararConfirm: 'Compare',
+                    cancelarComparar: 'Cancel',
+                    fecharRoteiro: 'Close',
+                    fecharDetalhes: 'Close',
+                    textoAlertaOk: 'OK',
+                    textoConfirmarSim: 'Yes',
+                    textoConfirmarNao: 'No',
+                    // Novas traduções para modais
+                    modalInfoTitulo: 'Information',
+                    modalConfirmarTitulo: 'Confirmation',
+                    modalSucessoTitulo: 'Success',
+                    modalAvisoTitulo: 'Warning',
+                    modalErroTitulo: 'Error',
+                }
+            };
+
+            let idiomaAtual = 'pt';
+
+            // ============================================================
+            // FUNÇÃO PARA ALTERAR IDIOMA
+            // ============================================================
+
+            function alterarIdioma(lang) {
+                idiomaAtual = lang;
+                const t = idiomas[lang];
+
+                $('#tituloPagina').text(t.tituloPagina);
+                $('#textoDashboard').text(t.dashboard);
+                $('#textoFavoritos').text(t.favoritos);
+                $('#heroTitulo').text(t.heroTitulo);
+                $('#heroSubtitulo').text(t.heroSubtitulo);
+                $('#filtroTodos').text(t.filtroTodos);
+                $('#filtroNatureza').text(t.filtroNatureza);
+                $('#filtroCultura').text(t.filtroCultura);
+                $('#filtroAventura').text(t.filtroAventura);
+                $('#filtroHospedagem').text(t.filtroHospedagem);
+                $('#filtroGastronomia').text(t.filtroGastronomia);
+                $('#textoVerMapa').text(t.verMapa);
+                $('#textoFiltrosAvancados').text(t.filtrosAvancados);
+                $('#opTodasCategorias').text(t.opTodasCategorias);
+                $('#opTodasDistancias').text(t.opTodasDistancias);
+                $('#opTodasAvaliacoes').text(t.opTodasAvaliacoes);
+                $('#opTodosPrecos').text(t.opTodosPrecos);
+                $('#opGratis').text(t.opGratis);
+                $('#opBarato').text(t.opBarato);
+                $('#opMedio').text(t.opMedio);
+                $('#opCaro').text(t.opCaro);
+                $('#textoAplicarFiltros').text(t.aplicarFiltros);
+                $('#textoLimparFiltros').text(t.limparFiltros);
+                $('#tabDestinos').text(t.tabDestinos);
+                $('#tabRoteiros').text(t.tabRoteiros);
+                $('#tabDestaques').text(t.tabDestaques);
+                $('#roteiro1Titulo').text(t.roteiro1Titulo);
+                $('#roteiro1Desc').text(t.roteiro1Desc);
+                $('#roteiro1Duracao').text(t.roteiro1Duracao);
+                $('#roteiro1Badge').text(t.roteiro1Badge);
+                $('#roteiro2Titulo').text(t.roteiro2Titulo);
+                $('#roteiro2Desc').text(t.roteiro2Desc);
+                $('#roteiro2Duracao').text(t.roteiro2Duracao);
+                $('#roteiro2Badge').text(t.roteiro2Badge);
+                $('#roteiro3Titulo').text(t.roteiro3Titulo);
+                $('#roteiro3Desc').text(t.roteiro3Desc);
+                $('#roteiro3Duracao').text(t.roteiro3Duracao);
+                $('#roteiro3Badge').text(t.roteiro3Badge);
+                $('#roteiro4Titulo').text(t.roteiro4Titulo);
+                $('#roteiro4Desc').text(t.roteiro4Desc);
+                $('#roteiro4Duracao').text(t.roteiro4Duracao);
+                $('#roteiro4Badge').text(t.roteiro4Badge);
+                $('#textoRoteirosPersonalizados').text(t.roteirosPersonalizados);
+                $('#textoRoteirosInfo').text(t.roteirosInfo);
+                $('#textoPlaneadorLink').text(t.planeadorLink);
+                $('#textoCriarRoteiro').text(t.criarRoteiro);
+                $('#textoVerMapaAcao').text(t.verMapaAcao);
+                $('#textoComparar').text(t.comparar);
+                $('#textoAtualizar').text(t.atualizar);
+                $('#textoVoltar').text(t.voltar);
+                $('#textoAdicionarRoteiro').text(t.adicionarRoteiro);
+                $('#textoVerMapaDetalhe').text(t.verMapaDetalhe);
+                $('#tituloRoteiroDetalhe').text(t.tituloRoteiroDetalhe);
+                $('#textoUsarRoteiro').text(t.usarRoteiro);
+                $('#tituloComparar').text(t.tituloComparar);
+                $('#labelDestino1').text(t.labelDestino1);
+                $('#labelDestino2').text(t.labelDestino2);
+                $('#textoCompararConfirm').text(t.compararConfirm);
+                $('#btnCancelarComparar').text(t.cancelarComparar);
+                $('#btnFecharRoteiro').text(t.fecharRoteiro);
+                $('#btnFecharDetalhes').text(t.fecharDetalhes);
+                $('#alertaBtnOk').text(t.textoAlertaOk);
+                $('#confirmacaoBtnSim').text(t.textoConfirmarSim);
+                $('#confirmacaoBtnNao').text(t.textoConfirmarNao);
+
+                // Atualizar placeholders da busca
+                if (lang === 'pt') {
+                    $('#heroSearch').attr('placeholder', '🔍 Procure atrações, locais ou atividades...');
+                } else {
+                    $('#heroSearch').attr('placeholder', '🔍 Search for attractions, places or activities...');
+                }
+
+                // Salvar idioma no localStorage
+                localStorage.setItem('sicami-idioma', lang);
+            }
+
+            // ============================================================
+            // FUNÇÕES DOS MODAIS VERDADEIROS
+            // ============================================================
+
+            // Referências aos modais
+            const modalAlertaEl = document.getElementById('modalAlerta');
+            const modalConfirmacaoEl = document.getElementById('modalConfirmacao');
+            let modalAlertaInstance = null;
+            let modalConfirmacaoInstance = null;
+
+            function getModalAlerta() {
+                if (!modalAlertaInstance) {
+                    modalAlertaInstance = new bootstrap.Modal(modalAlertaEl, {
+                        backdrop: 'static',
+                        keyboard: true
+                    });
+                }
+                return modalAlertaInstance;
+            }
+
+            function getModalConfirmacao() {
+                if (!modalConfirmacaoInstance) {
+                    modalConfirmacaoInstance = new bootstrap.Modal(modalConfirmacaoEl, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                }
+                return modalConfirmacaoInstance;
+            }
+
+            // Função para abrir modal de alerta
+            window.abrirModalAlerta = function(tipo, titulo, mensagem) {
+                const t = idiomas[idiomaAtual];
+                const modal = getModalAlerta();
+
+                const icones = {
+                    info: 'ℹ️',
+                    success: '✅',
+                    warning: '⚠️',
+                    error: '❌',
+                    heart: '❤️',
+                    map: '🗺️',
+                    star: '⭐',
+                    clock: '🕐',
+                    refresh: '🔄',
+                    back: '🔙',
+                    plus: '➕'
+                };
+
+                const cores = {
+                    info: '#0d6efd',
+                    success: '#198754',
+                    warning: '#ffc107',
+                    error: '#dc3545'
+                };
+
+                // Mapear títulos para os modais
+                const titulos = {
+                    info: t.modalInfoTitulo || 'Informação',
+                    success: t.modalSucessoTitulo || 'Sucesso',
+                    warning: t.modalAvisoTitulo || 'Aviso',
+                    error: t.modalErroTitulo || 'Erro'
+                };
+
+                const icone = icones[tipo] || 'ℹ️';
+                const cor = cores[tipo] || '#0d6efd';
+                const tituloModal = titulos[tipo] || 'Informação';
+
+                $('#alertaIcone').text(icone);
+                $('#alertaSubtitulo').text(titulo);
+                $('#alertaTexto').text(mensagem);
+                $('#alertaTitulo').html(`<i class="bi bi-${tipo === 'info' ? 'info-circle' : tipo === 'success' ? 'check-circle' : tipo === 'warning' ? 'exclamation-triangle' : 'x-circle'}"></i> ${tituloModal}`);
+
+                // Ajustar cor do botão
+                const btnOk = $('#alertaBtnOk');
+                btnOk.removeClass('btn-primary btn-success btn-warning btn-danger');
+                if (tipo === 'success') btnOk.addClass('btn-success');
+                else if (tipo === 'warning') btnOk.addClass('btn-warning');
+                else if (tipo === 'error') btnOk.addClass('btn-danger');
+                else btnOk.addClass('btn-primary');
+
+                modal.show();
+            };
+
+            // Função para abrir modal de confirmação
+            window.abrirModalConfirmacao = function(titulo, mensagem, callback) {
+                const t = idiomas[idiomaAtual];
+                const modal = getModalConfirmacao();
+
+                $('#confirmacaoIcone').text('❓');
+                $('#confirmacaoSubtitulo').text(titulo || 'Confirmar ação');
+                $('#confirmacaoTexto').text(mensagem || 'Deseja realmente realizar esta ação?');
+                $('#confirmacaoTitulo').html(`<i class="bi bi-question-circle"></i> ${t.modalConfirmarTitulo || 'Confirmação'}`);
+
+                // Remover eventos anteriores
+                $('#confirmacaoBtnSim').off('click');
+
+                // Adicionar novo evento
+                $('#confirmacaoBtnSim').on('click', function() {
+                    modal.hide();
+                    if (typeof callback === 'function') {
+                        callback(true);
+                    }
+                });
+
+                // Evento para quando o modal é fechado sem confirmação
+                $('#modalConfirmacao').off('hidden.bs.modal');
+                $('#modalConfirmacao').on('hidden.bs.modal', function() {
+                    if (typeof callback === 'function') {
+                        callback(false);
+                    }
+                });
+
+                modal.show();
+            };
+
+            // ============================================================
+            // ESTADO
+            // ============================================================
+
+            let destinosFiltrados = [...destinos];
+            let favoritos = JSON.parse(localStorage.getItem('destinosFavoritos') || '[]');
+            let selectedDestino = null;
+
+            // ============================================================
+            // INICIALIZAR MAPA MINIATURA
+            // ============================================================
+
+            let mapMini = null;
+            let mapMiniInitialized = false;
+
+            function initMapMini() {
+                if (mapMiniInitialized) return;
+
+                const container = document.getElementById('mapMini');
+                if (!container) return;
+
+                mapMini = L.map('mapMini', {
+                    zoomControl: false,
+                    attributionControl: false,
+                    dragging: false,
+                    touchZoom: false,
+                    scrollWheelZoom: false,
+                    doubleClickZoom: false,
+                    boxZoom: false,
+                    keyboard: false
+                }).setView([-9.5333, 16.3500], 8);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                }).addTo(mapMini);
+
+                mapMiniInitialized = true;
+                atualizarMapaMini();
+            }
+
+            function atualizarMapaMini() {
+                if (!mapMiniInitialized) return;
+
+                mapMini.eachLayer(function(layer) {
+                    if (layer instanceof L.Marker) {
+                        mapMini.removeLayer(layer);
+                    }
+                });
+
+                const cores = {
+                    'natureza': '#4CAF50',
+                    'cultura': '#FF9800',
+                    'aventura': '#E91E63',
+                    'hospedagem': '#2196F3',
+                    'gastronomia': '#FF5722'
+                };
+
+                destinosFiltrados.forEach(d => {
+                    const cor = cores[d.categoria] || '#6c757d';
+                    L.marker([d.lat, d.lng], {
+                        icon: L.divIcon({
+                            html: `<div style="
+                                background: ${cor};
+                                color: #fff;
+                                border-radius: 50%;
+                                width: 12px;
+                                height: 12px;
+                                border: 2px solid rgba(255,255,255,0.5);
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                            "></div>`,
+                            className: 'custom-marker',
+                            iconSize: [12, 12],
+                            iconAnchor: [6, 6]
+                        })
+                    }).addTo(mapMini);
+                });
+
+                if (destinosFiltrados.length > 0) {
+                    const group = L.featureGroup();
+                    destinosFiltrados.forEach(d => {
+                        group.addLayer(L.marker([d.lat, d.lng]));
+                    });
+                    mapMini.fitBounds(group.getBounds(), { padding: [20, 20] });
+                }
+            }
+
+            // ============================================================
+            // RENDERIZAR DESTINOS
+            // ============================================================
+
+            function renderizarDestinos(lista) {
+                const container = $('#gridDestinos');
+                container.empty();
+
+                if (lista.length === 0) {
+                    const msg = idiomaAtual === 'pt' ?
+                        'Nenhum destino encontrado' :
+                        'No destinations found';
+                    const sub = idiomaAtual === 'pt' ?
+                        'Tente ajustar os filtros para ver mais resultados.' :
+                        'Try adjusting the filters to see more results.';
+                    container.html(`
+                        <div class="col-12">
+                            <div style="text-align:center;padding:60px;color:rgba(255,255,255,0.4);">
+                                <i class="bi bi-search" style="font-size:3rem;display:block;margin-bottom:15px;"></i>
+                                <h5>${msg}</h5>
+                                <p style="font-size:0.9rem;">${sub}</p>
+                            </div>
+                        </div>
+                    `);
+                    return;
+                }
+
+                const cores = {
+                    'natureza': '#4CAF50',
+                    'cultura': '#FF9800',
+                    'aventura': '#E91E63',
+                    'hospedagem': '#2196F3',
+                    'gastronomia': '#FF5722'
+                };
+
+                const icones = {
+                    'natureza': '🌿',
+                    'cultura': '🏛️',
+                    'aventura': '🧗',
+                    'hospedagem': '🏨',
+                    'gastronomia': '🍽️'
+                };
+
+                const t = idiomas[idiomaAtual];
+
+                lista.forEach(d => {
+                    const cor = cores[d.categoria] || '#6c757d';
+                    const icone = icones[d.categoria] || '📍';
+                    const isFavorito = favoritos.includes(d.id);
+
+                    const imperdivelLabel = idiomaAtual === 'pt' ? '⭐ Imperdível' : '⭐ Must-see';
+                    const maisVisitadoLabel = idiomaAtual === 'pt' ? '🔥 Mais Visitado' : '🔥 Most Visited';
+                    const verLabel = idiomaAtual === 'pt' ? 'Ver' : 'View';
+                    const roteiroLabel = idiomaAtual === 'pt' ? 'Roteiro' : 'Itinerary';
+
+                    container.append(`
+                        <div class="col-md-6 col-lg-4 col-xl-3 mb-4 fade-in">
+                            <div class="destino-card" onclick="abrirDetalhes(${d.id})">
+                                <img src="${d.imagem}" class="destino-imagem" alt="${d.nome}">
+                                <div class="destino-badges">
+                                    ${d.imperdivel ? `<span class="badge-imperdivel">⭐ ${imperdivelLabel}</span>` : ''}
+                                    ${d.maisVisitado ? `<span class="badge-imperdivel" style="background:rgba(13,110,253,0.85);">${maisVisitadoLabel}</span>` : ''}
+                                    <span class="badge-categoria">${icone} ${d.categoria}</span>
+                                </div>
+                                <button class="favorito-btn ${isFavorito ? 'favorito' : ''}" 
+                                        onclick="event.stopPropagation(); toggleFavorito(${d.id})">
+                                    <i class="bi ${isFavorito ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                                </button>
+                                <div class="destino-body">
+                                    <div class="destino-nome">${d.nome}</div>
+                                    <div class="destino-desc">${d.descricao}</div>
+                                    <div class="destino-info">
+                                        <span class="avaliacao">⭐ ${d.avaliacao} (${d.reviews})</span>
+                                        <span class="distancia">📍 ${d.distancia} km</span>
+                                        <span>⏱️ ${d.duracaoVisita}</span>
+                                    </div>
+                                    <div class="destino-actions">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); abrirDetalhes(${d.id})">
+                                            <i class="bi bi-eye"></i> ${verLabel}
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); adicionarAoRoteiro(${d.id})">
+                                            <i class="bi bi-plus-circle"></i> ${roteiroLabel}
+                                        </button>
+                                        <button class="btn btn-outline-info btn-sm" onclick="event.stopPropagation(); verNoMapa(${d.id})">
+                                            <i class="bi bi-map"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+
+                const label = idiomaAtual === 'pt' ? 'destinos' : 'destinations';
+                $('#contadorDestinos').text(`${lista.length} ${label}`);
+                atualizarMapaMini();
+            }
+
+            // ============================================================
+            // RENDERIZAR DESTAQUES
+            // ============================================================
+
+            function renderizarDestaques() {
+                const container = $('#gridDestaques');
+                container.empty();
+
+                const destaques = destinos.filter(d => d.avaliacao >= 4.5 || d.imperdivel);
+                const t = idiomas[idiomaAtual];
+
+                const destaqueLabel = idiomaAtual === 'pt' ? '⭐ Destaque' : '⭐ Highlight';
+                const imperdivelLabel = idiomaAtual === 'pt' ? 'Imperdível' : 'Must-see';
+                const verLabel = idiomaAtual === 'pt' ? 'Ver' : 'View';
+                const roteiroLabel = idiomaAtual === 'pt' ? 'Roteiro' : 'Itinerary';
+
+                destaques.forEach(d => {
+                    const isFavorito = favoritos.includes(d.id);
+                    container.append(`
+                        <div class="col-md-6 col-lg-4 mb-4 fade-in">
+                            <div class="destino-card" onclick="abrirDetalhes(${d.id})" style="border-color:rgba(255,193,7,0.3);">
+                                <img src="${d.imagem}" class="destino-imagem" alt="${d.nome}">
+                                <div class="destino-badges">
+                                    <span class="badge-imperdivel" style="background:rgba(255,193,7,0.85);">${destaqueLabel}</span>
+                                    ${d.imperdivel ? `<span class="badge-imperdivel">${imperdivelLabel}</span>` : ''}
+                                    <span class="badge-categoria">${d.categoria}</span>
+                                </div>
+                                <button class="favorito-btn ${isFavorito ? 'favorito' : ''}" 
+                                        onclick="event.stopPropagation(); toggleFavorito(${d.id})">
+                                    <i class="bi ${isFavorito ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                                </button>
+                                <div class="destino-body">
+                                    <div class="destino-nome">${d.nome} <span style="font-size:0.8rem;color:#ffc107;">★${d.avaliacao}</span></div>
+                                    <div class="destino-desc">${d.descricao}</div>
+                                    <div class="destino-info">
+                                        <span class="distancia">📍 ${d.distancia} km</span>
+                                        <span>⏱️ ${d.duracaoVisita}</span>
+                                    </div>
+                                    <div class="destino-actions">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); abrirDetalhes(${d.id})">
+                                            <i class="bi bi-eye"></i> ${verLabel}
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); adicionarAoRoteiro(${d.id})">
+                                            <i class="bi bi-plus-circle"></i> ${roteiroLabel}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
+            // ============================================================
+            // FUNÇÕES DE INTERAÇÃO
+            // ============================================================
+
+            window.abrirDetalhes = function(id) {
+                const destino = destinos.find(d => d.id === id);
+                if (!destino) return;
+                selectedDestino = destino;
+
+                const estrelas = '★'.repeat(Math.round(destino.avaliacao)) + '☆'.repeat(5 - Math.round(destino
+                .avaliacao));
+
+                const isFavorito = favoritos.includes(destino.id);
+                const t = idiomas[idiomaAtual];
+
+                const favoritoBtnLabel = isFavorito ?
+                    (idiomaAtual === 'pt' ? ' Favorito' : ' Favorite') :
+                    (idiomaAtual === 'pt' ? ' Favoritar' : ' Favorite');
+
+                const imperdivelLabel = idiomaAtual === 'pt' ? '⭐ Imperdível' : '⭐ Must-see';
+                const maisVisitadoLabel = idiomaAtual === 'pt' ? '🔥 Mais Visitado' : '🔥 Most Visited';
+                const distanciaLabel = idiomaAtual === 'pt' ? 'Distância' : 'Distance';
+                const duracaoLabel = idiomaAtual === 'pt' ? 'Duração' : 'Duration';
+                const precoLabel = idiomaAtual === 'pt' ? 'Preço' : 'Price';
+                const horarioLabel = idiomaAtual === 'pt' ? 'Horário' : 'Schedule';
+                const melhorEpocaLabel = idiomaAtual === 'pt' ? 'Melhor Época' : 'Best Season';
+                const avaliacoesLabel = idiomaAtual === 'pt' ? 'avaliações' : 'reviews';
+                const galeriaLabel = idiomaAtual === 'pt' ? 'Galeria' : 'Gallery';
+                const comentariosLabel = idiomaAtual === 'pt' ? 'Comentários de Turistas' : 'Tourist Reviews';
+
+                $('#detalhesTitulo').html(`<i class="bi bi-pin-map"></i> ${destino.nome}`);
+
+                const conteudo = `
+                    <div class="row">
+                        <div class="col-md-12">
+                            <img src="${destino.imagem}" class="modal-detalhe-imagem" alt="${destino.nome}">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="badge" style="background:${destino.categoria === 'natureza' ? '#4CAF50' : destino.categoria === 'cultura' ? '#FF9800' : destino.categoria === 'aventura' ? '#E91E63' : destino.categoria === 'hospedagem' ? '#2196F3' : '#FF5722'};">${destino.categoria.toUpperCase()}</span>
+                                    ${destino.imperdivel ? `<span class="badge bg-danger">${imperdivelLabel}</span>` : ''}
+                                    ${destino.maisVisitado ? `<span class="badge bg-primary">${maisVisitadoLabel}</span>` : ''}
+                                </div>
+                                <button class="btn btn-sm ${isFavorito ? 'btn-danger' : 'btn-outline-danger'}" onclick="toggleFavorito(${destino.id}); abrirDetalhes(${destino.id})">
+                                    <i class="bi ${isFavorito ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                                    ${favoritoBtnLabel}
+                                </button>
+                            </div>
+                            <h4>${destino.nome}</h4>
+                            <div style="color:#ffc107;font-size:1.2rem;">${estrelas} ${destino.avaliacao}</div>
+                            <p style="color:rgba(255,255,255,0.7);margin-top:10px;">${destino.descricaoCompleta}</p>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>📍 ${distanciaLabel}:</strong> ${destino.distancia} km<br>
+                                    <strong>⏱️ ${duracaoLabel}:</strong> ${destino.duracaoVisita}<br>
+                                    <strong>💰 ${precoLabel}:</strong> ${destino.preco}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>🕐 ${horarioLabel}:</strong> ${destino.horario}<br>
+                                    <strong>📅 ${melhorEpocaLabel}:</strong> ${destino.melhorEpoca}<br>
+                                    <strong>⭐ ${avaliacoesLabel}:</strong> ${destino.reviews}
+                                </div>
+                            </div>
+                            <hr>
+                            <h6><i class="bi bi-images"></i> ${galeriaLabel}</h6>
+                            <div class="modal-detalhe-galeria">
+                                ${destino.galeria.map(img => `<img src="${img}" alt="${destino.nome}" onclick="abrirModalAlerta('info', 'Galeria', '📷 Abrindo imagem em tamanho completo...')">`).join('')}
+                            </div>
+                            <hr>
+                            <h6><i class="bi bi-chat"></i> ${comentariosLabel}</h6>
+                            <div class="avaliacao-usuario">
+                                <div class="usuario">👤 João Silva <span style="color:#ffc107;">⭐⭐⭐⭐⭐</span></div>
+                                <div class="comentario">"Lugar incrível! As quedas são de tirar o fôlego. Vale muito a visita."</div>
+                                <div class="data">📅 15/12/2025</div>
+                            </div>
+                            <div class="avaliacao-usuario">
+                                <div class="usuario">👤 Maria Santos <span style="color:#ffc107;">⭐⭐⭐⭐</span></div>
+                                <div class="comentario">"Experiência única. A natureza é exuberante. Recomendo levar câmera."</div>
+                                <div class="data">📅 10/11/2025</div>
+                            </div>
+                            <div class="avaliacao-usuario">
+                                <div class="usuario">👤 Pedro Costa <span style="color:#ffc107;">⭐⭐⭐⭐⭐</span></div>
+                                <div class="comentario">"Melhor atração de Malanje! Voltei para ver mais vezes."</div>
+                                <div class="data">📅 05/10/2025</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                $('#detalhesConteudo').html(conteudo);
+                $('#detalhesModal').modal('show');
+            };
+
+            window.toggleFavorito = function(id) {
+                const index = favoritos.indexOf(id);
+                if (index > -1) {
+                    favoritos.splice(index, 1);
+                    const msg = idiomaAtual === 'pt' ?
+                        '💔 Removido dos favoritos!' :
+                        '💔 Removed from favorites!';
+                    abrirModalAlerta('info', idiomaAtual === 'pt' ? 'Favoritos' : 'Favorites', msg);
+                } else {
+                    favoritos.push(id);
+                    const msg = idiomaAtual === 'pt' ?
+                        '❤️ Adicionado aos favoritos!' :
+                        '❤️ Added to favorites!';
+                    abrirModalAlerta('success', idiomaAtual === 'pt' ? 'Favoritos' : 'Favorites', msg);
+                }
+                localStorage.setItem('destinosFavoritos', JSON.stringify(favoritos));
+                aplicarFiltros();
+                const destino = destinos.find(d => d.id === id);
+                if (destino) {
+                    destino.favorito = favoritos.includes(id);
+                }
+            };
+
+            window.adicionarAoRoteiro = function(id) {
+                const destino = destinos.find(d => d.id === id);
+                if (!destino) return;
+                const msg = idiomaAtual === 'pt' ?
+                    `✅ "${destino.nome}" adicionado ao roteiro!\n\n📋 Vá ao Planeador de Viagem para organizar seu itinerário.` :
+                    `✅ "${destino.nome}" added to itinerary!\n\n📋 Go to Trip Planner to organize your itinerary.`;
+                abrirModalAlerta('success', idiomaAtual === 'pt' ? 'Roteiro' : 'Itinerary', msg);
+            };
+
+            window.verNoMapa = function(id) {
+                const destino = destinos.find(d => d.id === id);
+                if (!destino) return;
+                const msg = idiomaAtual === 'pt' ?
+                    `🗺️ Localizando "${destino.nome}" no mapa...\n\n📍 Coordenadas: ${destino.lat}, ${destino.lng}\n📏 Distância: ${destino.distancia} km de Malanje` :
+                    `🗺️ Locating "${destino.nome}" on map...\n\n📍 Coordinates: ${destino.lat}, ${destino.lng}\n📏 Distance: ${destino.distancia} km from Malanje`;
+                abrirModalAlerta('info', idiomaAtual === 'pt' ? 'Mapa' : 'Map', msg);
+            };
+
+            // ============================================================
+            // FILTROS
+            // ============================================================
+
+            function aplicarFiltros() {
+                const categoria = $('#filtroCategoria').val();
+                const distancia = parseInt($('#filtroDistancia').val()) || 0;
+                const avaliacao = parseFloat($('#filtroAvaliacao').val()) || 0;
+                const preco = $('#filtroPreco').val();
+                const busca = $('#heroSearch').val().toLowerCase();
+
+                // Filtro rápido (aba)
+                const filtroRapido = $('.filtro-rapido-btn.active').data('filtro');
+
+                destinosFiltrados = destinos.filter(d => {
+                    // Categoria
+                    if (categoria !== 'todas' && d.categoria !== categoria) return false;
+                    if (filtroRapido !== 'todos' && d.categoria !== filtroRapido) return false;
+
+                    // Distância
+                    if (distancia > 0 && d.distancia > distancia) return false;
+
+                    // Avaliação
+                    if (avaliacao > 0 && d.avaliacao < avaliacao) return false;
+
+                    // Preço
+                    if (preco !== 'todos' && d.precoCategoria !== preco) return false;
+
+                    // Busca
+                    if (busca && !d.nome.toLowerCase().includes(busca) && !d.descricao.toLowerCase().includes(busca))
+                        return false;
+
+                    return true;
+                });
+
+                // Se estiver na aba de destaques, mostrar apenas os destaques
+                if ($('#destaques-tab').hasClass('active')) {
+                    destinosFiltrados = destinosFiltrados.filter(d => d.avaliacao >= 4.5 || d.imperdivel);
+                }
+
+                renderizarDestinos(destinosFiltrados);
+                renderizarDestaques();
+                atualizarMapaMini();
+            }
+
+            // ============================================================
+            // ROTEIROS DETALHADOS
+            // ============================================================
+
+            const roteirosDetalhados = {
+                1: {
+                    titulo: '🌄 Roteiro 1 Dia - Essencial de Malanje',
+                    descricao: 'Descubra o melhor de Malanje em um único dia.',
+                    duracao: '1 dia',
+                    atracoes: [
+                        '🕐 08:00 - Museu Regional de Malanje (1.5h)',
+                        '🕐 10:00 - Partida para Pedras Negras',
+                        '🕐 11:30 - Pedras Negras de Pungo Andongo (2h)',
+                        '🕐 14:00 - Almoço no Restaurante Típico',
+                        '🕐 15:30 - Quedas de Kalandula (2.5h)',
+                        '🕐 18:30 - Retorno a Malanje'
+                    ],
+                    dicas: 'Leve água, protetor solar e câmera. Recomenda-se saída cedo.'
+                },
+                2: {
+                    titulo: '🌿 Roteiro Ecoturismo - Natureza e Conservação',
+                    descricao: 'Explore as maravilhas naturais e áreas de conservação.',
+                    duracao: '2 dias',
+                    atracoes: [
+                        '📅 Dia 1:',
+                        '🕐 08:00 - Parque Nacional da Cangandala (4h)',
+                        '🕐 13:00 - Almoço na região',
+                        '🕐 14:30 - Barragem de Kapanda (1.5h)',
+                        '🕐 17:00 - Check-in no Hotel Malanje Palace',
+                        '',
+                        '📅 Dia 2:',
+                        '🕐 08:00 - Nascente do Amor (1h)',
+                        '🕐 10:00 - Foz do Amor (1.5h)',
+                        '🕐 12:00 - Rápidos do Kwanza (2.5h)',
+                        '🕐 16:00 - Retorno'
+                    ],
+                    dicas: 'Leve roupas confortáveis, repelente e binóculos para observação.'
+                },
+                3: {
+                    titulo: '👨‍👩‍👧‍👦 Roteiro em Família - Diversão para Todos',
+                    descricao: 'Atrações adequadas para viajar com crianças.',
+                    duracao: '2 dias',
+                    atracoes: [
+                        '📅 Dia 1:',
+                        '🕐 09:00 - Museu Regional de Malanje (1.5h)',
+                        '🕐 11:00 - Foz do Amor (1.5h)',
+                        '🕐 13:00 - Almoço no Restaurante Típico',
+                        '🕐 15:00 - Barragem de Kapanda (1.5h)',
+                        '',
+                        '📅 Dia 2:',
+                        '🕐 08:00 - Nascente do Amor (1h)',
+                        '🕐 10:00 - Pedras Negras de Pungo Andongo (2h)',
+                        '🕐 13:00 - Piquenique na natureza',
+                        '🕐 15:00 - Quedas de Kalandula (2h)'
+                    ],
+                    dicas: 'Leve lanches, água e protetor solar. Cuidado próximo às quedas.'
+                },
+                4: {
+                    titulo: '💕 Roteiro Romântico - Momentos a Dois',
+                    descricao: 'Locais perfeitos para casais e momentos especiais.',
+                    duracao: '1 dia',
+                    atracoes: [
+                        '🕐 07:00 - Nascente do Amor - Banho nas águas cristalinas',
+                        '🕐 09:00 - Foz do Amor - Passeio e fotos',
+                        '🕐 11:30 - Almoço romântico no Restaurante Típico',
+                        '🕐 14:00 - Quedas de Kalandula - Pôr do sol',
+                        '🕐 17:30 - Jantar no Hotel Malanje Palace'
+                    ],
+                    dicas: 'Reserve o restaurante com antecedência. Leve câmera para fotos especiais.'
+                }
+            };
+
+            window.verRoteiro = function(id) {
+                const roteiro = roteirosDetalhados[id];
+                if (!roteiro) return;
+
+                const t = idiomas[idiomaAtual];
+                const titulo = idiomaAtual === 'pt' ? 'Roteiro Detalhado' : 'Detailed Itinerary';
+                const duracaoLabel = idiomaAtual === 'pt' ? 'Duração' : 'Duration';
+                const descricaoLabel = idiomaAtual === 'pt' ? 'Descrição' : 'Description';
+                const itinerarioLabel = idiomaAtual === 'pt' ? 'Itinerário' : 'Itinerary';
+                const dicasLabel = idiomaAtual === 'pt' ? 'Dicas' : 'Tips';
+
+                const conteudo = `
+                    <h5>${roteiro.titulo}</h5>
+                    <p><strong>⏱️ ${duracaoLabel}:</strong> ${roteiro.duracao}</p>
+                    <p><strong>📝 ${descricaoLabel}:</strong> ${roteiro.descricao}</p>
+                    <hr>
+                    <h6>📍 ${itinerarioLabel}:</h6>
+                    <ul style="color:rgba(255,255,255,0.7);">
+                        ${roteiro.atracoes.map(a => `<li>${a}</li>`).join('')}
+                    </ul>
+                    <hr>
+                    <h6>💡 ${dicasLabel}:</h6>
+                    <p style="color:rgba(255,255,255,0.7);">${roteiro.dicas}</p>
+                `;
+
+                $('#roteiroDetalheConteudo').html(conteudo);
+                $('#roteiroDetalheModal').modal('show');
+            };
+
+            // ============================================================
+            // COMPARAR DESTINOS
+            // ============================================================
+
+            function preencherComparar() {
+                const select1 = $('#compararDestino1');
+                const select2 = $('#compararDestino2');
+                select1.empty().append('<option value="">Selecione...</option>');
+                select2.empty().append('<option value="">Selecione...</option>');
+
+                destinos.forEach(d => {
+                    select1.append(`<option value="${d.id}">${d.nome}</option>`);
+                    select2.append(`<option value="${d.id}">${d.nome}</option>`);
+                });
+            }
+
+            $('#btnCompararConfirm').click(function() {
+                const id1 = parseInt($('#compararDestino1').val());
+                const id2 = parseInt($('#compararDestino2').val());
+
+                if (!id1 || !id2) {
+                    const msg = idiomaAtual === 'pt' ?
+                        '⚠️ Selecione dois destinos para comparar.' :
+                        '⚠️ Select two destinations to compare.';
+                    abrirModalAlerta('warning', idiomaAtual === 'pt' ? 'Aviso' : 'Warning', msg);
+                    return;
+                }
+
+                if (id1 === id2) {
+                    const msg = idiomaAtual === 'pt' ?
+                        '⚠️ Selecione dois destinos diferentes.' :
+                        '⚠️ Select two different destinations.';
+                    abrirModalAlerta('warning', idiomaAtual === 'pt' ? 'Aviso' : 'Warning', msg);
+                    return;
+                }
+
+                const d1 = destinos.find(d => d.id === id1);
+                const d2 = destinos.find(d => d.id === id2);
+
+                if (!d1 || !d2) return;
+
+                const t = idiomas[idiomaAtual];
+                const avaliacaoLabel = idiomaAtual === 'pt' ? 'Avaliação' : 'Rating';
+                const distanciaLabel = idiomaAtual === 'pt' ? 'Distância' : 'Distance';
+                const duracaoLabel = idiomaAtual === 'pt' ? 'Duração' : 'Duration';
+                const precoLabel = idiomaAtual === 'pt' ? 'Preço' : 'Price';
+                const categoriaLabel = idiomaAtual === 'pt' ? 'Categoria' : 'Category';
+                const melhorEpocaLabel = idiomaAtual === 'pt' ? 'Melhor Época' : 'Best Season';
+
+                const melhorMsg = idiomaAtual === 'pt' ?
+                    `💡 "${d1.nome}" tem melhor avaliação` :
+                    `💡 "${d1.nome}" has better rating`;
+
+                const melhorMsg2 = idiomaAtual === 'pt' ?
+                    `💡 "${d2.nome}" tem melhor avaliação` :
+                    `💡 "${d2.nome}" has better rating`;
+
+                const igualMsg = idiomaAtual === 'pt' ?
+                    'Ambos têm a mesma avaliação' :
+                    'Both have the same rating';
+
+                const resultado = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:15px;">
+                                <h5>${d1.nome}</h5>
+                                <img src="${d1.imagem}" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px;">
+                                <div><strong>⭐ ${avaliacaoLabel}:</strong> ${d1.avaliacao}</div>
+                                <div><strong>📍 ${distanciaLabel}:</strong> ${d1.distancia} km</div>
+                                <div><strong>⏱️ ${duracaoLabel}:</strong> ${d1.duracaoVisita}</div>
+                                <div><strong>💰 ${precoLabel}:</strong> ${d1.preco}</div>
+                                <div><strong>🏷️ ${categoriaLabel}:</strong> ${d1.categoria}</div>
+                                <div><strong>📅 ${melhorEpocaLabel}:</strong> ${d1.melhorEpoca}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:15px;">
+                                <h5>${d2.nome}</h5>
+                                <img src="${d2.imagem}" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px;">
+                                <div><strong>⭐ ${avaliacaoLabel}:</strong> ${d2.avaliacao}</div>
+                                <div><strong>📍 ${distanciaLabel}:</strong> ${d2.distancia} km</div>
+                                <div><strong>⏱️ ${duracaoLabel}:</strong> ${d2.duracaoVisita}</div>
+                                <div><strong>💰 ${precoLabel}:</strong> ${d2.preco}</div>
+                                <div><strong>🏷️ ${categoriaLabel}:</strong> ${d2.categoria}</div>
+                                <div><strong>📅 ${melhorEpocaLabel}:</strong> ${d2.melhorEpoca}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <span style="color:rgba(255,255,255,0.5);font-size:0.85rem;">
+                            ${d1.avaliacao > d2.avaliacao ? melhorMsg : d2.avaliacao > d1.avaliacao ? melhorMsg2 : igualMsg}
+                        </span>
+                    </div>
+                `;
+
+                $('#compararResultado').show().html(resultado);
+            });
+
+            // ============================================================
+            // EVENTOS DOS BOTÕES
+            // ============================================================
+
+            // Idioma
+            $('#langToggle').click(function() {
+                const novoIdioma = idiomaAtual === 'pt' ? 'en' : 'pt';
+                alterarIdioma(novoIdioma);
+                // Atualizar a página com o novo idioma
+                aplicarFiltros();
+                // Atualizar também os modais que podem estar abertos
+                const msg = idiomaAtual === 'pt' ?
+                    '🌐 Idioma alterado para Português' :
+                    '🌐 Language changed to English';
+                abrirModalAlerta('success', idiomaAtual === 'pt' ? 'Idioma' : 'Language', msg);
+            });
+
+            // Filtros rápidos
+            $('.filtro-rapido-btn').click(function() {
+                $('.filtro-rapido-btn').removeClass('active');
+                $(this).addClass('active');
+                aplicarFiltros();
+            });
+
+            // Busca hero
+            $('#heroSearch').on('input', function() {
+                aplicarFiltros();
+            });
+
+            // Aplicar filtros
+            $('#btnAplicarFiltros').click(function() {
+                aplicarFiltros();
+                $('#destinos-tab').tab('show');
+                const msg = idiomaAtual === 'pt' ?
+                    `✅ ${destinosFiltrados.length} destinos encontrados` :
+                    `✅ ${destinosFiltrados.length} destinations found`;
+                abrirModalAlerta('success', idiomaAtual === 'pt' ? 'Filtros' : 'Filters', msg);
+            });
+
+            // Limpar filtros
+            $('#btnLimparFiltros').click(function() {
+                $('#filtroCategoria').val('todas');
+                $('#filtroDistancia').val('0');
+                $('#filtroAvaliacao').val('0');
+                $('#filtroPreco').val('todos');
+                $('#heroSearch').val('');
+                $('.filtro-rapido-btn').removeClass('active');
+                $('.filtro-rapido-btn[data-filtro="todos"]').addClass('active');
+                aplicarFiltros();
+                const msg = idiomaAtual === 'pt' ?
+                    '🔄 Filtros limpos com sucesso' :
+                    '🔄 Filters cleared successfully';
+                abrirModalAlerta('info', idiomaAtual === 'pt' ? 'Filtros' : 'Filters', msg);
+            });
+
+            // Favoritos
+            $('#btnFavoritos').click(function() {
+                const favs = destinos.filter(d => favoritos.includes(d.id));
+                if (favs.length === 0) {
+                    const msg = idiomaAtual === 'pt' ?
+                        '💔 Você ainda não tem destinos favoritos.\n\nClique no ❤️ de um destino para adicioná-lo aos favoritos.' :
+                        '💔 You don\'t have favorite destinations yet.\n\nClick the ❤️ on a destination to add it to favorites.';
+                    abrirModalAlerta('info', idiomaAtual === 'pt' ? 'Favoritos' : 'Favorites', msg);
+                    return;
+                }
+                destinosFiltrados = favs;
+                renderizarDestinos(destinosFiltrados);
+                $('#destinos-tab').tab('show');
+                const msg = idiomaAtual === 'pt' ?
+                    `❤️ ${favs.length} destinos favoritos` :
+                    `❤️ ${favs.length} favorite destinations`;
+                abrirModalAlerta('success', idiomaAtual === 'pt' ? 'Favoritos' : 'Favorites', msg);
+            });
+
+            // Planeador
+            $('#btnPlaneador').click(function() {
+                const msg = idiomaAtual === 'pt' ?
+                    '🗺️ Redirecionando para o Planeador de Viagem...\n\nCrie seu roteiro personalizado com os destinos selecionados.' :
+                    '🗺️ Redirecting to Trip Planner...\n\nCreate your custom itinerary with selected destinations.';
+                abrirModalAlerta('info', idiomaAtual === 'pt' ? 'Planeador' : 'Planner', msg);
+            });
+
+            // Mapa
+            $('#btnMapa').click(function() {
+                const msg = idiomaAtual === 'pt' ?
+                    `🗺️ Redirecionando para o Mapa Interativo...\n\n${destinosFiltrados.length} destinos disponíveis no mapa.` :
+                    `🗺️ Redirecting to Interactive Map...\n\n${destinosFiltrados.length} destinations available on map.`;
+                abrirModalAlerta('info', idiomaAtual === 'pt' ? 'Mapa' : 'Map', msg);
+            });
+
+            // Comparar
+            $('#btnComparar').click(function() {
+                preencherComparar();
+                $('#compararResultado').hide();
+                $('#compararModal').modal('show');
+            });
+
+            // Atualizar
+            $('#btnAtualizar').click(function() {
+                aplicarFiltros();
+                const label = idiomaAtual === 'pt' ? 'destinos' : 'destinations';
+                const favoritosLabel = idiomaAtual === 'pt' ? 'favoritos' : 'favorites';
+                const msg = idiomaAtual === 'pt' ?
+                    `🔄 Dados atualizados com sucesso!\n\n📊 ${destinos.length} destinos turísticos\n❤️ ${favoritos.length} ${favoritosLabel}` :
+                    `🔄 Data updated successfully!\n\n📊 ${destinos.length} tourist destinations\n❤️ ${favoritos.length} ${favoritosLabel}`;
+                abrirModalAlerta('success', idiomaAtual === 'pt' ? 'Atualização' : 'Update', msg);
+            });
+
+            // Voltar
+            $('#btnVoltar').click(function() {
+                abrirModalConfirmacao(
+                    idiomaAtual === 'pt' ? 'Sair' : 'Exit',
+                    idiomaAtual === 'pt' ? 'Deseja realmente sair da tela de destinos?' : 'Do you really want to exit the destinations screen?',
+                    function(confirmado) {
+                        if (confirmado) {
+                            const msg = idiomaAtual === 'pt' ?
+                                '🔙 Retornando ao menu principal...' :
+                                '🔙 Returning to main menu...';
+                            abrirModalAlerta('info', idiomaAtual === 'pt' ? 'Sair' : 'Exit', msg);
+                        }
+                    }
+                );
+            });
+
+            // Ver Mapa Completo (do mini-mapa)
+            $('#btnVerMapaCompleto').click(function() {
+                const msg = idiomaAtual === 'pt' ?
+                    `🗺️ Redirecionando para o Mapa Interativo completo...\n\n${destinosFiltrados.length} destinos no mapa.` :
+                    `🗺️ Redirecting to full Interactive Map...\n\n${destinosFiltrados.length} destinations on map.`;
+                abrirModalAlerta('info', idiomaAtual === 'pt' ? 'Mapa' : 'Map', msg);
+            });
+
+            // Dashboard
+            $('#btnDashboard').click(function(e) {
+                e.preventDefault();
+                const msg = idiomaAtual === 'pt' ?
+                    '🔙 Redirecionando para o Dashboard Principal...' :
+                    '🔙 Redirecting to Main Dashboard...';
+                abrirModalAlerta('info', idiomaAtual === 'pt' ? 'Dashboard' : 'Dashboard', msg);
+            });
+
+            // Adicionar ao Roteiro (modal)
+            $('#btnAdicionarRoteiro').click(function() {
+                if (selectedDestino) {
+                    const msg = idiomaAtual === 'pt' ?
+                        `✅ "${selectedDestino.nome}" adicionado ao roteiro!` :
+                        `✅ "${selectedDestino.nome}" added to itinerary!`;
+                    abrirModalAlerta('success', idiomaAtual === 'pt' ? 'Roteiro' : 'Itinerary', msg);
+                    $('#detalhesModal').modal('hide');
+                }
+            });
+
+            // Ver no Mapa (modal)
+            $('#btnVerMapaDetalhe').click(function() {
+                if (selectedDestino) {
+                    verNoMapa(selectedDestino.id);
+                    $('#detalhesModal').modal('hide');
+                }
+            });
+
+            // Usar Roteiro
+            $('#btnUsarRoteiro').click(function() {
+                const msg = idiomaAtual === 'pt' ?
+                    '✅ Roteiro carregado no Planeador de Viagem!' :
+                    '✅ Itinerary loaded in Trip Planner!';
+                abrirModalAlerta('success', idiomaAtual === 'pt' ? 'Roteiro' : 'Itinerary', msg);
+                $('#roteiroDetalheModal').modal('hide');
+            });
+
+            // Tema
+            let isDarkTheme = true;
+
+            function toggleTheme() {
+                isDarkTheme = !isDarkTheme;
+                if (isDarkTheme) {
+                    $('body').removeClass('light-theme');
+                    $('#themeIcon').removeClass('bi-sun-fill').addClass('bi-moon-stars');
+                } else {
+                    $('body').addClass('light-theme');
+                    $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+                }
+                localStorage.setItem('sicami-theme-destinos', isDarkTheme ? 'dark' : 'light');
+            }
+
+            const savedTheme = localStorage.getItem('sicami-theme-destinos');
+            if (savedTheme === 'light') {
+                isDarkTheme = false;
+                $('body').addClass('light-theme');
+                $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+            }
+            $('#themeToggle').click(toggleTheme);
+
+            // ============================================================
+            // INICIALIZAÇÃO
+            // ============================================================
+
+            // Restaurar idioma
+            const idiomaSalvo = localStorage.getItem('sicami-idioma');
+            if (idiomaSalvo && idiomaSalvo !== 'pt') {
+                alterarIdioma(idiomaSalvo);
+            } else {
+                alterarIdioma('pt');
+            }
+
+            setTimeout(initMapMini, 500);
+            aplicarFiltros();
+
+            // Atualizar data/hora
+            function updateDateTime() {
+                const now = new Date();
+                const options = {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                };
+                $('#dateTimeDisplay').text(
+                    now.toLocaleDateString(idiomaAtual === 'pt' ? 'pt-BR' : 'en-US', options)
+                );
+            }
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+
+            console.log('✅ Destinos de Malanje carregado!');
+            console.log(`📍 ${destinos.length} destinos turísticos disponíveis`);
+            console.log(`❤️ ${favoritos.length} favoritos`);
+            console.log(`🌐 Idioma: ${idiomaAtual}`);
+
+        });
+    </script>
+</body>
+</html>

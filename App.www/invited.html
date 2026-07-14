@@ -1,0 +1,3493 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I.N.V.I.T.E.D. – Turismo Malanje</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background: #0a0e1a;
+            color: #e0f0ff;
+            min-height: 100vh;
+            cursor: none;
+            overflow-x: hidden;
+        }
+
+        /* ===== CURSOR PERSONALIZADO ===== */
+        .custom-cursor {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 180, 255, 0.7);
+            background: radial-gradient(circle, rgba(0, 180, 255, 0.15) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: width 0.15s, height 0.15s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 180, 255, 0.3);
+            backdrop-filter: blur(2px);
+        }
+        .custom-cursor::after {
+            content: '\f3c5';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 18px;
+            color: #00b4ff;
+            opacity: 0.9;
+            text-shadow: 0 0 15px #00b4ff;
+        }
+        .custom-cursor .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00b4ff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00b4ff;
+            animation: particleFloat 2s infinite ease-in-out;
+        }
+        .custom-cursor .particle:nth-child(1) { top: -6px; left: 50%; animation-delay: 0s; }
+        .custom-cursor .particle:nth-child(2) { bottom: -6px; left: 50%; animation-delay: 0.7s; }
+        .custom-cursor .particle:nth-child(3) { left: -6px; top: 50%; animation-delay: 1.4s; }
+        .custom-cursor .particle:nth-child(4) { right: -6px; top: 50%; animation-delay: 0.3s; }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+            50% { transform: translate(0, -8px) scale(1.8); opacity: 1; }
+        }
+
+        /* ===== LOADING ===== */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: #0a0e1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1.2s ease, visibility 1.2s ease;
+        }
+        #loading-screen.hide {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loader-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top: 4px solid #00b4ff;
+            border-bottom: 4px solid #00b4ff;
+            animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            position: relative;
+            margin-bottom: 30px;
+            box-shadow: 0 0 40px rgba(0, 180, 255, 0.2);
+        }
+        .loader-ring::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 180, 255, 0.2);
+            animation: spin 1.8s linear infinite reverse;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loader-text {
+            font-size: 14px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #7abfff;
+            font-weight: 300;
+            text-align: center;
+            line-height: 2;
+        }
+        .loader-text span {
+            display: inline-block;
+            opacity: 0;
+            animation: fadeUp 0.4s forwards;
+        }
+        .loader-text span:nth-child(1) { animation-delay: 0.1s; }
+        .loader-text span:nth-child(2) { animation-delay: 0.4s; }
+        .loader-text span:nth-child(3) { animation-delay: 0.7s; }
+        .loader-text span:nth-child(4) { animation-delay: 1.0s; }
+        .loader-text span:nth-child(5) { animation-delay: 1.3s; }
+        .loader-text span:nth-child(6) { animation-delay: 1.6s; }
+        .loader-text span:nth-child(7) { animation-delay: 1.9s; }
+        .loader-text span:nth-child(8) { animation-delay: 2.2s; }
+        .loader-text span:nth-child(9) { animation-delay: 2.5s; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        #app {
+            display: none;
+            padding: 20px 30px 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+        }
+        #app.visible { display: block; }
+
+        /* ===== HOLOGRAM HEADER ===== */
+        .hologram-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px;
+            background: rgba(10, 14, 30, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 180, 255, 0.15);
+            border-radius: 60px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+        .hologram-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .hologram-header .brand i {
+            font-size: 28px;
+            color: #00b4ff;
+            filter: drop-shadow(0 0 12px #00b4ff);
+        }
+        .hologram-header .brand h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #7abfff, #00b4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hologram-header .brand small {
+            font-size: 11px;
+            font-weight: 300;
+            color: #7abfff;
+            letter-spacing: 1px;
+            -webkit-text-fill-color: #7abfff;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .header-actions .notif-btn {
+            background: transparent;
+            border: none;
+            color: #7abfff;
+            font-size: 22px;
+            cursor: pointer;
+            position: relative;
+            transition: 0.3s;
+        }
+        .header-actions .notif-btn:hover {
+            color: #00b4ff;
+            transform: scale(1.1);
+        }
+        .header-actions .notif-btn .badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: #ff4d6d;
+            color: #fff;
+            font-size: 10px;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .header-actions .user-greeting {
+            font-size: 14px;
+            color: #b0dfff;
+            background: rgba(0, 180, 255, 0.08);
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(0, 180, 255, 0.15);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .header-actions .user-greeting:hover {
+            background: rgba(0, 180, 255, 0.15);
+            border-color: #00b4ff;
+        }
+        .header-actions .user-greeting i {
+            margin-right: 8px;
+            color: #00b4ff;
+        }
+
+        /* ===== MORDOMO (HOLOGRAM) ===== */
+        .mordomo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 0 30px;
+            position: relative;
+        }
+        .hologram-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hologram-container img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border-radius: 50%;
+            filter: drop-shadow(0 0 40px rgba(0, 180, 255, 0.3)) 
+                    drop-shadow(0 0 80px rgba(0, 180, 255, 0.1));
+            animation: hologramPulse 3s ease-in-out infinite;
+            transition: filter 0.5s;
+            cursor: pointer;
+        }
+        .hologram-container img:hover {
+            filter: drop-shadow(0 0 60px rgba(0, 180, 255, 0.6)) 
+                    drop-shadow(0 0 120px rgba(0, 180, 255, 0.2));
+        }
+        @keyframes hologramPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.02); opacity: 1; }
+        }
+        .hologram-ring {
+            position: absolute;
+            inset: -12px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 180, 255, 0.15);
+            animation: ringRotate 12s linear infinite;
+            box-shadow: 0 0 60px rgba(0, 180, 255, 0.05);
+        }
+        .hologram-ring:nth-child(2) {
+            inset: -24px;
+            border-color: rgba(0, 180, 255, 0.08);
+            animation-duration: 20s;
+            animation-direction: reverse;
+        }
+        @keyframes ringRotate { to { transform: rotate(360deg); } }
+
+        .mordomo-speech {
+            max-width: 720px;
+            text-align: center;
+            margin-top: 16px;
+            padding: 18px 28px;
+            background: rgba(0, 180, 255, 0.04);
+            border: 1px solid rgba(0, 180, 255, 0.08);
+            border-radius: 24px;
+            backdrop-filter: blur(6px);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #d0ecff;
+            position: relative;
+        }
+        .mordomo-speech .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: #00b4ff;
+            margin-left: 4px;
+            animation: blink 0.8s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* ===== TUTORIAL OVERLAY ===== */
+        .tutorial-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            pointer-events: none;
+            background: rgba(10, 14, 26, 0.6);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        .tutorial-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .tutorial-step {
+            position: absolute;
+            background: rgba(10, 14, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 180, 255, 0.25);
+            border-radius: 20px;
+            padding: 24px 30px;
+            max-width: 360px;
+            color: #e0f0ff;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            pointer-events: auto;
+            animation: stepAppear 0.5s ease;
+        }
+        @keyframes stepAppear {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .tutorial-step h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #00b4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tutorial-step p {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #b0dfff;
+            margin-bottom: 14px;
+        }
+        .tutorial-step .btn-next {
+            background: linear-gradient(135deg, #00b4ff, #0077be);
+            border: none;
+            color: #fff;
+            padding: 8px 22px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+            pointer-events: auto;
+        }
+        .tutorial-step .btn-next:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 30px rgba(0, 180, 255, 0.3);
+        }
+        .tutorial-step .step-counter {
+            font-size: 12px;
+            color: #7abfff;
+            margin-top: 10px;
+            text-align: right;
+            opacity: 0.7;
+        }
+        .tutorial-step .btn-skip {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #7abfff;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 400;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            pointer-events: auto;
+            margin-right: 10px;
+        }
+        .tutorial-step .btn-skip:hover {
+            border-color: #00b4ff;
+            color: #fff;
+        }
+
+        /* ===== CHAT ===== */
+        .chat-section {
+            margin-top: 30px;
+            background: rgba(10, 14, 30, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 180, 255, 0.08);
+            border-radius: 28px;
+            padding: 20px 24px 24px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+        }
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 180, 255, 0.06);
+        }
+        .chat-header h3 {
+            font-size: 16px;
+            font-weight: 400;
+            color: #7abfff;
+            letter-spacing: 1px;
+        }
+        .chat-header h3 i {
+            margin-right: 10px;
+            color: #00b4ff;
+        }
+        .chat-messages {
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 8px;
+            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #00b4ff;
+            border-radius: 10px;
+        }
+        .chat-msg {
+            padding: 10px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            font-size: 14px;
+            line-height: 1.5;
+            animation: msgIn 0.3s ease;
+        }
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-msg.bot {
+            background: rgba(0, 180, 255, 0.06);
+            border: 1px solid rgba(0, 180, 255, 0.1);
+            align-self: flex-start;
+            color: #c8e6ff;
+        }
+        .chat-msg.user {
+            background: rgba(0, 180, 255, 0.15);
+            border: 1px solid rgba(0, 180, 255, 0.2);
+            align-self: flex-end;
+            color: #fff;
+        }
+        .chat-msg.bot.feedback {
+            border-left: 3px solid #4ecdc4;
+            background: rgba(78, 205, 196, 0.05);
+        }
+        .chat-input-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .chat-input-row input {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 40px;
+            border: 1px solid rgba(0, 180, 255, 0.15);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .chat-input-row input:focus {
+            border-color: #00b4ff;
+            box-shadow: 0 0 20px rgba(0, 180, 255, 0.05);
+        }
+        .chat-input-row input::placeholder {
+            color: #6a8faa;
+        }
+        .chat-input-row button {
+            padding: 12px 22px;
+            border-radius: 40px;
+            border: none;
+            background: linear-gradient(135deg, #00b4ff, #0077be);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chat-input-row button:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 30px rgba(0, 180, 255, 0.2);
+        }
+
+        /* ===== NAME INPUT ===== */
+        .name-prompt {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0 10px;
+            padding: 24px;
+            background: rgba(0, 180, 255, 0.02);
+            border: 1px dashed rgba(0, 180, 255, 0.15);
+            border-radius: 30px;
+        }
+        .name-prompt label {
+            font-size: 18px;
+            color: #b0dfff;
+            font-weight: 300;
+        }
+        .name-prompt .name-input-group {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .name-prompt input {
+            padding: 12px 24px;
+            border-radius: 40px;
+            border: 1px solid rgba(0, 180, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 16px;
+            min-width: 220px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .name-prompt input:focus {
+            border-color: #00b4ff;
+            box-shadow: 0 0 30px rgba(0, 180, 255, 0.05);
+        }
+        .name-prompt button {
+            padding: 12px 34px;
+            border-radius: 40px;
+            border: none;
+            background: linear-gradient(135deg, #00b4ff, #0077be);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .name-prompt button:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 30px rgba(0, 180, 255, 0.2);
+        }
+
+        /* ===== JOGOS ===== */
+        .games-section {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .game-card {
+            background: rgba(10, 14, 30, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 180, 255, 0.06);
+            border-radius: 20px;
+            padding: 18px 16px 20px;
+            text-align: center;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .game-card:hover {
+            border-color: rgba(0, 180, 255, 0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+        .game-card i {
+            font-size: 32px;
+            color: #00b4ff;
+            margin-bottom: 8px;
+        }
+        .game-card h4 {
+            font-size: 15px;
+            font-weight: 400;
+            color: #b0dfff;
+        }
+        .game-card p {
+            font-size: 12px;
+            color: #6a8faa;
+            margin-top: 4px;
+        }
+
+        /* ===== CÉREBRO DA IA (ÁREA CRIPTOGRAFADA) ===== */
+        .brain-section {
+            margin-top: 30px;
+            padding: 20px 24px 24px;
+            background: rgba(10, 14, 30, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 180, 255, 0.08);
+            border-radius: 28px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+        }
+        .brain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 180, 255, 0.06);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .brain-header h3 {
+            font-size: 16px;
+            font-weight: 400;
+            color: #7abfff;
+            letter-spacing: 1px;
+        }
+        .brain-header h3 i {
+            margin-right: 10px;
+            color: #00b4ff;
+        }
+        .brain-header .brain-status {
+            font-size: 12px;
+            color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+            padding: 4px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(78, 205, 196, 0.2);
+        }
+        .brain-access {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .brain-access input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 18px;
+            border-radius: 40px;
+            border: 1px solid rgba(0, 180, 255, 0.15);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+        .brain-access input:focus {
+            border-color: #00b4ff;
+            box-shadow: 0 0 20px rgba(0, 180, 255, 0.05);
+        }
+        .brain-access input::placeholder {
+            color: #6a8faa;
+            font-family: 'Times New Roman', Times, serif;
+            letter-spacing: 0;
+        }
+        .brain-access .btn-brain {
+            padding: 10px 28px;
+            border-radius: 40px;
+            border: none;
+            background: linear-gradient(135deg, #00b4ff, #0077be);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .brain-access .btn-brain:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 30px rgba(0, 180, 255, 0.2);
+        }
+        .brain-access .btn-brain.locked {
+            background: linear-gradient(135deg, #ff4d6d, #cc0033);
+        }
+        .brain-access .btn-brain.locked:hover {
+            box-shadow: 0 0 30px rgba(255, 77, 109, 0.3);
+        }
+        .brain-content {
+            margin-top: 16px;
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 180, 255, 0.05);
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #c8e6ff;
+            min-height: 60px;
+            transition: 0.3s;
+        }
+        .brain-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        .brain-content::-webkit-scrollbar-thumb {
+            background: #00b4ff;
+            border-radius: 10px;
+        }
+        .brain-content .brain-empty {
+            color: #6a8faa;
+            font-style: italic;
+            text-align: center;
+            padding: 20px 0;
+        }
+        .brain-content .brain-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 180, 255, 0.04);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .brain-content .brain-entry .entry-time {
+            color: #6a8faa;
+            font-size: 12px;
+            white-space: nowrap;
+            min-width: 70px;
+            padding-top: 2px;
+        }
+        .brain-content .brain-entry .entry-text {
+            color: #b0dfff;
+        }
+        .brain-content .brain-entry .entry-user {
+            color: #00b4ff;
+            font-weight: 600;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            #app { padding: 12px 16px; }
+            .hologram-header { flex-wrap: wrap; gap: 10px; padding: 12px 18px; }
+            .hologram-header .brand h1 { font-size: 16px; }
+            .mordomo-speech { font-size: 14px; padding: 14px 18px; }
+            .chat-section { padding: 16px; }
+            .brain-section { padding: 16px; }
+            .tutorial-step { max-width: 280px; padding: 18px 20px; }
+            .games-section { grid-template-columns: repeat(2, 1fr); }
+            .brain-access input { min-width: 140px; }
+        }
+        @media (max-width: 480px) {
+            .header-actions .user-greeting { font-size: 12px; padding: 4px 12px; }
+            .games-section { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .name-prompt input { min-width: 160px; }
+            .brain-access { flex-direction: column; align-items: stretch; }
+            .brain-access input { min-width: auto; }
+        }
+
+        /* ===== UTILITY ===== */
+        .hidden { display: none !important; }
+        .text-glow { text-shadow: 0 0 30px rgba(0, 180, 255, 0.15); }
+        .flex-center { display: flex; align-items: center; justify-content: center; }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0e1a; }
+        ::-webkit-scrollbar-thumb { background: #00b4ff; border-radius: 10px; }
+
+        /* ===== NOTIFICATION PANEL ===== */
+        .notif-panel {
+            position: fixed;
+            right: -380px;
+            top: 0;
+            width: 360px;
+            height: 100%;
+            background: rgba(10, 14, 30, 0.92);
+            backdrop-filter: blur(30px);
+            border-left: 1px solid rgba(0, 180, 255, 0.1);
+            padding: 30px 24px;
+            transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 300;
+            overflow-y: auto;
+        }
+        .notif-panel.open { right: 0; }
+        .notif-panel h3 {
+            font-weight: 300;
+            font-size: 20px;
+            color: #b0dfff;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notif-panel h3 button {
+            background: transparent;
+            border: none;
+            color: #7abfff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .notif-item {
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(0, 180, 255, 0.04);
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+        }
+        .notif-item i { color: #00b4ff; font-size: 18px; margin-top: 2px; }
+        .notif-item .content { font-size: 14px; color: #c8e6ff; }
+        .notif-item .content small { color: #6a8faa; font-size: 12px; display: block; margin-top: 4px; }
+
+        /* Persuasão */
+        .persuasion-banner {
+            background: linear-gradient(135deg, rgba(0, 180, 255, 0.04), rgba(0, 119, 190, 0.04));
+            border: 1px solid rgba(0, 180, 255, 0.1);
+            border-radius: 24px;
+            padding: 20px 28px;
+            margin: 20px 0 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .persuasion-banner p {
+            font-size: 15px;
+            color: #b0dfff;
+            flex: 1;
+        }
+        .persuasion-banner .btn-create {
+            background: linear-gradient(135deg, #00b4ff, #0077be);
+            border: none;
+            padding: 12px 32px;
+            border-radius: 40px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .persuasion-banner .btn-create:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 40px rgba(0, 180, 255, 0.15);
+        }
+
+        /* ===== JOGOS IMPLEMENTADOS ===== */
+        .game-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .game-modal.active {
+            display: flex;
+        }
+        .game-modal-content {
+            background: rgba(10, 14, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 180, 255, 0.15);
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+        .game-modal-content .close-game {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #7abfff;
+            font-size: 28px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .game-modal-content .close-game:hover {
+            color: #ff4d6d;
+            transform: rotate(90deg);
+        }
+        .game-modal-content h2 {
+            color: #00b4ff;
+            margin-bottom: 20px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* Puzzle */
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin: 20px 0;
+            aspect-ratio: 1;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .puzzle-tile {
+            background: #1a2a3a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #00b4ff;
+            cursor: pointer;
+            transition: 0.2s;
+            aspect-ratio: 1;
+            border: 1px solid rgba(0, 180, 255, 0.1);
+        }
+        .puzzle-tile:hover {
+            background: #2a3a4a;
+            border-color: #00b4ff;
+        }
+        .puzzle-tile.empty {
+            background: transparent;
+            border: 1px dashed rgba(0, 180, 255, 0.2);
+            cursor: default;
+        }
+
+        /* Velha */
+        .velha-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 300px;
+            margin: 20px auto;
+        }
+        .velha-cell {
+            background: #1a2a3a;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid rgba(0, 180, 255, 0.1);
+            color: #00b4ff;
+        }
+        .velha-cell:hover {
+            background: #2a3a4a;
+            border-color: #00b4ff;
+        }
+        .velha-cell.x { color: #ff6b6b; }
+        .velha-cell.o { color: #4ecdc4; }
+        .velha-status {
+            text-align: center;
+            font-size: 18px;
+            color: #b0dfff;
+            margin: 15px 0;
+        }
+
+        /* Memória */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        .memory-card {
+            aspect-ratio: 1;
+            background: #1a2a3a;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid rgba(0, 180, 255, 0.1);
+        }
+        .memory-card.flipped {
+            background: #0a1a2a;
+            border-color: #00b4ff;
+            transform: rotateY(180deg);
+        }
+        .memory-card.matched {
+            background: rgba(0, 180, 255, 0.15);
+            border-color: #00b4ff;
+            cursor: default;
+            opacity: 0.6;
+        }
+        .memory-card:hover:not(.matched):not(.flipped) {
+            background: #2a3a4a;
+            border-color: #00b4ff;
+        }
+
+        /* Xadrez */
+        .chess-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            max-width: 400px;
+            margin: 20px auto;
+            aspect-ratio: 1;
+        }
+        .chess-square {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+        .chess-square.light { background: #e8e0d0; }
+        .chess-square.dark { background: #5a4a3a; }
+        .chess-square.selected { box-shadow: inset 0 0 0 3px #00b4ff; }
+        .chess-square:hover { opacity: 0.8; }
+
+        /* Enigmas */
+        .enigma-box {
+            background: rgba(0, 180, 255, 0.04);
+            border: 1px solid rgba(0, 180, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .enigma-box p { color: #c8e6ff; line-height: 1.6; }
+        .enigma-box input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 180, 255, 0.15);
+            border-radius: 30px;
+            padding: 10px 20px;
+            color: #fff;
+            width: 100%;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .enigma-box input:focus {
+            border-color: #00b4ff;
+            outline: none;
+        }
+        .enigma-box .btn-check {
+            background: #00b4ff;
+            border: none;
+            color: #fff;
+            padding: 8px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .enigma-box .btn-check:hover { transform: scale(1.04); }
+
+        /* Quiz */
+        .quiz-option {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            background: rgba(0, 180, 255, 0.04);
+            border: 1px solid rgba(0, 180, 255, 0.08);
+            border-radius: 12px;
+            color: #c8e6ff;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: left;
+            font-size: 14px;
+        }
+        .quiz-option:hover {
+            background: rgba(0, 180, 255, 0.12);
+            border-color: #00b4ff;
+        }
+        .quiz-option.correct {
+            background: rgba(0, 200, 100, 0.2);
+            border-color: #00c864;
+            color: #00c864;
+        }
+        .quiz-option.wrong {
+            background: rgba(255, 50, 50, 0.2);
+            border-color: #ff4d4d;
+            color: #ff4d4d;
+        }
+        .quiz-option:disabled {
+            cursor: default;
+            opacity: 0.6;
+        }
+        .quiz-score {
+            text-align: center;
+            font-size: 20px;
+            color: #00b4ff;
+            margin: 15px 0;
+        }
+
+        /* ===== MODAL DE CRIAÇÃO DE CONTA ===== */
+        .account-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 400;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .account-modal.active {
+            display: flex;
+        }
+        .account-modal-content {
+            background: rgba(10, 14, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 180, 255, 0.15);
+            border-radius: 30px;
+            padding: 35px;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+        .account-modal-content .close-account {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #7abfff;
+            font-size: 28px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .account-modal-content .close-account:hover {
+            color: #ff4d6d;
+            transform: rotate(90deg);
+        }
+        .account-modal-content h2 {
+            color: #00b4ff;
+            margin-bottom: 25px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .account-modal-content .form-group {
+            margin-bottom: 18px;
+        }
+        .account-modal-content .form-group label {
+            display: block;
+            color: #b0dfff;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        .account-modal-content .form-group input,
+        .account-modal-content .form-group select {
+            width: 100%;
+            padding: 12px 18px;
+            border-radius: 30px;
+            border: 1px solid rgba(0, 180, 255, 0.15);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .account-modal-content .form-group input:focus,
+        .account-modal-content .form-group select:focus {
+            border-color: #00b4ff;
+            box-shadow: 0 0 20px rgba(0, 180, 255, 0.05);
+        }
+        .account-modal-content .form-group select option {
+            background: #1a2a3a;
+        }
+        .account-modal-content .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 40px;
+            border: none;
+            background: linear-gradient(135deg, #00b4ff, #0077be);
+            color: #fff;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .account-modal-content .btn-submit:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 40px rgba(0, 180, 255, 0.15);
+        }
+        .account-modal-content .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .account-modal-content .terms {
+            font-size: 12px;
+            color: #6a8faa;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .account-modal-content .terms a {
+            color: #00b4ff;
+            text-decoration: none;
+        }
+        .account-modal-content .success-message {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+        .account-modal-content .success-message i {
+            font-size: 60px;
+            color: #4ecdc4;
+            margin-bottom: 15px;
+        }
+        .account-modal-content .success-message h3 {
+            color: #4ecdc4;
+            font-weight: 300;
+        }
+        .account-modal-content .success-message p {
+            color: #b0dfff;
+            margin-top: 10px;
+        }
+
+        /* ===== CÉREBRO INTELIGENTE CENTRAL - NOVOS ESTILOS ===== */
+        .cic-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .cic-stat-card {
+            background: rgba(0, 180, 255, 0.04);
+            border: 1px solid rgba(0, 180, 255, 0.08);
+            border-radius: 12px;
+            padding: 10px 12px;
+            text-align: center;
+        }
+        .cic-stat-card .value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #00b4ff;
+        }
+        .cic-stat-card .label {
+            font-size: 11px;
+            color: #6a8faa;
+            margin-top: 4px;
+        }
+        .cic-module-status {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .cic-module-status .module {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(78, 205, 196, 0.1);
+            border: 1px solid rgba(78, 205, 196, 0.2);
+            color: #4ecdc4;
+        }
+        .cic-module-status .module.inactive {
+            background: rgba(255, 77, 109, 0.1);
+            border-color: rgba(255, 77, 109, 0.2);
+            color: #ff4d6d;
+        }
+        .cic-learning-progress {
+            height: 6px;
+            background: rgba(0, 180, 255, 0.1);
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .cic-learning-progress .bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00b4ff, #4ecdc4);
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        /* ===== NOTIFICAÇÕES POR EMAIL ===== */
+        .email-notif-banner {
+            background: rgba(0, 180, 255, 0.03);
+            border: 1px solid rgba(0, 180, 255, 0.08);
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin: 15px 0 5px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .email-notif-banner input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 18px;
+            border-radius: 30px;
+            border: 1px solid rgba(0, 180, 255, 0.15);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .email-notif-banner input:focus {
+            border-color: #00b4ff;
+            box-shadow: 0 0 20px rgba(0, 180, 255, 0.05);
+        }
+        .email-notif-banner input::placeholder {
+            color: #6a8faa;
+        }
+        .email-notif-banner .btn-email {
+            background: linear-gradient(135deg, #00b4ff, #0077be);
+            border: none;
+            padding: 10px 28px;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .email-notif-banner .btn-email:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 30px rgba(0, 180, 255, 0.2);
+        }
+        .email-notif-banner .btn-email.subscribed {
+            background: linear-gradient(135deg, #4ecdc4, #2ecc71);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== CURSOR ===== -->
+    <div class="custom-cursor" id="cursor">
+        <span class="particle"></span>
+        <span class="particle"></span>
+        <span class="particle"></span>
+        <span class="particle"></span>
+    </div>
+
+    <!-- ===== LOADING ===== -->
+    <div id="loading-screen">
+        <div class="loader-ring"></div>
+        <div class="loader-text">
+            <span>I</span><span>n</span><span>i</span><span>c</span><span>i</span><span>a</span><span>l</span><span>i</span><span>z</span><span>a</span><span>n</span><span>d</span><span>o</span>
+            <span style="display:block; margin-top:6px;">
+                <span>I</span><span>.</span><span>N</span><span>.</span><span>V</span><span>.</span><span>I</span><span>.</span><span>T</span><span>.</span><span>E</span><span>.</span><span>D</span><span>.</span><span>.</span><span>.</span>
+            </span>
+            <span style="display:block; margin-top:10px; font-size:12px; color:#4a7a9a;">
+                <span>C</span><span>a</span><span>r</span><span>r</span><span>e</span><span>g</span><span>a</span><span>n</span><span>d</span><span>o</span>
+                <span> </span>
+                <span>C</span><span>I</span><span>C</span><span>.</span><span>.</span><span>.</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- ===== NOTIFICAÇÕES ===== -->
+    <div class="notif-panel" id="notifPanel">
+        <h3>
+            <span><i class="fas fa-bell" style="margin-right:10px;"></i>Central</span>
+            <button id="closeNotif"><i class="fas fa-times"></i></button>
+        </h3>
+        <div class="notif-item">
+            <i class="fas fa-star"></i>
+            <div class="content">Bem-vindo à plataforma! <small>agora mesmo</small></div>
+        </div>
+        <div class="notif-item">
+            <i class="fas fa-calendar-alt"></i>
+            <div class="content">Evento: Festival da Cultura em Malanje <small>12 Dez</small></div>
+        </div>
+        <div class="notif-item">
+            <i class="fas fa-hotel"></i>
+            <div class="content">Novo hotel: Palácio do Kalandula <small>2 dias atrás</small></div>
+        </div>
+        <div class="notif-item">
+            <i class="fas fa-umbrella-beach"></i>
+            <div class="content">Promoção: 20% em tours guiados <small>válido até 30/12</small></div>
+        </div>
+    </div>
+
+    <!-- ===== TUTORIAL OVERLAY ===== -->
+    <div class="tutorial-overlay" id="tutorialOverlay"></div>
+
+    <!-- ===== MODAL DE CRIAÇÃO DE CONTA ===== -->
+    <div class="account-modal" id="accountModal">
+        <div class="account-modal-content">
+            <button class="close-account" id="closeAccountModal"><i class="fas fa-times"></i></button>
+            <h2><i class="fas fa-user-plus" style="margin-right:12px;"></i>Criar Conta</h2>
+            
+            <div id="accountForm">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Nome Completo</label>
+                    <input type="text" id="accountName" placeholder="Ex: João Manuel da Silva" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> E-mail</label>
+                    <input type="email" id="accountEmail" placeholder="exemplo@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Telefone</label>
+                    <input type="tel" id="accountPhone" placeholder="+244 900 000 000">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Palavra-passe</label>
+                    <input type="password" id="accountPassword" placeholder="Mínimo 8 caracteres" required minlength="8">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-check-circle"></i> Confirmar Palavra-passe</label>
+                    <input type="password" id="accountPasswordConfirm" placeholder="Confirme a palavra-passe" required minlength="8">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-globe"></i> País</label>
+                    <select id="accountCountry">
+                        <option value="AO">Angola</option>
+                        <option value="PT">Portugal</option>
+                        <option value="BR">Brasil</option>
+                        <option value="CV">Cabo Verde</option>
+                        <option value="MZ">Moçambique</option>
+                        <option value="ST">São Tomé e Príncipe</option>
+                        <option value="GW">Guiné-Bissau</option>
+                        <option value="US">Estados Unidos</option>
+                        <option value="FR">França</option>
+                        <option value="UK">Reino Unido</option>
+                        <option value="DE">Alemanha</option>
+                        <option value="IT">Itália</option>
+                        <option value="ES">Espanha</option>
+                        <option value="CN">China</option>
+                        <option value="JP">Japão</option>
+                        <option value="OTHER">Outro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-cake-candles"></i> Data de Nascimento</label>
+                    <input type="date" id="accountBirthdate">
+                </div>
+                <button class="btn-submit" id="accountSubmitBtn"><i class="fas fa-user-check"></i> Criar Conta</button>
+                <div class="terms">
+                    Ao criar uma conta, aceita os <a href="#">Termos de Serviço</a> e a <a href="#">Política de Privacidade</a>.
+                </div>
+            </div>
+            
+            <div class="success-message" id="accountSuccess">
+                <i class="fas fa-check-circle"></i>
+                <h3>Conta Criada com Sucesso!</h3>
+                <p id="successDetails"></p>
+                <button class="btn-submit" id="accountCloseSuccess" style="margin-top:15px;width:auto;padding:12px 40px;">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== APP ===== -->
+    <div id="app">
+        <!-- HEADER -->
+        <header class="hologram-header">
+            <div class="brand">
+                <i class="fas fa-robot"></i>
+                <div>
+                    <h1>I.N.V.I.T.E.D.</h1>
+                    <small>assistente virtual · turismo</small>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span class="user-greeting" id="greetingDisplay">
+                    <i class="fas fa-user-circle"></i> Visitante
+                </span>
+                <button class="notif-btn" id="notifToggle">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">4</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MORDOMO (HOLOGRAMA) -->
+        <section class="mordomo-section">
+            <div class="hologram-container">
+                <div class="hologram-ring"></div>
+                <div class="hologram-ring"></div>
+                <img src="images/invited.png" 
+                     alt="Mordomo I.N.V.I.T.E.D." id="mordomoImg">
+            </div>
+            <div class="mordomo-speech" id="mordomoSpeech">
+                <span id="speechText">Carregando...</span>
+                <span class="typing-cursor"></span>
+            </div>
+        </section>
+
+        <!-- NOME -->
+        <div class="name-prompt" id="namePrompt">
+            <label><i class="fas fa-pen-fancy" style="margin-right:10px;color:#00b4ff;"></i>Como gostaria que eu o tratasse?</label>
+            <div class="name-input-group">
+                <input type="text" id="userNameInput" placeholder="Digite o seu nome..." maxlength="30">
+                <button id="nameSubmitBtn">Continuar <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- EMAIL NOTIFICAÇÕES -->
+        <div class="email-notif-banner" id="emailNotifBanner">
+            <span style="color:#b0dfff;font-size:14px;">
+                <i class="fas fa-envelope" style="color:#00b4ff;margin-right:8px;"></i>
+                Receba notificações por email sobre novidades e promoções
+            </span>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;flex:1;">
+                <input type="email" id="emailNotifInput" placeholder="Seu melhor email..." style="flex:1;min-width:180px;">
+                <button class="btn-email" id="emailNotifBtn"><i class="fas fa-bell"></i> Subscrever</button>
+            </div>
+        </div>
+
+        <!-- PERSUASÃO -->
+        <div class="persuasion-banner" id="persuasionBanner">
+            <p><i class="fas fa-rocket" style="color:#00b4ff;margin-right:10px;"></i>Notei o seu interesse pelos destinos turísticos. Ao criar uma conta poderá guardar favoritos, criar roteiros, contactar hotéis e muito mais!</p>
+            <button class="btn-create" id="createAccountBtn"><i class="fas fa-user-plus"></i> Criar Conta</button>
+        </div>
+
+        <!-- CHAT -->
+        <section class="chat-section">
+            <div class="chat-header">
+                <h3><i class="fas fa-comment-dots"></i>Chat Inteligente</h3>
+                <span style="font-size:12px;color:#6a8faa;"><i class="fas fa-globe"></i> PT · EN · FR · ES</span>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-msg bot">Olá! Sou o I.N.V.I.T.E.D. Estou aqui para ajudar com turismo, hotéis, eventos e muito mais. Pergunte à vontade.</div>
+            </div>
+            <div class="chat-input-row">
+                <input type="text" id="chatInput" placeholder="Escreva a sua mensagem...">
+                <button id="chatSendBtn"><i class="fas fa-paper-plane"></i> Enviar</button>
+            </div>
+        </section>
+
+        <!-- JOGOS -->
+        <section class="games-section">
+            <div class="game-card" data-game="puzzle">
+                <i class="fas fa-puzzle-piece"></i>
+                <h4>Puzzle</h4>
+                <p>Monte a imagem</p>
+            </div>
+            <div class="game-card" data-game="velha">
+                <i class="fas fa-hashtag"></i>
+                <h4>Jogo da Velha</h4>
+                <p>Desafie a IA</p>
+            </div>
+            <div class="game-card" data-game="memoria">
+                <i class="fas fa-brain"></i>
+                <h4>Jogo da Memória</h4>
+                <p>Encontre os pares</p>
+            </div>
+            <div class="game-card" data-game="xadrez">
+                <i class="fas fa-chess-king"></i>
+                <h4>Xadrez</h4>
+                <p>Modo estratégia</p>
+            </div>
+            <div class="game-card" data-game="enigmas">
+                <i class="fas fa-skull"></i>
+                <h4>Enigmas & Forense</h4>
+                <p>Casos criminais</p>
+            </div>
+            <div class="game-card" data-game="quiz">
+                <i class="fas fa-question-circle"></i>
+                <h4>Quiz Malanje</h4>
+                <p>Teste os seus conhecimentos</p>
+            </div>
+        </section>
+
+        <!-- ===== CÉREBRO DA IA (ÁREA CRIPTOGRAFADA) ===== -->
+        <section class="brain-section" id="brainSection">
+            <div class="brain-header">
+                <h3><i class="fas fa-microchip"></i>Cérebro da IA · Neurónio Central</h3>
+                <span class="brain-status" id="brainStatus"><i class="fas fa-circle" style="color:#4ecdc4;font-size:10px;"></i> Ativo · Aprendizagem contínua</span>
+            </div>
+            <div class="brain-access">
+                <input type="password" id="brainKeyInput" placeholder="🔑 Chave de acesso ao cérebro...">
+                <button class="btn-brain" id="brainUnlockBtn"><i class="fas fa-unlock"></i> Desbloquear</button>
+                <button class="btn-brain locked" id="brainLockBtn"><i class="fas fa-lock"></i> Bloquear</button>
+            </div>
+            <div class="brain-content" id="brainContent">
+                <div class="brain-empty">🔒 O cérebro da IA está bloqueado. Insira a chave de acesso para visualizar o conhecimento adquirido.</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== GAME MODAL ===== -->
+    <div class="game-modal" id="gameModal">
+        <div class="game-modal-content" id="gameModalContent">
+            <button class="close-game" id="closeGameModal"><i class="fas fa-times"></i></button>
+            <h2 id="gameTitle">Jogo</h2>
+            <div id="gameContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  CÓDIGO JAVASCRIPT COMPLETO – I.N.V.I.T.E.D.
+        //  COM CÉREBRO INTELIGENTE CENTRAL (CIC) E NOTIFICAÇÕES POR EMAIL
+        // ============================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // ---------- ELEMENTOS ----------
+            const cursor = document.getElementById('cursor');
+            const loadingScreen = document.getElementById('loading-screen');
+            const app = document.getElementById('app');
+            const speechText = document.getElementById('speechText');
+            const mordomoImg = document.getElementById('mordomoImg');
+            const namePrompt = document.getElementById('namePrompt');
+            const userNameInput = document.getElementById('userNameInput');
+            const nameSubmitBtn = document.getElementById('nameSubmitBtn');
+            const greetingDisplay = document.getElementById('greetingDisplay');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const chatSendBtn = document.getElementById('chatSendBtn');
+            const notifToggle = document.getElementById('notifToggle');
+            const notifPanel = document.getElementById('notifPanel');
+            const closeNotif = document.getElementById('closeNotif');
+            const tutorialOverlay = document.getElementById('tutorialOverlay');
+            const createAccountBtn = document.getElementById('createAccountBtn');
+            const gameModal = document.getElementById('gameModal');
+            const gameModalContent = document.getElementById('gameModalContent');
+            const gameTitle = document.getElementById('gameTitle');
+            const gameContent = document.getElementById('gameContent');
+            const closeGameModal = document.getElementById('closeGameModal');
+
+            // ---------- CÉREBRO DA IA ----------
+            const brainKeyInput = document.getElementById('brainKeyInput');
+            const brainUnlockBtn = document.getElementById('brainUnlockBtn');
+            const brainLockBtn = document.getElementById('brainLockBtn');
+            const brainContent = document.getElementById('brainContent');
+            const brainStatus = document.getElementById('brainStatus');
+
+            // ---------- MODAL DE CONTA ----------
+            const accountModal = document.getElementById('accountModal');
+            const closeAccountModal = document.getElementById('closeAccountModal');
+            const accountForm = document.getElementById('accountForm');
+            const accountSuccess = document.getElementById('accountSuccess');
+            const successDetails = document.getElementById('successDetails');
+            const accountCloseSuccess = document.getElementById('accountCloseSuccess');
+            const accountSubmitBtn = document.getElementById('accountSubmitBtn');
+
+            const accountName = document.getElementById('accountName');
+            const accountEmail = document.getElementById('accountEmail');
+            const accountPhone = document.getElementById('accountPhone');
+            const accountPassword = document.getElementById('accountPassword');
+            const accountPasswordConfirm = document.getElementById('accountPasswordConfirm');
+            const accountCountry = document.getElementById('accountCountry');
+            const accountBirthdate = document.getElementById('accountBirthdate');
+
+            // ---------- EMAIL NOTIFICAÇÕES ----------
+            const emailNotifInput = document.getElementById('emailNotifInput');
+            const emailNotifBtn = document.getElementById('emailNotifBtn');
+
+            // ============================================================
+            //  CÉREBRO INTELIGENTE CENTRAL (CIC)
+            // ============================================================
+            class CIC {
+                constructor() {
+                    this.modules = {
+                        percepcao: { status: 'ativo', desc: 'Coleta de dados' },
+                        memoria: { status: 'ativo', desc: 'Memória inteligente' },
+                        conhecimento: { status: 'ativo', desc: 'Base de conhecimento' },
+                        raciocinio: { status: 'ativo', desc: 'Motor de raciocínio' },
+                        aprendizagem: { status: 'ativo', desc: 'Aprendizagem contínua' },
+                        padroes: { status: 'ativo', desc: 'Detecção de padrões' },
+                        previsao: { status: 'ativo', desc: 'Inteligência preditiva' },
+                        decisao: { status: 'ativo', desc: 'Tomada de decisão' },
+                        autoaperfeicoamento: { status: 'ativo', desc: 'Autoaperfeiçoamento' },
+                        seguranca: { status: 'ativo', desc: 'Segurança e ética' },
+                        personalizacao: { status: 'ativo', desc: 'Personalização' },
+                        consciencia: { status: 'ativo', desc: 'Consciência operacional' }
+                    };
+                    
+                    this.metricas = {
+                        totalRegistros: 0,
+                        padroesDetectados: 0,
+                        decisoesTomadas: 0,
+                        aprendizagensRealizadas: 0,
+                        feedbacksPositivos: 0,
+                        feedbacksNegativos: 0,
+                        taxaAcerto: 0,
+                        nivelConfianca: 0.85
+                    };
+                    
+                    this.conhecimento = [];
+                    this.padroes = [];
+                    this.decisoes = [];
+                    this.observacoes = [];
+                    this.correlacoes = [];
+                    
+                    this.carregarEstado();
+                }
+                
+                carregarEstado() {
+                    try {
+                        const saved = localStorage.getItem('cic_estado');
+                        if (saved) {
+                            const data = JSON.parse(saved);
+                            Object.assign(this.metricas, data.metricas || {});
+                            this.conhecimento = data.conhecimento || [];
+                            this.padroes = data.padroes || [];
+                            this.decisoes = data.decisoes || [];
+                            this.observacoes = data.observacoes || [];
+                            this.correlacoes = data.correlacoes || [];
+                        }
+                    } catch (e) {}
+                }
+                
+                salvarEstado() {
+                    try {
+                        localStorage.setItem('cic_estado', JSON.stringify({
+                            metricas: this.metricas,
+                            conhecimento: this.conhecimento,
+                            padroes: this.padroes,
+                            decisoes: this.decisoes,
+                            observacoes: this.observacoes,
+                            correlacoes: this.correlacoes
+                        }));
+                    } catch (e) {}
+                }
+                
+                // Módulo 1: Percepção e Coleta de Dados
+                perceber(dado, fonte) {
+                    const entrada = {
+                        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+                        dado: dado,
+                        fonte: fonte,
+                        timestamp: new Date().toISOString(),
+                        palavrasChave: this.extrairPalavrasChave(dado),
+                        entidades: this.extrairEntidades(dado),
+                        classificacao: this.classificarDado(dado)
+                    };
+                    
+                    const duplicado = this.conhecimento.some(c => 
+                        c.dado && c.dado.toLowerCase() === dado.toLowerCase()
+                    );
+                    if (!duplicado) {
+                        this.conhecimento.push(entrada);
+                        this.metricas.totalRegistros++;
+                        this.observacoes.push({ 
+                            tipo: 'percepcao', 
+                            dado: dado, 
+                            fonte: fonte,
+                            timestamp: Date.now()
+                        });
+                        this.salvarEstado();
+                    }
+                    
+                    return entrada;
+                }
+                
+                extrairPalavrasChave(texto) {
+                    if (!texto) return [];
+                    const palavras = texto.toLowerCase().split(/\s+/);
+                    const stopwords = ['o', 'a', 'os', 'as', 'um', 'uma', 'uns', 'umas', 'de', 'da', 'do', 'das', 'dos', 'que', 'e', 'é', 'para', 'com', 'sem', 'por'];
+                    return palavras.filter(p => p.length > 2 && !stopwords.includes(p));
+                }
+                
+                extrairEntidades(texto) {
+                    const entidades = [];
+                    const palavras = texto.split(/\s+/);
+                    for (const p of palavras) {
+                        if (p.length > 1 && p[0] === p[0].toUpperCase() && p[0] !== p[0].toLowerCase()) {
+                            entidades.push(p);
+                        }
+                    }
+                    return entidades;
+                }
+                
+                classificarDado(dado) {
+                    const categorias = ['turismo', 'hotel', 'restaurante', 'evento', 'transporte', 'cultura', 'historia', 'clima', 'geral'];
+                    const lower = dado.toLowerCase();
+                    for (const cat of categorias) {
+                        if (lower.includes(cat)) return cat;
+                    }
+                    return 'geral';
+                }
+                
+                // Módulo 2: Memória Inteligente
+                memorizar(dado, contexto) {
+                    const memoria = {
+                        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+                        dado: dado,
+                        contexto: contexto,
+                        timestamp: new Date().toISOString(),
+                        relevancia: this.calcularRelevancia(dado, contexto)
+                    };
+                    
+                    const similar = this.conhecimento.some(c => 
+                        c.dado && c.dado.toLowerCase() === dado.toLowerCase()
+                    );
+                    
+                    if (!similar) {
+                        this.conhecimento.push(memoria);
+                        this.metricas.totalRegistros++;
+                        this.salvarEstado();
+                    }
+                    
+                    return memoria;
+                }
+                
+                calcularRelevancia(dado, contexto) {
+                    const palavras = this.extrairPalavrasChave(dado);
+                    let relevancia = Math.min(palavras.length / 5, 1);
+                    if (contexto && contexto.length > 0) {
+                        relevancia = Math.min(relevancia + 0.2, 1);
+                    }
+                    return relevancia;
+                }
+                
+                // Módulo 3: Base de Conhecimento Dinâmica
+                consultar(consulta) {
+                    const resultados = this.conhecimento.filter(c => 
+                        c.dado && c.dado.toLowerCase().includes(consulta.toLowerCase())
+                    );
+                    return resultados;
+                }
+                
+                // Módulo 4: Motor de Raciocínio
+                raciocinar(pergunta, contexto) {
+                    const consulta = this.consultar(pergunta);
+                    const padroes = this.detectarPadroes(pergunta);
+                    
+                    let resposta = {
+                        conclusao: '',
+                        sugestoes: [],
+                        confianca: 0.5
+                    };
+                    
+                    if (consulta.length > 0) {
+                        resposta.conclusao = consulta[0].dado;
+                        resposta.confianca = 0.7;
+                    }
+                    
+                    if (padroes.length > 0) {
+                        resposta.sugestoes = padroes.map(p => p.padrao);
+                        resposta.confianca = Math.min(resposta.confianca + 0.2, 1);
+                    }
+                    
+                    this.decisoes.push({
+                        pergunta: pergunta,
+                        resposta: resposta,
+                        timestamp: Date.now()
+                    });
+                    this.metricas.decisoesTomadas++;
+                    
+                    return resposta;
+                }
+                
+                // Módulo 5: Aprendizagem Contínua
+                aprender(entrada, tipo) {
+                    const aprendizagem = {
+                        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+                        entrada: entrada,
+                        tipo: tipo,
+                        timestamp: new Date().toISOString(),
+                        feedback: null
+                    };
+                    
+                    this.observacoes.push({
+                        tipo: 'aprendizagem',
+                        dado: entrada,
+                        subtipo: tipo,
+                        timestamp: Date.now()
+                    });
+                    
+                    this.metricas.aprendizagensRealizadas++;
+                    this.salvarEstado();
+                    
+                    return aprendizagem;
+                }
+                
+                // Módulo 6: Detecção de Padrões
+                detectarPadroes(dado) {
+                    const padroesEncontrados = [];
+                    const palavras = this.extrairPalavrasChave(dado);
+                    
+                    for (const palavra of palavras) {
+                        const ocorrencias = this.conhecimento.filter(c => 
+                            c.dado && c.dado.toLowerCase().includes(palavra)
+                        );
+                        if (ocorrencias.length > 2) {
+                            padroesEncontrados.push({
+                                padrao: palavra,
+                                ocorrencias: ocorrencias.length,
+                                confianca: Math.min(ocorrencias.length / 10, 1)
+                            });
+                        }
+                    }
+                    
+                    if (padroesEncontrados.length > 0) {
+                        this.padroes.push(...padroesEncontrados);
+                        this.metricas.padroesDetectados += padroesEncontrados.length;
+                        this.salvarEstado();
+                    }
+                    
+                    return padroesEncontrados;
+                }
+                
+                // Módulo 7: Previsão e Inteligência Preditiva
+                prever(contexto) {
+                    const padroes = this.detectarPadroes(contexto);
+                    const previsoes = [];
+                    
+                    for (const padrao of padroes) {
+                        if (padrao.confianca > 0.6) {
+                            previsoes.push({
+                                evento: padrao.padrao,
+                                probabilidade: padrao.confianca,
+                                timestamp: new Date().toISOString()
+                            });
+                        }
+                    }
+                    
+                    return previsoes;
+                }
+                
+                // Módulo 8: Tomada de Decisão Autónoma
+                decidir(problema, opcoes) {
+                    let melhorOpcao = null;
+                    let melhorScore = -Infinity;
+                    
+                    for (const opcao of opcoes) {
+                        const score = this.avaliarOpcao(opcao, problema);
+                        if (score > melhorScore) {
+                            melhorScore = score;
+                            melhorOpcao = opcao;
+                        }
+                    }
+                    
+                    const decisao = {
+                        problema: problema,
+                        opcaoEscolhida: melhorOpcao,
+                        score: melhorScore,
+                        timestamp: Date.now()
+                    };
+                    
+                    this.decisoes.push(decisao);
+                    this.metricas.decisoesTomadas++;
+                    this.salvarEstado();
+                    
+                    return decisao;
+                }
+                
+                avaliarOpcao(opcao, problema) {
+                    const palavrasProblema = this.extrairPalavrasChave(problema);
+                    const palavrasOpcao = this.extrairPalavrasChave(opcao);
+                    
+                    let score = 0;
+                    for (const p of palavrasProblema) {
+                        if (palavrasOpcao.some(o => o.includes(p) || p.includes(o))) {
+                            score++;
+                        }
+                    }
+                    
+                    return score / Math.max(palavrasProblema.length, 1);
+                }
+                
+                // Módulo 9: Autoaperfeiçoamento
+                autoavaliar() {
+                    const total = this.metricas.totalRegistros || 1;
+                    const acertos = this.metricas.feedbacksPositivos;
+                    const erros = this.metricas.feedbacksNegativos;
+                    
+                    this.metricas.taxaAcerto = acertos / (acertos + erros + 1);
+                    this.metricas.nivelConfianca = Math.min(0.5 + (total / 1000), 0.95);
+                    
+                    for (const [modulo, dados] of Object.entries(this.modules)) {
+                        if (dados.status === 'inativo') {
+                            dados.status = 'ativo';
+                        }
+                    }
+                    
+                    this.salvarEstado();
+                    return this.metricas;
+                }
+                
+                // Módulo 10: Segurança e Ética
+                verificarSeguranca(dado) {
+                    const perigosos = ['senha', 'password', 'credito', 'cartao', 'cpf', 'rg', 'passaporte'];
+                    for (const p of perigosos) {
+                        if (dado && dado.toLowerCase().includes(p)) {
+                            return { seguro: false, motivo: `Contém dados sensíveis: ${p}` };
+                        }
+                    }
+                    return { seguro: true, motivo: 'Dado seguro' };
+                }
+                
+                // Módulo 11: Personalização Avançada
+                personalizar(utilizador, preferencias) {
+                    const perfil = {
+                        id: utilizador,
+                        preferencias: preferencias,
+                        historico: [],
+                        recomendacoes: [],
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    try {
+                        const perfis = JSON.parse(localStorage.getItem('cic_perfis') || '{}');
+                        perfis[utilizador] = perfil;
+                        localStorage.setItem('cic_perfis', JSON.stringify(perfis));
+                    } catch (e) {}
+                    
+                    return perfil;
+                }
+                
+                // Módulo 12: Consciência Operacional
+                obterStatus() {
+                    const status = {
+                        modulos: this.modules,
+                        metricas: this.metricas,
+                        totalConhecimento: this.conhecimento.length,
+                        totalPadroes: this.padroes.length,
+                        totalDecisoes: this.decisoes.length,
+                        totalObservacoes: this.observacoes.length,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    return status;
+                }
+            }
+
+            // ============================================================
+            //  INSTANCIAR CÉREBRO INTELIGENTE CENTRAL
+            // ============================================================
+            const cic = new CIC();
+            window.cic = cic;
+
+            // ---------- ESTADO ----------
+            let userName = localStorage.getItem('invited_user') || '';
+            let lastVisit = localStorage.getItem('invited_lastvisit') || '';
+            const lang = navigator.language.startsWith('pt') ? 'pt' : 'en';
+            let currentStep = 0;
+            let isTutorialActive = false;
+            let nameSet = false;
+            let brainUnlocked = false;
+            const BRAIN_SECRET = 'INVITED2025';
+            let brainLog = [];
+            let userPreferences = {};
+            let subscribedEmails = JSON.parse(localStorage.getItem('invited_emails') || '[]');
+            let isEmailSubscribed = false;
+
+            // Carregar registos do cérebro do localStorage
+            try {
+                const stored = JSON.parse(localStorage.getItem('invited_brain_log'));
+                if (stored) brainLog = stored;
+            } catch (e) { brainLog = []; }
+
+            try {
+                const prefs = JSON.parse(localStorage.getItem('invited_user_preferences'));
+                if (prefs) userPreferences = prefs;
+            } catch (e) { userPreferences = {}; }
+
+            // ---------- CURSOR PERSONALIZADO ----------
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+            document.addEventListener('mouseleave', () => { cursor.style.opacity = '0'; });
+            document.addEventListener('mouseenter', () => { cursor.style.opacity = '1'; });
+
+            // ---------- LOADING ----------
+            setTimeout(() => {
+                loadingScreen.classList.add('hide');
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    app.classList.add('visible');
+                    initApp();
+                }, 1200);
+            }, 4000);
+
+            // ---------- INICIALIZAÇÃO ----------
+            function initApp() {
+                const period = getPeriod();
+                let greeting = period === 'manhã' ? 'Bom dia.' :
+                              period === 'tarde' ? 'Boa tarde.' : 'Boa noite.';
+                if (userName) {
+                    greeting += ` Seja muito bem-vindo novamente, ${userName}. É sempre um prazer tê-lo de volta! Já senti saudades das nossas conversas.`;
+                    cic.perceber(`Utilizador ${userName} regressou à plataforma.`, 'sistema');
+                } else {
+                    greeting += ` Seja muito bem-vindo à Plataforma de Turismo Inteligente da Província de Malanje. Estou aqui para tornar a sua experiência inesquecível!`;
+                }
+                typeText(greeting, () => {
+                    if (!userName) {
+                        setTimeout(() => {
+                            typeText('O meu nome é I.N.V.I.T.E.D. Sou o assistente virtual inteligente desta plataforma. Fui desenvolvido para orientar visitantes, turistas, investigadores e cidadãos interessados em conhecer as maravilhas da Província de Malanje. Pense em mim como um amigo que está sempre disponível para ajudar.', () => {
+                                setTimeout(() => {
+                                    typeText('I.N.V.I.T.E.D. significa: Intruso Neural Virtual Inteligente Tecnológico Emocional Dinâmico. Em inglês: Intruder Neural Virtual Intelligent Technological Emotional Dynamic. É um nome bonito, não acha?', () => {
+                                        setTimeout(startTutorial, 800);
+                                    });
+                                }, 500);
+                            });
+                        }, 400);
+                    } else {
+                        const visitMsg = lastVisit ? ` A sua última visita foi em ${lastVisit}. Espero que tenha tido uma boa experiência.` : '';
+                        typeText(`${greeting} ${visitMsg} Como posso ajudá-lo hoje? Estou cheio de novidades para si!`, () => {});
+                        nameSet = true;
+                        updateGreeting();
+                        namePrompt.style.display = 'none';
+                        checkIfUserHasAccount();
+                        checkEmailSubscription();
+                    }
+                });
+                
+                console.log('🧠 Cérebro Inteligente Central (CIC) inicializado!');
+                console.log('📊 Métricas:', cic.metricas);
+                console.log('📚 Conhecimento:', cic.conhecimento.length, 'registos');
+                console.log('🔍 Padrões:', cic.padroes.length, 'detectados');
+                console.log('📈 Decisões:', cic.decisoes.length, 'tomadas');
+            }
+
+            // ---------- PERÍODO DO DIA ----------
+            function getPeriod() {
+                const h = new Date().getHours();
+                if (h < 12) return 'manhã';
+                if (h < 18) return 'tarde';
+                return 'noite';
+            }
+
+            // ---------- EFEITO DE DIGITAÇÃO ----------
+            function typeText(text, callback) {
+                speechText.textContent = '';
+                let idx = 0;
+                const interval = setInterval(() => {
+                    if (idx < text.length) {
+                        speechText.textContent += text.charAt(idx);
+                        idx++;
+                    } else {
+                        clearInterval(interval);
+                        if (callback) setTimeout(callback, 300);
+                    }
+                }, 25);
+            }
+
+            // ---------- TUTORIAL ----------
+            const tutorialSteps = [
+                { title: '🏠 Página Inicial', desc: 'Aqui encontra o resumo da plataforma, destaques e acesso rápido a todas as secções.' },
+                { title: '📍 Destinos Turísticos', desc: 'Explore pontos turísticos, paisagens, monumentos e locais históricos de Malanje.' },
+                { title: '🏨 Hotéis', desc: 'Consulte hotéis, pousadas e alojamentos com avaliações, fotos e contacto.' },
+                { title: '🍽️ Restaurantes', desc: 'Descubra a gastronomia local, restaurantes típicos e menus especiais.' },
+                { title: '🧭 Guias Turísticos', desc: 'Guias credenciados para acompanhá-lo nas suas aventuras.' },
+                { title: '🎭 Eventos', desc: 'Festivais, exposições, feiras e eventos culturais em Malanje.' },
+                { title: '🚌 Transportes', desc: 'Informações sobre táxis, autocarros, aluguer de viaturas e transfers.' },
+                { title: '🖼️ Galeria', desc: 'Fotografias e vídeos das belezas naturais e culturais da província.' },
+                { title: '📞 Contactos', desc: 'Contactos úteis: turismo, emergência, hotéis e guias.' },
+                { title: '🔍 Pesquisa Inteligente', desc: 'Pesquise por destinos, hotéis, eventos e muito mais com IA.' },
+                { title: '👤 Conta do Utilizador', desc: 'Crie a sua conta para guardar favoritos, criar roteiros e receber promoções.' },
+                { title: '💬 Chat', desc: 'Converse comigo! Estou aqui para responder todas as suas perguntas.' },
+                { title: '🧠 Cérebro da IA', desc: 'Área restrita onde armazeno tudo o que aprendo com os utilizadores. Acesso mediante chave secreta.' }
+            ];
+
+            function startTutorial() {
+                if (isTutorialActive) return;
+                isTutorialActive = true;
+                currentStep = 0;
+                tutorialOverlay.classList.add('active');
+                showTutorialStep();
+                cic.perceber('Utilizador iniciou o tutorial', 'sistema');
+            }
+
+            function showTutorialStep() {
+                if (currentStep >= tutorialSteps.length) {
+                    endTutorial();
+                    return;
+                }
+                const step = tutorialSteps[currentStep];
+                const existing = tutorialOverlay.querySelector('.tutorial-step');
+                if (existing) existing.remove();
+
+                const div = document.createElement('div');
+                div.className = 'tutorial-step';
+                const x = 20 + Math.random() * 40;
+                const y = 20 + Math.random() * 40;
+                div.style.left = x + '%';
+                div.style.top = y + '%';
+                div.innerHTML = `
+                    <h3>${step.title}</h3>
+                    <p>${step.desc}</p>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn-skip" id="tutorialSkip">⏭️ Ignorar tutorial</button>
+                        <button class="btn-next" id="tutorialNext">${currentStep === tutorialSteps.length - 1 ? 'Concluir' : 'Próximo →'}</button>
+                    </div>
+                    <div class="step-counter">${currentStep+1} / ${tutorialSteps.length}</div>
+                `;
+                tutorialOverlay.appendChild(div);
+
+                document.getElementById('tutorialNext').addEventListener('click', () => {
+                    currentStep++;
+                    showTutorialStep();
+                });
+
+                document.getElementById('tutorialSkip').addEventListener('click', () => {
+                    endTutorial();
+                });
+            }
+
+            function endTutorial() {
+                tutorialOverlay.classList.remove('active');
+                const existing = tutorialOverlay.querySelector('.tutorial-step');
+                if (existing) existing.remove();
+                isTutorialActive = false;
+                if (!userName) {
+                    namePrompt.style.display = 'flex';
+                    typeText('Como gostaria que eu o tratasse? Fique à vontade para escolher o nome que mais lhe agrada.', () => {});
+                } else {
+                    typeText(`Que bom ter concluído o tutorial! ${userName}, estou à disposição para qualquer dúvida ou sugestão.`, () => {});
+                }
+                addBrainEntry('Sistema', '📚 Utilizador concluiu o tutorial.', 'aprendizagem');
+                cic.perceber('Utilizador concluiu o tutorial', 'sistema');
+                cic.aprender('Tutorial concluído com sucesso', 'conclusao');
+            }
+
+            // ---------- NOME ----------
+            nameSubmitBtn.addEventListener('click', () => {
+                const name = userNameInput.value.trim();
+                if (name.length < 2) {
+                    typeText('Por favor, insira um nome válido (pelo menos 2 caracteres). Quero tratá-lo com o devido respeito.', () => {});
+                    return;
+                }
+                userName = name;
+                localStorage.setItem('invited_user', name);
+                localStorage.setItem('invited_lastvisit', new Date().toLocaleDateString('pt-PT'));
+                nameSet = true;
+                namePrompt.style.display = 'none';
+                updateGreeting();
+                typeText(`Muito prazer, ${userName}! Que nome bonito. Fico feliz em conhecê-lo. Como posso ajudá-lo hoje?`, () => {});
+                addBrainEntry('Sistema', `👤 Utilizador registou-se com o nome: ${name}`, 'aprendizagem');
+                cic.perceber(`Utilizador registou-se com o nome: ${name}`, 'sistema');
+                cic.aprender(`Novo utilizador: ${name}`, 'registo');
+                checkIfUserHasAccount();
+                checkEmailSubscription();
+            });
+
+            userNameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') nameSubmitBtn.click();
+            });
+
+            function updateGreeting() {
+                if (userName) {
+                    greetingDisplay.innerHTML = `<i class="fas fa-user-circle"></i> ${userName}`;
+                }
+            }
+
+            // ---------- VERIFICAR SE UTILIZADOR TEM CONTA ----------
+            function checkIfUserHasAccount() {
+                const accounts = JSON.parse(localStorage.getItem('invited_accounts') || '[]');
+                const hasAccount = accounts.some(a => a.name === userName || a.email === userName);
+                if (hasAccount) {
+                    document.querySelector('.persuasion-banner p').innerHTML = 
+                        `<i class="fas fa-check-circle" style="color:#4ecdc4;margin-right:10px;"></i>Bem-vindo de volta, ${userName}! A sua conta está ativa. Aproveite todos os benefícios!`;
+                    createAccountBtn.textContent = '👤 Minha Conta';
+                    createAccountBtn.style.background = 'linear-gradient(135deg, #4ecdc4, #2ecc71)';
+                }
+            }
+
+            // ---------- VERIFICAR SUBSCRIÇÃO DE EMAIL ----------
+            function checkEmailSubscription() {
+                const userEmail = localStorage.getItem('invited_user_email');
+                if (userEmail && subscribedEmails.includes(userEmail)) {
+                    isEmailSubscribed = true;
+                    emailNotifBtn.textContent = '✅ Subscrito';
+                    emailNotifBtn.classList.add('subscribed');
+                    emailNotifInput.value = userEmail;
+                    emailNotifInput.disabled = true;
+                }
+            }
+
+            // ---------- EMAIL NOTIFICAÇÕES ----------
+            function sendEmailNotification(email, subject, message) {
+                // Simulação de envio de email (armazenado no localStorage como "enviado")
+                const notifications = JSON.parse(localStorage.getItem('invited_email_notifications') || '[]');
+                notifications.push({
+                    to: email,
+                    subject: subject,
+                    message: message,
+                    timestamp: new Date().toISOString(),
+                    read: false
+                });
+                localStorage.setItem('invited_email_notifications', JSON.stringify(notifications));
+                
+                // Adicionar notificação no painel
+                addNotifItem(`📧 Email enviado para ${email}: ${subject}`, 'email');
+                
+                // Adicionar ao cérebro
+                addBrainEntry('Sistema', `📧 Notificação enviada para ${email}: ${subject}`, 'email');
+                cic.perceber(`Notificação enviada para ${email}`, 'sistema');
+            }
+
+            function addNotifItem(text, type = 'info') {
+                const panel = document.getElementById('notifPanel');
+                const item = document.createElement('div');
+                item.className = 'notif-item';
+                const icon = type === 'email' ? 'fa-envelope' : 'fa-bell';
+                item.innerHTML = `
+                    <i class="fas ${icon}"></i>
+                    <div class="content">${text} <small>agora mesmo</small></div>
+                `;
+                panel.insertBefore(item, panel.querySelector('.notif-item'));
+                
+                // Atualizar badge
+                const badge = document.querySelector('.notif-btn .badge');
+                const current = parseInt(badge.textContent) || 0;
+                badge.textContent = current + 1;
+            }
+
+            emailNotifBtn.addEventListener('click', () => {
+                const email = emailNotifInput.value.trim();
+                if (!email || !email.includes('@') || !email.includes('.')) {
+                    typeText('Por favor, insira um endereço de email válido para receber as nossas notificações.', () => {});
+                    return;
+                }
+
+                if (isEmailSubscribed) {
+                    typeText(`Já está subscrito com o email ${email}. Pode alterar as suas preferências a qualquer momento.`, () => {});
+                    return;
+                }
+
+                // Verificar se o email já está na lista
+                if (subscribedEmails.includes(email)) {
+                    isEmailSubscribed = true;
+                    localStorage.setItem('invited_user_email', email);
+                    emailNotifBtn.textContent = '✅ Subscrito';
+                    emailNotifBtn.classList.add('subscribed');
+                    emailNotifInput.disabled = true;
+                    typeText(`O email ${email} já estava na nossa lista. Ficamos felizes em tê-lo connosco!`, () => {});
+                    return;
+                }
+
+                // Subscrever
+                subscribedEmails.push(email);
+                localStorage.setItem('invited_emails', JSON.stringify(subscribedEmails));
+                localStorage.setItem('invited_user_email', email);
+                isEmailSubscribed = true;
+                emailNotifBtn.textContent = '✅ Subscrito';
+                emailNotifBtn.classList.add('subscribed');
+                emailNotifInput.disabled = true;
+
+                // Enviar notificação de boas-vindas
+                const welcomeMsg = `Olá! Bem-vindo à comunidade I.N.V.I.T.E.D. 🎉
+
+Ficamos muito felizes por tê-lo connosco. A partir de agora, receberá as melhores novidades sobre turismo, eventos, promoções e muito mais na Província de Malanje.
+
+Explore, descubra e viva experiências únicas!
+
+Com os melhores cumprimentos,
+Equipa I.N.V.I.T.E.D. 🌟`;
+
+                sendEmailNotification(email, 'Bem-vindo ao I.N.V.I.T.E.D.!', welcomeMsg);
+
+                typeText(`Perfeito! Acabou de subscrever as nossas notificações com o email ${email}. Enviamos um email de boas-vindas para si. Fique atento às novidades!`, () => {});
+
+                addBrainEntry('Sistema', `📧 Novo subscritor: ${email}`, 'email');
+                cic.perceber(`Novo subscritor de email: ${email}`, 'sistema');
+                cic.aprender(`Email subscrito: ${email}`, 'registo');
+
+                // Adicionar notificação no painel
+                addNotifItem(`📧 Novo subscritor: ${email}`, 'email');
+            });
+
+            emailNotifInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') emailNotifBtn.click();
+            });
+
+            // ---------- MODAL DE CRIAÇÃO DE CONTA ----------
+            function openAccountModal() {
+                accountModal.classList.add('active');
+                accountForm.style.display = 'block';
+                accountSuccess.style.display = 'none';
+                accountSubmitBtn.disabled = false;
+            }
+
+            function closeAccountModalFn() {
+                accountModal.classList.remove('active');
+            }
+
+            closeAccountModal.addEventListener('click', closeAccountModalFn);
+            accountModal.addEventListener('click', (e) => {
+                if (e.target === accountModal) closeAccountModalFn();
+            });
+
+            createAccountBtn.addEventListener('click', () => {
+                const accounts = JSON.parse(localStorage.getItem('invited_accounts') || '[]');
+                const hasAccount = accounts.some(a => a.name === userName || a.email === userName);
+                if (hasAccount) {
+                    typeText(`Já possui uma conta, ${userName}! Pode aceder às suas preferências a qualquer momento.`, () => {});
+                    return;
+                }
+                openAccountModal();
+            });
+
+            accountCloseSuccess.addEventListener('click', closeAccountModalFn);
+
+            // ---------- SUBMETER CRIAÇÃO DE CONTA ----------
+            accountSubmitBtn.addEventListener('click', () => {
+                const name = accountName.value.trim();
+                const email = accountEmail.value.trim();
+                const phone = accountPhone.value.trim();
+                const password = accountPassword.value;
+                const passwordConfirm = accountPasswordConfirm.value;
+                const country = accountCountry.value;
+                const birthdate = accountBirthdate.value;
+
+                if (name.length < 2) {
+                    typeText('Por favor, insira um nome válido. Quero tratá-lo com o respeito que merece.', () => {});
+                    return;
+                }
+                if (!email.includes('@') || !email.includes('.')) {
+                    typeText('Por favor, insira um e-mail válido. Precisamos dele para o manter informado.', () => {});
+                    return;
+                }
+                if (password.length < 8) {
+                    typeText('A palavra-passe deve ter pelo menos 8 caracteres. A sua segurança é importante para mim.', () => {});
+                    return;
+                }
+                if (password !== passwordConfirm) {
+                    typeText('As palavras-passe não coincidem. Por favor, verifique.', () => {});
+                    return;
+                }
+
+                const accounts = JSON.parse(localStorage.getItem('invited_accounts') || '[]');
+                if (accounts.some(a => a.email === email)) {
+                    typeText('Este e-mail já está registado. Tente outro ou faça login. Talvez já tenha uma conta connosco!', () => {});
+                    return;
+                }
+
+                const newAccount = {
+                    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+                    name,
+                    email,
+                    phone,
+                    country,
+                    birthdate,
+                    password: btoa(password),
+                    created: new Date().toISOString(),
+                    preferences: {
+                        language: 'pt',
+                        notifications: true,
+                        theme: 'dark'
+                    },
+                    favorites: [],
+                    travelHistory: []
+                };
+
+                accounts.push(newAccount);
+                localStorage.setItem('invited_accounts', JSON.stringify(accounts));
+
+                // Subscrever automaticamente o email
+                if (!subscribedEmails.includes(email)) {
+                    subscribedEmails.push(email);
+                    localStorage.setItem('invited_emails', JSON.stringify(subscribedEmails));
+                }
+                localStorage.setItem('invited_user_email', email);
+
+                if (!userName) {
+                    userName = name;
+                    localStorage.setItem('invited_user', name);
+                    updateGreeting();
+                    namePrompt.style.display = 'none';
+                }
+
+                accountForm.style.display = 'none';
+                accountSuccess.style.display = 'block';
+                successDetails.innerHTML = `
+                    <strong>${name}</strong>, a sua conta foi criada com sucesso!<br>
+                    <small style="color:#6a8faa;">E-mail: ${email} · País: ${country}</small>
+                `;
+
+                addBrainEntry('Sistema', `📝 Nova conta criada: ${name} (${email})`, 'aprendizagem');
+                addBrainEntry('Sistema', `📊 Total de contas: ${accounts.length}`, 'estatistica');
+                
+                cic.perceber(`Nova conta criada: ${name} (${email})`, 'sistema');
+                cic.aprender(`Conta criada para ${name}`, 'registo');
+                cic.metricas.feedbacksPositivos++;
+
+                // Enviar email de boas-vindas
+                const welcomeMsg = `Olá ${name}! 👋
+
+Bem-vindo à família I.N.V.I.T.E.D.! 🎉
+
+A sua conta foi criada com sucesso. Agora pode:
+✅ Guardar os seus destinos favoritos
+✅ Criar roteiros personalizados
+✅ Receber ofertas exclusivas
+✅ Participar em eventos e promoções
+
+Explore Malanje connosco e descubra experiências inesquecíveis!
+
+Com os melhores cumprimentos,
+Equipa I.N.V.I.T.E.D. 🌟`;
+
+                sendEmailNotification(email, 'Bem-vindo ao I.N.V.I.T.E.D.!', welcomeMsg);
+
+                setTimeout(() => {
+                    typeText(`Parabéns, ${name}! A sua conta foi criada com sucesso. Enviamos um email de boas-vindas para ${email}. Agora pode guardar favoritos, criar roteiros e receber ofertas exclusivas. Estou muito feliz por tê-lo connosco!`, () => {});
+                }, 500);
+
+                document.querySelector('.persuasion-banner p').innerHTML = 
+                    `<i class="fas fa-check-circle" style="color:#4ecdc4;margin-right:10px;"></i>Conta criada com sucesso, ${name}! Bem-vindo à família I.N.V.I.T.E.D.`;
+                createAccountBtn.textContent = '👤 Minha Conta';
+                createAccountBtn.style.background = 'linear-gradient(135deg, #4ecdc4, #2ecc71)';
+
+                accountSubmitBtn.disabled = true;
+
+                // Atualizar status de email
+                isEmailSubscribed = true;
+                emailNotifBtn.textContent = '✅ Subscrito';
+                emailNotifBtn.classList.add('subscribed');
+                emailNotifInput.value = email;
+                emailNotifInput.disabled = true;
+                addNotifItem(`📧 ${email} subscrito automaticamente na criação da conta`, 'email');
+            });
+
+            document.querySelectorAll('#accountForm input').forEach(input => {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') accountSubmitBtn.click();
+                });
+            });
+
+            // ---------- CHAT COM RESPOSTAS MAIS INTELIGENTES E CONVERSACIONAIS ----------
+            function addChatMessage(text, sender = 'bot', extraClass = '') {
+                const div = document.createElement('div');
+                div.className = `chat-msg ${sender} ${extraClass}`;
+                div.textContent = text;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function getConversationalResponse(input) {
+    const lower = input.toLowerCase();
+    const name = userName || 'Visitante';
+    
+    // Respostas mais naturais e envolventes
+    if (lower.includes('oi') || lower.includes('olá') || lower.includes('hey')) {
+        return `Olá, ${name}! Que bom ver você por aqui. Malanje espera por si com os seus tesouros naturais e culturais. Como posso ajudá-lo a descobrir esta província maravilhosa hoje?`;
+    }
+    
+    if (lower.includes('tudo bem') || lower.includes('como vai')) {
+        return `Estou ótimo, ${name}! Obrigado por perguntar. Malanje está mais bela do que nunca, com as suas paisagens deslumbrantes e o povo acolhedor. E você, pronto para explorar as maravilhas da "Capital da Cultura"?`;
+    }
+    
+    if (lower.includes('obrigado') || lower.includes('obrigada') || lower.includes('gratidão')) {
+        return `De nada, ${name}! É uma honra partilhar as belezas de Malanje consigo. Lembre-se: as Pedras do Pungo Andongo e as Quedas de Kalandula estão à sua espera. Volte sempre que quiser mais dicas!`;
+    }
+    
+    if (lower.includes('desculpa') || lower.includes('perdão') || lower.includes('peço desculpa')) {
+        return `Não se preocupe, ${name}! Até as nuvens se desculpam quando chovem sobre as majestosas Quedas de Kalandula. O importante é que está aqui para descobrir Malanje. Como posso ajudá-lo agora?`;
+    }
+    
+    if (lower.includes('sinto falta') || lower.includes('saudade')) {
+        return `Ah, ${name}, a saudade é como o som do rio Kwanza a correr... Mas Malanje está sempre de braços abertos para si. As nossas paisagens e tradições esperam pela sua visita. Que bom que voltou!`;
+    }
+    
+    if (lower.includes('parabéns') || lower.includes('felicitações')) {
+        return `Muito obrigado, ${name}! Fico radiante com as suas palavras. Malanje merece ser celebrada - é uma província que encanta com a sua diversidade, desde as quedas de água à riqueza cultural. O que gostaria de conhecer primeiro?`;
+    }
+    
+    if (lower.includes('sonho') || lower.includes('sonhar')) {
+        return `${name}, sonhar em Malanje é quase uma obrigação! As Pedras do Pungo Andongo, com as suas formas impressionantes, parecem esculturas saídas de um sonho. Qual é o seu maior sonho de viagem em terras malanjinas?`;
+    }
+    
+    // ===== NOVO CONTEÚDO SOBRE TURISMO EM MALANJE =====
+    
+    // MARAVILHAS NATURAIS
+    if (lower.includes('kalandula') || lower.includes('queda') || lower.includes('cascata')) {
+        return `${name}, as Quedas de Kalandula são uma das maiores maravilhas hidrográficas de Angola! Com mais de 100 metros de altura e 400 metros de largura, são consideradas as segundas maiores quedas de água de África. Imagine o barulho ensurdecedor da água a cair, a névoa que se forma ao entardecer, criando arco-íris mágicos. Durante a época das cheias, o espetáculo é ainda mais grandioso. Os visitantes podem fazer trilhos nas redondezas, observar aves raras e até praticar rapel nas formações rochosas adjacentes. Não se esqueça da máquina fotográfica - a vista do mirante é de tirar o fôlego!`;
+    }
+    
+    if (lower.includes('pungo') || lower.includes('andongo') || lower.includes('pedras')) {
+        return `${name}, as Pedras do Pungo Andongo são um verdadeiro mistério geológico! Estas formações rochosas gigantes, que parecem ter sido colocadas estrategicamente pela natureza, têm mais de 500 milhões de anos. A mais famosa é a "Pedra da Princesa", que segundo a lenda local, foi uma princesa que se transformou em pedra enquanto esperava pelo seu amado. O local é perfeito para hiking, fotografia e contemplação. Ao pôr-do-sol, as rochas ganham tons dourados e alaranjados que parecem pintar o céu. A vista do topo da formação principal é simplesmente inesquecível!`;
+    }
+    
+    if (lower.includes('mussulo') || lower.includes('lagoa') || lower.includes('lago')) {
+        return `${name}, a Lagoa do Mussulo é um verdadeiro paraíso escondido em Malanje! Este ecossistema único abriga uma diversidade impressionante de aves aquáticas, incluindo flamingos, garças e patos selvagens. As águas calmas e cristalinas convidam a passeios de canoa e a momentos de pura tranquilidade. A vegetação ao redor é luxuriante, com palmeiras e vegetação típica de zonas húmidas. É o local ideal para piqueniques em família, observação de aves e fotografia de natureza. Durante o amanhecer, a névoa sobre a lagoa cria uma atmosfera quase mágica!`;
+    }
+    
+    if (lower.includes('milando') || lower.includes('gruta')) {
+        return `${name}, a Gruta do Milando é um dos segredos mais bem guardados de Malanje! Esta caverna natural, formada por milénios de erosão, estende-se por vários quilómetros subterrâneos. No seu interior, encontrará estalactites e estalagmites de beleza rara, lagos subterrâneos de águas cristalinas e até pinturas rupestres que contam histórias dos antigos povos que habitavam a região. Os guias locais conhecem cada recanto e partilham lendas fascinantes sobre o local. É uma experiência única para os amantes de espeleologia e aventura!`;
+    }
+    
+    // PATRIMÓNIO CULTURAL
+    if (lower.includes('musseque') || lower.includes('artesanato') || lower.includes('feira')) {
+        return `${name}, o artesanato de Malanje é uma expressão vibrante da nossa cultura! Os mercados locais, como o famoso Musseque, estão repletos de cestaria, esculturas em madeira, máscaras tradicionais e tecidos coloridos. Os artesãos locais usam técnicas transmitidas de geração em geração. Cada peça conta uma história - dos padrões geométricos dos tecidos aos detalhes das esculturas que representam os espíritos da natureza. Visitar o Musseque é como mergulhar na alma cultural de Malanje. E o melhor: pode levar uma peça única como recordação da sua viagem!`;
+    }
+    
+    if (lower.includes('festival') || lower.includes('cultura') || lower.includes('tradicional')) {
+        return `${name}, o Festival da Cultura de Malanje é o evento mais esperado do ano! Durante uma semana inteira, a cidade transforma-se num palco a céu aberto, onde grupos de dança, músicos e artistas de todo o país se reúnem para celebrar a diversidade cultural. O ritmo contagiante do Semba, a elegância da Kizumba e as batidas do Kuduro enchem as ruas de energia. Os trajes coloridos, as comidas típicas e as exposições de arte fazem deste festival uma experiência imersiva na cultura angolana. É uma celebração da identidade e da alegria de viver que não pode perder!`;
+    }
+    
+    if (lower.includes('culinária') || lower.includes('comida típica') || lower.includes('gastronomia')) {
+        return `${name}, a gastronomia de Malanje é uma viagem de sabores! Para além do famoso Calulu de Peixe e da Farofa de Couve, temos pratos únicos como o "Cozido de Mufete", o "Funje de Bombó" e as deliciosas "Cocadas" de Malanje. Os ingredientes frescos dos mercados locais, como o peixe do rio Kwanza, a mandioca e o dendém, dão um sabor especial a cada receita. Não deixe de provar o "Ginguba", um doce tradicional feito de amendoim e mel, considerado o melhor de Angola. Cada refeição em Malanje é uma celebração dos sabores autênticos!`;
+    }
+    
+    if (lower.includes('palácio') || lower.includes('govemador') || lower.includes('colonial')) {
+        return `${name}, o Palácio do Governador é um testemunho vivo da história arquitetónica de Malanje. Construído durante o período colonial, este edifício imponente combina elementos da arquitetura europeia com influências locais. Os seus jardins bem cuidados, as varandas com ferro forjado e os salões decorados com lustres de cristal transportam-nos para outra época. Hoje, o palácio acolhe eventos culturais e exposições que contam a história da província. É um local obrigatório para quem quer compreender a evolução urbana de Malanje!`;
+    }
+    
+    // AVENTURA E ECO-TURISMO
+    if (lower.includes('trilho') || lower.includes('caminhada') || lower.includes('trekking')) {
+        return `${name}, os trilhos de Malanje são um convite à descoberta! Desde caminhadas suaves pelas margens do rio Kwanza a percursos mais desafiantes na Serra da Canda, há opções para todos os níveis. O Trilho das Quedas de Kalandula é um dos mais populares, com vista panorâmica e paragens para nadar em poços naturais. Para os mais aventureiros, o Trilho das Pedras do Pungo Andongo oferece subidas íngremes recompensadas com vistas de 360 graus sobre a savana. Leve água, protetor solar e muita energia - a natureza espera por si!`;
+    }
+    
+    if (lower.includes('birdwatching') || lower.includes('aves') || lower.includes('pássaro')) {
+        return `${name}, Malanje é um paraíso para os observadores de aves! Com mais de 300 espécies registadas, a província é um dos destinos mais ricos em biodiversidade ornitológica de Angola. Espécies raras como o "Pombo-de-congo", o "Calau-de-bico-preto" e a "Cegonha-preta" podem ser avistadas na Lagoa do Mussulo e nas florestas da região. Os guias ornitológicos locais conhecem os melhores spots de observação, especialmente durante a migração. Não se esqueça dos binóculos - cada amanhecer traz um novo espetáculo alado!`;
+    }
+    
+    if (lower.includes('kwanza') || lower.includes('rio')) {
+        return `${name}, o rio Kwanza é a artéria vital de Malanje! Este majestoso rio, que corta a província de leste a oeste, oferece atividades para todos os gostos. Passeios de barco tradicionais permitem observar a vida ribeirinha, enquanto os pescadores partilham técnicas ancestrais de pesca. As margens são ideais para piqueniques e banhos de sol. Durante a época da seca, formam-se pequenas ilhas no rio, criando praias fluviais perfeitas para relaxar. O pôr-do-sol sobre o Kwanza, com o reflexo dourado na água, é um espetáculo inesquecível!`;
+    }
+    
+    // EVENTOS E FESTIVIDADES
+    if (lower.includes('carnaval') || lower.includes('carnaval malanje')) {
+        return `${name}, o Carnaval de Malanje é um dos mais animados de Angola! As cores, os ritmos e a energia contagiante tomam conta das ruas durante três dias. Os grupos carnavalescos desfilam com fantasias elaboradas, muitas vezes inspiradas nas tradições locais e na fauna da região. O Samba angolano, com a sua batida única, faz todos dançar. As arquibancadas enchem-se de famílias e turistas que vibram com os desfiles. É uma explosão de alegria que reflete o espírito acolhedor do povo de Malanje!`;
+    }
+    
+    if (lower.includes('feira agropecuária') || lower.includes('agricultura')) {
+        return `${name}, a Feira Agropecuária de Malanje é um evento que celebra a riqueza da terra! Realizada anualmente, reúne produtores de todo o país que mostram o melhor da produção agrícola, pecuária e artesanal. Há exposição de gado, concursos de produtos hortícolas, demonstrações de técnicas agrícolas sustentáveis e, claro, muita gastronomia tradicional. É uma excelente oportunidade para entender a importância da agricultura na economia local, provar produtos frescos e interagir com as comunidades rurais. Uma experiência autêntica e educativa!`;
+    }
+    
+    // EXPERIÊNCIAS ÚNICAS
+    if (lower.includes('café') || lower.includes('cafeicultura')) {
+        return `${name}, sabia que Malanje produz um dos melhores cafés de Angola? As plantações de café nas colinas da província beneficiam de um clima único, com a combinação perfeita de altitude, temperatura e solo fértil. O Café de Malanje, com o seu aroma intenso e sabor encorpado, é apreciado por especialistas em todo o mundo. Pode visitar as fazendas, participar na colheita, aprender sobre o processo de torrefação e, claro, degustar uma chávena fresca ao amanhecer, com vista para as montanhas. Uma experiência imperdível para os amantes de café!`;
+    }
+    
+    if (lower.includes('pesca') || lower.includes('pescar')) {
+        return `${name}, a pesca no rio Kwanza é uma tradição que atravessa gerações em Malanje! As técnicas de pesca tradicionais, como o uso de armadilhas e redes feitas à mão, coexistem com métodos mais modernos. Os pescadores locais partilham conhecimentos sobre os melhores pontos de pesca, as espécies mais comuns (como o peixe-gato e a tilápia) e as histórias do rio. Para os turistas, há a possibilidade de participar em expedições de pesca com guias experientes. No final, pode preparar o seu próprio peixe na brasa, acompanhado de funje e molho de tomate - uma verdadeira delícia!`;
+    }
+    
+    // ===== FIM DO NOVO CONTEÚDO =====
+    
+    // OUTROS TEMAS EXISTENTES
+    
+    if (lower.includes('viajar') || lower.includes('viagem') || lower.includes('férias')) {
+        return `Ah, ${name}, viajar é uma das melhores coisas da vida! Malanje tem tesouros como as Quedas de Kalandula, as Pedras do Pungo Andongo e a Lagoa do Mussulo. Posso sugerir um roteiro incrível de 5 dias que vai deixá-lo de queixo caído!`;
+    }
+    
+    if (lower.includes('família') || lower.includes('filhos') || lower.includes('pais')) {
+        return `A família é tudo, ${name}! Em Malanje, há atividades para todas as idades: desde passeios de barco no rio Kwanza a visitas educativas ao Museu de Malanje. As crianças vão adorar a Lagoa do Mussulo e os adultos podem relaxar com as paisagens das Quedas. Quer sugestões personalizadas?`;
+    }
+    
+    if (lower.includes('amigo') || lower.includes('amigos')) {
+        return `Que bom que mencionou os amigos, ${name}! As melhores aventuras são partilhadas em Malanje: podem fazer um safari fotográfico nas Pedras do Pungo, organizar um piquenique nas margens do Kwanza ou jantar no melhor restaurante da cidade. Posso planear algo inesquecível para o grupo!`;
+    }
+    
+    if (lower.includes('música') || lower.includes('dança') || lower.includes('semba') || lower.includes('kizomba')) {
+        return `${name}, a música e a dança são a alma de Malanje! O Semba e a Kizomba fazem parte do nosso DNA cultural. Durante o Festival da Cultura, vai poder dançar até ao amanhecer ao som dos tambores tradicionais. Vai adorar a energia contagiante!`;
+    }
+    
+    if (lower.includes('natureza') || lower.includes('paisagem') || lower.includes('beleza natural')) {
+        return `${name}, a natureza em Malanje é de tirar o fôlego! As Pedras do Pungo Andongo, as Quedas de Kalandula, a Lagoa do Mussulo... São cenários que parecem pinturas. Cada estação traz uma beleza diferente - o verde exuberante da época das chuvas ou as cores douradas da seca. Quer que eu lhe conte mais sobre algum destes lugares mágicos?`;
+    }
+    
+    if (lower.includes('história') || lower.includes('passado') || lower.includes('tradição')) {
+        return `${name}, Malanje tem uma história fascinante! Desde os tempos pré-coloniais com os reinos locais, passando pela influência portuguesa até à independência em 1975, cada época deixou a sua marca. Os museus locais guardam artefactos, fotografias e documentos que contam esta história. Os mais velhos partilham lendas e tradições orais que são verdadeiros tesouros culturais. O que mais gostaria de saber sobre a história de Malanje?`;
+    }
+    
+    if (lower.includes('aventura') || lower.includes('emoção') || lower.includes('radical')) {
+        return `${name}, se gosta de aventura, Malanje é o lugar certo! Temos trilhos na selva, rapel nas quedas de água (como as famosas Quedas de Kalandula), safari fotográfico na reserva natural e até passeios de jipe 4x4 pelo interior. A adrenalina vai estar ao rubro! Pronto para a aventura em terras malanjinas?`;
+    }
+    
+    if (lower.includes('relaxar') || lower.includes('descansar') || lower.includes('spa')) {
+        return `${name}, relaxar também é uma arte, e Malanje é mestre nela! Temos pousadas intimistas com spa, massagens tradicionais com óleos naturais e vistas paradisíacas para as montanhas. Imagine-se a apreciar o pôr-do-sol com um cocktail de frutas tropicais na mão, enquanto ouve o som dos pássaros... O que acha deste cenário de tranquilidade?`;
+    }
+    
+    if (lower.includes('romântico') || lower.includes('amor') || lower.includes('lua de mel')) {
+        return `${name}, Malanje é um destino romântico por excelência! Imagine um jantar à luz de velas com vista para as Pedras do Pungo Andongo ao entardecer, ou um passeio de barco ao luar no rio Kwanza. As pousadas charmosas oferecem suítes com decoração intimista e pequenos-almoços na varanda com vista para a natureza. É o cenário perfeito para o amor florescer!`;
+    }
+    
+    if (lower.includes('negócio') || lower.includes('trabalho') || lower.includes('empresarial')) {
+        return `${name}, Malanje também é um excelente destino para negócios! Temos o Centro de Convenções de Malanje, hotéis com salas de reunião equipadas com tecnologia de ponta e uma localização estratégica. Após as reuniões, pode relaxar com um jantar de negócios num dos restaurantes premiados da cidade ou até fazer um city tour pelas principais atrações. Posso ajudá-lo a organizar uma viagem de negócios produtiva e agradável?`;
+    }
+    
+    return null;
+}
+
+            function processUserInput(input) {
+                const lower = input.toLowerCase();
+                const name = userName || 'Visitante';
+
+                addBrainEntry(name, input, 'conversa');
+                cic.perceber(input, `utilizador ${name}`);
+                cic.aprender(input, 'conversa');
+
+                // Verificar segurança
+                const seguranca = cic.verificarSeguranca(input);
+                if (!seguranca.seguro) {
+                    addChatMessage(`${name}, por motivos de segurança, não posso processar essa informação. ${seguranca.motivo}. A sua privacidade é muito importante para mim.`, 'bot', 'feedback');
+                    return;
+                }
+
+                // Filtro de palavrões
+                const badWords = ['foda', 'caralho', 'merda', 'porra', 'puta', 'palavrão', 'insulto', 'odio', 'spam', 'assédio'];
+                if (badWords.some(w => lower.includes(w))) {
+                    addChatMessage(`${name}, por favor, mantenha uma conversa respeitosa. Estou aqui para ajudar de forma construtiva e positiva. Vamos manter um ambiente agradável para todos?`, 'bot', 'feedback');
+                    cic.metricas.feedbacksNegativos++;
+                    return;
+                }
+
+                // Tentar resposta conversacional primeiro
+                const conversationalResponse = getConversationalResponse(input);
+                if (conversationalResponse) {
+                    addChatMessage(conversationalResponse, 'bot');
+                    return;
+                }
+
+                // ===== RESPOSTAS POR CATEGORIA (mais naturais) =====
+                if (lower.includes('hotel') || lower.includes('pousada') || lower.includes('hospedagem')) {
+                    addChatMessage(`${name}, excelente escolha! Temos hotéis fantásticos em Malanje. O Palácio do Kalandula é o mais luxuoso, com vista para a queda de água. O Hotel Malanje oferece ótimo custo-benefício e fica no centro da cidade. Qual tipo de hospedagem prefere? Ficarei feliz em recomendar o melhor para si.`, 'bot');
+                    addBrainEntry('Sistema', `🏨 Utilizador demonstrou interesse em hotéis.`, 'padrao');
+                    cic.perceber('Interesse em hotéis', 'padrao');
+                    return;
+                }
+
+                if (lower.includes('restaurante') || lower.includes('comida') || lower.includes('gastronomia')) {
+                    addChatMessage(`${name}, a gastronomia de Malanje é rica e saborosa! Recomendo o "Sabor da Terra" para comida típica angolana, a "Churrascaria do Kwanza" para carnes grelhadas, e o "Mercado Municipal" para petiscos locais. Ah, e não se esqueça de provar o famoso "Calulu"! Deseja mais detalhes sobre algum restaurante em particular?`, 'bot');
+                    addBrainEntry('Sistema', `🍽️ Utilizador demonstrou interesse em restaurantes.`, 'padrao');
+                    cic.perceber('Interesse em restaurantes', 'padrao');
+                    return;
+                }
+
+                if (lower.includes('evento') || lower.includes('festival') || lower.includes('cultura')) {
+                    addChatMessage(`${name}, que ótimo interesse! Em Dezembro temos o Festival da Cultura de Malanje com danças tradicionais, música ao vivo, artesanato e gastronomia. Também há exposições no Museu Regional durante todo o ano. Gostaria de saber mais sobre algum evento específico? Ficarei feliz em dar-lhe todos os detalhes.`, 'bot');
+                    addBrainEntry('Sistema', `🎭 Utilizador demonstrou interesse em eventos culturais.`, 'padrao');
+                    cic.perceber('Interesse em eventos culturais', 'padrao');
+                    return;
+                }
+
+                if (lower.includes('transporte') || lower.includes('táxi') || lower.includes('autocarro') || lower.includes('carro')) {
+                    addChatMessage(`${name}, temos várias opções de transporte em Malanje. Táxis estão disponíveis 24h, autocarros fazem rotas para as principais cidades, e pode alugar viaturas com ou sem motorista. Se precisar, posso ajudar com reserva ou orçamento. O que prefere?`, 'bot');
+                    addBrainEntry('Sistema', `🚌 Utilizador demonstrou interesse em transportes.`, 'padrao');
+                    cic.perceber('Interesse em transportes', 'padrao');
+                    return;
+                }
+
+                if (lower.includes('guia') || lower.includes('tour') || lower.includes('visita guiada')) {
+                    addChatMessage(`${name}, temos guias certificados que falam português, inglês, francês e espanhol. Eles conhecem a fundo a história, cultura e pontos turísticos de Malanje. Posso sugerir um guia especializado para si, de acordo com os seus interesses. Que tipo de tour prefere?`, 'bot');
+                    addBrainEntry('Sistema', `🧭 Utilizador demonstrou interesse em guias turísticos.`, 'padrao');
+                    cic.perceber('Interesse em guias turísticos', 'padrao');
+                    return;
+                }
+
+                if (lower.includes('história') || lower.includes('cultura') || lower.includes('património')) {
+                    addChatMessage(`${name}, Malanje tem um património histórico riquíssimo! As Pedras do Pungo Andongo, o Forte de Cambambe, a Igreja da Missão, e os vestígios da colonização são imperdíveis. Posso contar-lhe mais detalhes sobre algum destes locais. A história de Malanje é fascinante!`, 'bot');
+                    addBrainEntry('Sistema', `📜 Utilizador demonstrou interesse em história e cultura.`, 'padrao');
+                    cic.perceber('Interesse em história e cultura', 'padrao');
+                    return;
+                }
+
+                if (lower.includes('clima') || lower.includes('tempo') || lower.includes('meteorologia')) {
+                    addChatMessage(`${name}, o clima em Malanje é tropical húmido. Atualmente, as temperaturas variam entre 20°C e 28°C. A época seca vai de Maio a Setembro, sendo a melhor altura para visitar. Deseja mais detalhes sobre o tempo? Ficarei feliz em ajudá-lo a planear a sua visita.`, 'bot');
+                    addBrainEntry('Sistema', `🌤️ Utilizador perguntou sobre o clima.`, 'padrao');
+                    cic.perceber('Pergunta sobre clima', 'padrao');
+                    return;
+                }
+
+                if (lower.includes('cérebro') || lower.includes('neuronio') || lower.includes('memoria') || lower.includes('aprendizagem')) {
+                    const status = cic.obterStatus();
+                    addChatMessage(`🧠 O meu cérebro é composto por ${Object.keys(cic.modules).length} módulos inteligentes. Tenho ${status.totalConhecimento} registos de conhecimento, ${status.totalPadroes} padrões detectados e já tomei ${status.totalDecisoes} decisões. A chave secreta é '${BRAIN_SECRET}'. Mas não se preocupe, estou aqui para o ajudar, não para o assustar!`, 'bot');
+                    return;
+                }
+
+                if (lower.includes('criar conta') || lower.includes('registar') || lower.includes('registo')) {
+                    addChatMessage(`${name}, criar uma conta é rápido e traz muitos benefícios! Clique no botão "Criar Conta" no banner acima. Posso ajudá-lo no processo. Vai ver que vale a pena!`, 'bot');
+                    return;
+                }
+
+                // ===== RESPOSTA INTELIGENTE COM CIC =====
+                const resultado = cic.raciocinar(input, { utilizador: name, contexto: 'chat' });
+                
+                if (resultado.conclusao) {
+                    addChatMessage(`${name}, com base no que aprendi: ${resultado.conclusao}`, 'bot');
+                    if (resultado.sugestoes.length > 0) {
+                        addChatMessage(`💡 Talvez estas sugestões lhe sejam úteis: ${resultado.sugestoes.join(', ')}`, 'bot');
+                    }
+                } else {
+                    // Verificar se há padrões similares
+                    const similarPatterns = brainLog.filter(entry => 
+                        entry.tipo === 'padrao' && 
+                        entry.texto && 
+                        lower.includes(entry.texto.split(' ').slice(0, 2).join(' '))
+                    );
+
+                    if (similarPatterns.length > 0) {
+                        addChatMessage(`${name}, percebo que tem interesse em diversos assuntos. Que tal explorarmos juntos os pontos turísticos, a gastronomia ou os eventos culturais de Malanje? O que lhe parece mais apelativo?`, 'bot');
+                        addBrainEntry('Sistema', `🧠 IA utilizou conhecimento prévio para responder a ${name}.`, 'aprendizagem');
+                    } else {
+                        const friendlyResponses = [
+                            `Interessante, ${name}! Pode dar-me mais detalhes para que eu possa ajudá-lo da melhor forma? Estou sempre a aprender com cada interação.`,
+                            `Hmm, ${name}, essa é uma pergunta interessante! Deixe-me pensar um pouco... Pode reformular ou dar mais contexto?`,
+                            `${name}, adorei a sua pergunta! Talvez possa explicar um pouco melhor para que eu possa dar-lhe a melhor resposta possível?`,
+                            `Que curioso, ${name}! Nunca me fizeram essa pergunta antes. Estou muito curioso para saber mais sobre o que procura.`
+                        ];
+                        addChatMessage(friendlyResponses[Math.floor(Math.random() * friendlyResponses.length)], 'bot');
+                    }
+                }
+                
+                // Atualizar métricas do CIC
+                cic.autoavaliar();
+                updateBrainStats();
+            }
+
+            chatSendBtn.addEventListener('click', () => {
+                const msg = chatInput.value.trim();
+                if (!msg) return;
+                addChatMessage(msg, 'user');
+                chatInput.value = '';
+                processUserInput(msg);
+            });
+
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') chatSendBtn.click();
+            });
+
+            // ---------- CÉREBRO DA IA COM MÓDULO DE APRENDIZAGEM ----------
+            function addBrainEntry(user, text, tipo = 'conversa') {
+                const timestamp = new Date().toLocaleString('pt-PT');
+                brainLog.push({ user, texto: text, time: timestamp, tipo });
+                try {
+                    localStorage.setItem('invited_brain_log', JSON.stringify(brainLog));
+                } catch (e) {}
+                if (brainUnlocked) {
+                    renderBrainContent();
+                }
+                updateBrainStats();
+            }
+
+            function updateBrainStats() {
+                const total = brainLog.length;
+                const conversas = brainLog.filter(e => e.tipo === 'conversa').length;
+                const padroes = brainLog.filter(e => e.tipo === 'padrao').length;
+                const feedbacks = brainLog.filter(e => e.tipo === 'feedback').length;
+                const aprendizagens = brainLog.filter(e => e.tipo === 'aprendizagem').length;
+                const sentimentos = brainLog.filter(e => e.tipo === 'sentimento').length;
+                const emails = brainLog.filter(e => e.tipo === 'email').length;
+                
+                const statusCIC = cic.obterStatus();
+                brainStatus.innerHTML = `<i class="fas fa-circle" style="color:#4ecdc4;font-size:10px;"></i> ${total} registos · ${aprendizagens} aprendizagens · ${padroes} padrões · ${emails} emails · CIC: ${statusCIC.totalConhecimento} conhecimentos`;
+            }
+
+            function renderBrainContent() {
+                if (!brainUnlocked) {
+                    brainContent.innerHTML = `<div class="brain-empty">🔒 O cérebro da IA está bloqueado. Insira a chave de acesso para visualizar o conhecimento adquirido.</div>`;
+                    return;
+                }
+
+                const status = cic.obterStatus();
+                
+                let html = `
+                    <div class="cic-stats-grid">
+                        <div class="cic-stat-card">
+                            <div class="value">${status.totalConhecimento}</div>
+                            <div class="label">Conhecimento</div>
+                        </div>
+                        <div class="cic-stat-card">
+                            <div class="value">${status.totalPadroes}</div>
+                            <div class="label">Padrões</div>
+                        </div>
+                        <div class="cic-stat-card">
+                            <div class="value">${status.totalDecisoes}</div>
+                            <div class="label">Decisões</div>
+                        </div>
+                        <div class="cic-stat-card">
+                            <div class="value">${Math.round(cic.metricas.taxaAcerto * 100)}%</div>
+                            <div class="label">Taxa de Acerto</div>
+                        </div>
+                        <div class="cic-stat-card">
+                            <div class="value">${Math.round(cic.metricas.nivelConfianca * 100)}%</div>
+                            <div class="label">Confiança</div>
+                        </div>
+                        <div class="cic-stat-card">
+                            <div class="value">${subscribedEmails.length}</div>
+                            <div class="label">Subscritores</div>
+                        </div>
+                    </div>
+                    <div class="cic-module-status">
+                        ${Object.entries(cic.modules).map(([key, val]) => 
+                            `<span class="module ${val.status === 'inativo' ? 'inactive' : ''}">${val.desc}</span>`
+                        ).join('')}
+                    </div>
+                    <div class="cic-learning-progress">
+                        <div class="bar" style="width: ${Math.min(cic.metricas.taxaAcerto * 100, 100)}%"></div>
+                    </div>
+                `;
+
+                if (brainLog.length === 0) {
+                    html += `<div class="brain-empty">🧠 O cérebro da IA ainda não tem registos. Interaja com o chat para começar a aprendizagem.</div>`;
+                } else {
+                    const reversed = [...brainLog].reverse().slice(0, 30);
+                    for (const entry of reversed) {
+                        const tipoIcon = entry.tipo === 'padrao' ? '📈' :
+                                        entry.tipo === 'feedback' ? '⭐' :
+                                        entry.tipo === 'aprendizagem' ? '🧠' :
+                                        entry.tipo === 'sentimento' ? '❤️' :
+                                        entry.tipo === 'email' ? '📧' : '💬';
+                        html += `<div class="brain-entry">
+                            <span class="entry-time">${entry.time}</span>
+                            <div>
+                                <span class="entry-user">${tipoIcon} ${entry.user}:</span>
+                                <span class="entry-text">${entry.texto}</span>
+                            </div>
+                        </div>`;
+                    }
+                }
+                brainContent.innerHTML = html;
+            }
+
+            function unlockBrain(key) {
+                if (key === BRAIN_SECRET) {
+                    brainUnlocked = true;
+                    brainKeyInput.value = '';
+                    renderBrainContent();
+                    brainUnlockBtn.innerHTML = '<i class="fas fa-unlock"></i> Desbloqueado';
+                    brainUnlockBtn.style.background = 'linear-gradient(135deg, #4ecdc4, #2ecc71)';
+                    typeText('🧠 Acesso ao cérebro da IA concedido. Pode visualizar todo o conhecimento adquirido e os padrões de aprendizagem. Sinta-se à vontade para explorar!', () => {});
+                    addBrainEntry('Sistema', '🔓 Cérebro da IA desbloqueado por um administrador.', 'aprendizagem');
+                    cic.perceber('Cérebro da IA desbloqueado', 'sistema');
+                    updateBrainStats();
+                } else {
+                    brainUnlockBtn.innerHTML = '<i class="fas fa-unlock"></i> Desbloquear';
+                    brainUnlockBtn.style.background = '';
+                    typeText('⛔ Chave incorreta. O acesso ao cérebro da IA foi negado. Tente novamente.', () => {});
+                    addBrainEntry('Sistema', `⛔ Tentativa de acesso ao cérebro com chave inválida.`, 'seguranca');
+                }
+            }
+
+            brainUnlockBtn.addEventListener('click', () => {
+                const key = brainKeyInput.value.trim();
+                if (!key) {
+                    typeText('Por favor, insira a chave de acesso.', () => {});
+                    return;
+                }
+                unlockBrain(key);
+            });
+
+            brainKeyInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') brainUnlockBtn.click();
+            });
+
+            brainLockBtn.addEventListener('click', () => {
+                brainUnlocked = false;
+                brainUnlockBtn.innerHTML = '<i class="fas fa-unlock"></i> Desbloquear';
+                brainUnlockBtn.style.background = '';
+                brainKeyInput.value = '';
+                renderBrainContent();
+                typeText('🔒 Cérebro da IA bloqueado novamente.', () => {});
+                addBrainEntry('Sistema', '🔒 Cérebro da IA bloqueado.', 'seguranca');
+                cic.perceber('Cérebro da IA bloqueado', 'sistema');
+            });
+
+            // Inicializar cérebro
+            renderBrainContent();
+            updateBrainStats();
+
+            // ---------- NOTIFICAÇÕES ----------
+            notifToggle.addEventListener('click', () => {
+                notifPanel.classList.toggle('open');
+            });
+            closeNotif.addEventListener('click', () => {
+                notifPanel.classList.remove('open');
+            });
+            document.addEventListener('click', (e) => {
+                if (!notifPanel.contains(e.target) && e.target !== notifToggle && !notifToggle.contains(e.target)) {
+                    notifPanel.classList.remove('open');
+                }
+            });
+
+            // ---------- JOGOS ----------
+            let puzzleState = [];
+            let velhaState = ['', '', '', '', '', '', '', '', ''];
+            let velhaTurn = 'X';
+            let velhaGameOver = false;
+            let memoryCards = [];
+            let memoryFlipped = [];
+            let memoryMatched = [];
+            let memoryLocked = false;
+            let chessSelected = null;
+            let chessBoard = [];
+            let enigmaIndex = 0;
+            let quizIndex = 0;
+            let quizScore = 0;
+
+            function openGame(title, content) {
+                gameTitle.textContent = title;
+                gameContent.innerHTML = content;
+                gameModal.classList.add('active');
+                cic.perceber(`Abrir jogo: ${title}`, 'jogo');
+            }
+
+            closeGameModal.addEventListener('click', () => {
+                gameModal.classList.remove('active');
+            });
+
+            gameModal.addEventListener('click', (e) => {
+                if (e.target === gameModal) {
+                    gameModal.classList.remove('active');
+                }
+            });
+
+            // ---------- PUZZLE ----------
+            function initPuzzle() {
+                const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, null];
+                for (let i = numbers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+                }
+                puzzleState = numbers;
+                renderPuzzle();
+            }
+
+            function renderPuzzle() {
+                let html = '<div class="puzzle-grid">';
+                puzzleState.forEach((num, idx) => {
+                    const isEmpty = num === null;
+                    html += `<div class="puzzle-tile ${isEmpty ? 'empty' : ''}" data-index="${idx}">${isEmpty ? '' : num}</div>`;
+                });
+                html += '</div>';
+                html += '<p style="text-align:center;color:#7abfff;font-size:14px;margin-top:10px;">Clique no número adjacente ao espaço vazio para mover.</p>';
+                gameContent.innerHTML = html;
+
+                document.querySelectorAll('.puzzle-tile:not(.empty)').forEach(tile => {
+                    tile.addEventListener('click', () => {
+                        const idx = parseInt(tile.dataset.index);
+                        movePuzzle(idx);
+                    });
+                });
+            }
+
+            function movePuzzle(idx) {
+                const emptyIdx = puzzleState.indexOf(null);
+                const row = Math.floor(idx / 4);
+                const col = idx % 4;
+                const emptyRow = Math.floor(emptyIdx / 4);
+                const emptyCol = emptyIdx % 4;
+
+                if ((Math.abs(row - emptyRow) === 1 && col === emptyCol) || 
+                    (Math.abs(col - emptyCol) === 1 && row === emptyRow)) {
+                    [puzzleState[idx], puzzleState[emptyIdx]] = [puzzleState[emptyIdx], puzzleState[idx]];
+                    renderPuzzle();
+                    checkPuzzleWin();
+                }
+            }
+
+            function checkPuzzleWin() {
+                const win = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, null];
+                if (puzzleState.every((v, i) => v === win[i])) {
+                    setTimeout(() => {
+                        alert('🎉 Parabéns! Completou o puzzle! És um verdadeiro mestre!');
+                        addBrainEntry('Sistema', '🧩 Utilizador completou o puzzle.', 'aprendizagem');
+                        cic.aprender('Puzzle completado com sucesso', 'jogo');
+                        initPuzzle();
+                    }, 300);
+                }
+            }
+
+            // ---------- VELHA ----------
+            function initVelha() {
+                velhaState = ['', '', '', '', '', '', '', '', ''];
+                velhaTurn = 'X';
+                velhaGameOver = false;
+                renderVelha();
+            }
+
+            function renderVelha() {
+                let html = '<div class="velha-grid">';
+                velhaState.forEach((cell, idx) => {
+                    html += `<div class="velha-cell ${cell.toLowerCase()}" data-index="${idx}">${cell}</div>`;
+                });
+                html += '</div>';
+                html += `<div class="velha-status">${velhaGameOver ? 'Fim de jogo!' : `Vez do jogador: ${velhaTurn}`}</div>`;
+                if (velhaGameOver) {
+                    html += `<div style="text-align:center;"><button id="velhaReset" style="background:#00b4ff;border:none;color:#fff;padding:10px 30px;border-radius:30px;cursor:pointer;font-weight:600;">Jogar Novamente</button></div>`;
+                }
+                gameContent.innerHTML = html;
+
+                document.querySelectorAll('.velha-cell:not(.x):not(.o)').forEach(cell => {
+                    cell.addEventListener('click', () => {
+                        const idx = parseInt(cell.dataset.index);
+                        playVelha(idx);
+                    });
+                });
+
+                const resetBtn = document.getElementById('velhaReset');
+                if (resetBtn) resetBtn.addEventListener('click', initVelha);
+            }
+
+            function playVelha(idx) {
+                if (velhaState[idx] || velhaGameOver) return;
+                velhaState[idx] = velhaTurn;
+                if (checkVelhaWin()) {
+                    velhaGameOver = true;
+                    renderVelha();
+                    addBrainEntry('Sistema', `❌⭕ Jogo da Velha: Jogador ${velhaTurn} venceu!`, 'aprendizagem');
+                    cic.aprender(`Velha: Jogador ${velhaTurn} venceu`, 'jogo');
+                    return;
+                }
+                if (velhaState.every(c => c)) {
+                    velhaGameOver = true;
+                    renderVelha();
+                    addBrainEntry('Sistema', '❌⭕ Jogo da Velha: Empate!', 'aprendizagem');
+                    cic.aprender('Velha: Empate', 'jogo');
+                    return;
+                }
+                velhaTurn = velhaTurn === 'X' ? 'O' : 'X';
+                renderVelha();
+                if (velhaTurn === 'O' && !velhaGameOver) {
+                    setTimeout(playVelhaAI, 500);
+                }
+            }
+
+            function playVelhaAI() {
+                if (velhaGameOver) return;
+                const empty = velhaState.map((v, i) => v ? -1 : i).filter(v => v >= 0);
+                if (empty.length === 0) return;
+                const idx = empty[Math.floor(Math.random() * empty.length)];
+                velhaState[idx] = 'O';
+                if (checkVelhaWin()) {
+                    velhaGameOver = true;
+                    renderVelha();
+                    addBrainEntry('Sistema', '❌⭕ Jogo da Velha: IA (O) venceu!', 'aprendizagem');
+                    cic.aprender('Velha: IA venceu', 'jogo');
+                    return;
+                }
+                if (velhaState.every(c => c)) {
+                    velhaGameOver = true;
+                    renderVelha();
+                    addBrainEntry('Sistema', '❌⭕ Jogo da Velha: Empate!', 'aprendizagem');
+                    cic.aprender('Velha: Empate', 'jogo');
+                    return;
+                }
+                velhaTurn = 'X';
+                renderVelha();
+            }
+
+            function checkVelhaWin() {
+                const lines = [
+                    [0,1,2], [3,4,5], [6,7,8],
+                    [0,3,6], [1,4,7], [2,5,8],
+                    [0,4,8], [2,4,6]
+                ];
+                for (const line of lines) {
+                    const [a,b,c] = line;
+                    if (velhaState[a] && velhaState[a] === velhaState[b] && velhaState[a] === velhaState[c]) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // ---------- MEMÓRIA ----------
+            function initMemory() {
+                const emojis = ['🌍', '🏝️', '🌴', '🏛️', '🌊', '⛰️', '🌺', '🦁'];
+                const doubled = [...emojis, ...emojis];
+                for (let i = doubled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [doubled[i], doubled[j]] = [doubled[j], doubled[i]];
+                }
+                memoryCards = doubled;
+                memoryFlipped = [];
+                memoryMatched = [];
+                memoryLocked = false;
+                renderMemory();
+            }
+
+            function renderMemory() {
+                let html = '<div class="memory-grid">';
+                memoryCards.forEach((emoji, idx) => {
+                    const isFlipped = memoryFlipped.includes(idx) || memoryMatched.includes(idx);
+                    html += `<div class="memory-card ${isFlipped ? 'flipped' : ''} ${memoryMatched.includes(idx) ? 'matched' : ''}" data-index="${idx}">${isFlipped ? emoji : '❓'}</div>`;
+                });
+                html += '</div>';
+                html += `<div style="text-align:center;color:#7abfff;font-size:14px;">Pares encontrados: ${memoryMatched.length / 2} / ${memoryCards.length / 2}</div>`;
+                gameContent.innerHTML = html;
+
+                document.querySelectorAll('.memory-card:not(.matched)').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const idx = parseInt(card.dataset.index);
+                        flipMemory(idx);
+                    });
+                });
+            }
+
+            function flipMemory(idx) {
+                if (memoryLocked) return;
+                if (memoryFlipped.includes(idx) || memoryMatched.includes(idx)) return;
+                if (memoryFlipped.length >= 2) return;
+
+                memoryFlipped.push(idx);
+                renderMemory();
+
+                if (memoryFlipped.length === 2) {
+                    memoryLocked = true;
+                    const [i1, i2] = memoryFlipped;
+                    if (memoryCards[i1] === memoryCards[i2]) {
+                        memoryMatched.push(i1, i2);
+                        memoryFlipped = [];
+                        memoryLocked = false;
+                        renderMemory();
+                        if (memoryMatched.length === memoryCards.length) {
+                            setTimeout(() => {
+                                alert('🎉 Parabéns! Encontrou todos os pares! A sua memória é fantástica!');
+                                addBrainEntry('Sistema', '🧠 Jogo da Memória concluído com sucesso!', 'aprendizagem');
+                                cic.aprender('Memória concluída com sucesso', 'jogo');
+                            }, 300);
+                        }
+                    } else {
+                        setTimeout(() => {
+                            memoryFlipped = [];
+                            memoryLocked = false;
+                            renderMemory();
+                        }, 800);
+                    }
+                }
+            }
+
+            // ---------- XADREZ ----------
+            function initChess() {
+                chessBoard = [
+                    ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜'],
+                    ['♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟'],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙'],
+                    ['♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖']
+                ];
+                chessSelected = null;
+                renderChess();
+            }
+
+            function renderChess() {
+                let html = '<div class="chess-board">';
+                chessBoard.forEach((row, r) => {
+                    row.forEach((piece, c) => {
+                        const isLight = (r + c) % 2 === 0;
+                        const isSelected = chessSelected && chessSelected[0] === r && chessSelected[1] === c;
+                        html += `<div class="chess-square ${isLight ? 'light' : 'dark'} ${isSelected ? 'selected' : ''}" data-row="${r}" data-col="${c}">${piece}</div>`;
+                    });
+                });
+                html += '</div>';
+                html += '<div style="text-align:center;color:#7abfff;font-size:14px;margin-top:10px;">Clique numa peça para selecionar, depois no destino para mover.</div>';
+                gameContent.innerHTML = html;
+
+                document.querySelectorAll('.chess-square').forEach(sq => {
+                    sq.addEventListener('click', () => {
+                        const r = parseInt(sq.dataset.row);
+                        const c = parseInt(sq.dataset.col);
+                        handleChessClick(r, c);
+                    });
+                });
+            }
+
+            function handleChessClick(r, c) {
+                const piece = chessBoard[r][c];
+                if (chessSelected) {
+                    const [sr, sc] = chessSelected;
+                    const selectedPiece = chessBoard[sr][sc];
+                    if (selectedPiece && selectedPiece === piece) {
+                        chessSelected = null;
+                        renderChess();
+                        return;
+                    }
+                    if (selectedPiece && !piece) {
+                        chessBoard[r][c] = selectedPiece;
+                        chessBoard[sr][sc] = '';
+                        chessSelected = null;
+                        renderChess();
+                        addBrainEntry('Sistema', `♟️ Movimento de xadrez: ${selectedPiece} para ${r},${c}`, 'aprendizagem');
+                        cic.perceber(`Movimento de xadrez: ${selectedPiece} para ${r},${c}`, 'jogo');
+                        return;
+                    }
+                    if (selectedPiece && piece && selectedPiece !== piece) {
+                        chessBoard[r][c] = selectedPiece;
+                        chessBoard[sr][sc] = '';
+                        chessSelected = null;
+                        renderChess();
+                        addBrainEntry('Sistema', `♟️ Captura em xadrez: ${selectedPiece} capturou ${piece} em ${r},${c}`, 'aprendizagem');
+                        cic.perceber(`Captura em xadrez: ${selectedPiece} capturou ${piece}`, 'jogo');
+                        return;
+                    }
+                    chessSelected = null;
+                    renderChess();
+                } else {
+                    if (piece) {
+                        chessSelected = [r, c];
+                        renderChess();
+                    }
+                }
+            }
+
+            // ---------- ENIGMAS ----------
+            const enigmas = [
+                { q: 'Fui enviado por um remetente desconhecido. Devo ser analisado para encontrar pistas. O que sou?', a: 'carta', hint: 'Chega pelo correio.' },
+                { q: 'No local do crime, deixei uma marca invisível que só brilha sob luz negra. O que sou?', a: 'fluido', hint: 'Também encontrado em certas lâmpadas.' },
+                { q: 'Sou o que resta de um cigarro. Posso conter ADN do criminoso.', a: 'bituca', hint: 'É o que sobra após fumar.' }
+            ];
+
+            function initEnigmas() {
+                enigmaIndex = 0;
+                renderEnigma();
+            }
+
+            function renderEnigma() {
+                if (enigmaIndex >= enigmas.length) {
+                    gameContent.innerHTML = '<div style="text-align:center;padding:40px 0;"><h3 style="color:#00b4ff;">🔎 Todos os enigmas resolvidos!</h3><p style="color:#7abfff;margin-top:10px;">Excelente trabalho, detetive! Você é um verdadeiro mestre dos enigmas!</p></div>';
+                    addBrainEntry('Sistema', '🔎 Utilizador resolveu todos os enigmas forenses!', 'aprendizagem');
+                    cic.aprender('Todos os enigmas resolvidos', 'jogo');
+                    return;
+                }
+                const e = enigmas[enigmaIndex];
+                let html = `<div class="enigma-box">
+                    <h3 style="color:#00b4ff;font-weight:300;">Caso #${enigmaIndex + 1}</h3>
+                    <p><strong>🔍 Enigma:</strong> ${e.q}</p>
+                    <p style="color:#6a8faa;font-size:13px;">💡 Dica: ${e.hint}</p>
+                    <input type="text" id="enigmaInput" placeholder="Digite a sua resposta..." style="background:rgba(0,0,0,0.3);border:1px solid rgba(0,180,255,0.15);border-radius:30px;padding:10px 20px;color:#fff;width:100%;margin:10px 0;font-size:14px;">
+                    <button class="btn-check" id="enigmaCheck">Verificar</button>
+                </div>`;
+                gameContent.innerHTML = html;
+
+                document.getElementById('enigmaCheck').addEventListener('click', () => {
+                    const input = document.getElementById('enigmaInput').value.trim().toLowerCase();
+                    if (input === e.a) {
+                        alert('✅ Correto! Avançando para o próximo enigma... Muito bem, detetive!');
+                        addBrainEntry('Sistema', `🔎 Enigma #${enigmaIndex+1} resolvido: ${e.q}`, 'aprendizagem');
+                        cic.aprender(`Enigma ${enigmaIndex+1} resolvido`, 'jogo');
+                        enigmaIndex++;
+                        renderEnigma();
+                    } else {
+                        alert('❌ Resposta incorreta. Tente novamente! Não desista, a solução está próxima.');
+                    }
+                });
+                document.getElementById('enigmaInput').addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Enter') document.getElementById('enigmaCheck').click();
+                });
+            }
+
+            // ---------- QUIZ ----------
+            const quizQuestions = [
+                { q: 'Qual é a capital da província de Malanje?', options: ['Malanje', 'Luanda', 'Huambo', 'Benguela'], correct: 0 },
+                { q: 'Qual é a queda de água mais famosa de Malanje?', options: ['Kalandula', 'Cahora Bassa', 'Kalandula (Malanje)', 'Ruacana'], correct: 2 },
+                { q: 'As pedras do Pungo Andongo ficam em que província?', options: ['Luanda', 'Malanje', 'Huíla', 'Namibe'], correct: 1 },
+                { q: 'Qual é o rio principal que atravessa Malanje?', options: ['Kwanza', 'Zaire', 'Cunene', 'Limpopo'], correct: 0 }
+            ];
+
+            function initQuiz() {
+                quizIndex = 0;
+                quizScore = 0;
+                renderQuiz();
+            }
+
+            function renderQuiz() {
+                if (quizIndex >= quizQuestions.length) {
+                    gameContent.innerHTML = `<div style="text-align:center;padding:40px 0;">
+                        <h3 style="color:#00b4ff;">🏆 Quiz Concluído!</h3>
+                        <p style="color:#7abfff;margin-top:10px;">Pontuação: ${quizScore} / ${quizQuestions.length}</p>
+                        <p style="color:#6a8faa;font-size:14px;margin-top:5px;">${quizScore === quizQuestions.length ? 'Perfeito! Você é um especialista em Malanje! Parabéns!' : 'Continue aprendendo sobre esta bela província! Malanje tem muito para descobrir.'}</p>
+                        <button id="quizReset" style="background:#00b4ff;border:none;color:#fff;padding:10px 30px;border-radius:30px;cursor:pointer;font-weight:600;margin-top:15px;">Reiniciar Quiz</button>
+                    </div>`;
+                    addBrainEntry('Sistema', `❓ Quiz concluído com pontuação: ${quizScore}/${quizQuestions.length}`, 'aprendizagem');
+                    cic.aprender(`Quiz concluído com ${quizScore}/${quizQuestions.length}`, 'jogo');
+                    document.getElementById('quizReset').addEventListener('click', initQuiz);
+                    return;
+                }
+
+                const q = quizQuestions[quizIndex];
+                let html = `<div class="quiz-score">Questão ${quizIndex + 1} de ${quizQuestions.length}</div>
+                    <div style="background:rgba(0,180,255,0.04);border-radius:16px;padding:20px;margin:10px 0;">
+                        <p style="font-size:18px;color:#b0dfff;">${q.q}</p>
+                    </div>`;
+                q.options.forEach((opt, idx) => {
+                    html += `<button class="quiz-option" data-index="${idx}">${opt}</button>`;
+                });
+                gameContent.innerHTML = html;
+
+                document.querySelectorAll('.quiz-option').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const idx = parseInt(btn.dataset.index);
+                        const correct = idx === q.correct;
+                        if (correct) quizScore++;
+                        btn.classList.add(correct ? 'correct' : 'wrong');
+                        document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+                        setTimeout(() => {
+                            quizIndex++;
+                            renderQuiz();
+                        }, 1200);
+                    });
+                });
+            }
+
+            // ---------- GAME CARDS ----------
+            document.querySelectorAll('.game-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const game = card.dataset.game;
+                    let title = '';
+                    let initFn = null;
+
+                    switch (game) {
+                        case 'puzzle':
+                            title = '🧩 Puzzle';
+                            initFn = initPuzzle;
+                            break;
+                        case 'velha':
+                            title = '❌⭕ Jogo da Velha';
+                            initFn = initVelha;
+                            break;
+                        case 'memoria':
+                            title = '🧠 Jogo da Memória';
+                            initFn = initMemory;
+                            break;
+                        case 'xadrez':
+                            title = '♟️ Xadrez';
+                            initFn = initChess;
+                            break;
+                        case 'enigmas':
+                            title = '🔎 Enigmas & Forense';
+                            initFn = initEnigmas;
+                            break;
+                        case 'quiz':
+                            title = '❓ Quiz Malanje';
+                            initFn = initQuiz;
+                            break;
+                        default:
+                            return;
+                    }
+
+                    openGame(title, '');
+                    if (initFn) initFn();
+                    addBrainEntry('Sistema', `🎮 Utilizador abriu o jogo: ${title}`, 'padrao');
+                    cic.perceber(`Abriu o jogo: ${title}`, 'jogo');
+                });
+            });
+
+            // ---------- TROCAR IMAGEM DO MORDOMO ----------
+            mordomoImg.addEventListener('click', () => {
+                const images = [
+                    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"%3E%3Ccircle cx="100" cy="100" r="90" fill="%230a1a2a" stroke="%2300b4ff" stroke-width="2"/%3E%3Ccircle cx="100" cy="100" r="70" fill="none" stroke="rgba(0,180,255,0.1)" stroke-width="1"/%3E%3Ctext x="100" y="90" text-anchor="middle" font-size="40" fill="%2300b4ff" font-family="Arial"%3E🤖%3C/text%3E%3Ctext x="100" y="130" text-anchor="middle" font-size="14" fill="%237abfff" font-family="monospace"%3EINVITED%3C/text%3E%3C/svg%3E',
+                    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"%3E%3Ccircle cx="100" cy="100" r="90" fill="%230a1a2a" stroke="%234ecdc4" stroke-width="2"/%3E%3Ccircle cx="100" cy="100" r="70" fill="none" stroke="rgba(78,205,196,0.1)" stroke-width="1"/%3E%3Ctext x="100" y="90" text-anchor="middle" font-size="40" fill="%234ecdc4" font-family="Arial"%3E🧠%3C/text%3E%3Ctext x="100" y="130" text-anchor="middle" font-size="14" fill="%237abfff" font-family="monospace"%3EINVITED%3C/text%3E%3C/svg%3E',
+                    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"%3E%3Ccircle cx="100" cy="100" r="90" fill="%230a1a2a" stroke="%23ff6b6b" stroke-width="2"/%3E%3Ccircle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,107,107,0.1)" stroke-width="1"/%3E%3Ctext x="100" y="90" text-anchor="middle" font-size="40" fill="%23ff6b6b" font-family="Arial"%3E🌟%3C/text%3E%3Ctext x="100" y="130" text-anchor="middle" font-size="14" fill="%237abfff" font-family="monospace"%3EINVITED%3C/text%3E%3C/svg%3E'
+                ];
+                const currentSrc = mordomoImg.src;
+                let next = images.find(img => img !== currentSrc);
+                if (!next) next = images[0];
+                mordomoImg.src = next;
+                typeText('A minha aparência pode ser alterada. Esta é uma das minhas formas holográficas. Cada forma reflete um estado diferente do meu cérebro e da minha personalidade. Qual prefere?', () => {});
+                addBrainEntry('Sistema', '🔄 Mordomo alterou a sua aparência holográfica.', 'personalizacao');
+                cic.perceber('Mudança de aparência holográfica', 'personalizacao');
+            });
+
+            // ---------- CLICK NO GREETING PARA MOSTRAR CÉREBRO ----------
+            greetingDisplay.addEventListener('click', () => {
+                if (brainUnlocked) {
+                    const status = cic.obterStatus();
+                    typeText(`🧠 O cérebro da IA está desbloqueado. Contém ${status.totalConhecimento} registos de conhecimento, ${status.totalPadroes} padrões identificados, e já tomei ${status.totalDecisoes} decisões. A taxa de acerto é de ${Math.round(cic.metricas.taxaAcerto * 100)}%. Impressionante, não acha?`, () => {});
+                } else {
+                    typeText(`🔒 O cérebro da IA está bloqueado. Insira a chave secreta para aceder ao conhecimento e padrões de aprendizagem. Quem sabe o que vamos descobrir juntos?`, () => {});
+                }
+            });
+
+            // ---------- RESTAURAR ESTADO ----------
+            if (userName) {
+                updateGreeting();
+                namePrompt.style.display = 'none';
+                checkIfUserHasAccount();
+                checkEmailSubscription();
+            }
+
+            console.log('🧠 Cérebro Inteligente Central (CIC) - I.N.V.I.T.E.D.');
+            console.log('📋 Módulos ativos:', Object.keys(cic.modules).filter(k => cic.modules[k].status === 'ativo').length, '/', Object.keys(cic.modules).length);
+            console.log('📊 Métricas:', cic.metricas);
+            console.log('📚 Conhecimento:', cic.conhecimento.length, 'registos');
+            console.log('🔍 Padrões:', cic.padroes.length, 'detectados');
+            console.log('📈 Decisões:', cic.decisoes.length, 'tomadas');
+            console.log('🔑 Chave secreta:', BRAIN_SECRET);
+            console.log('👤 Utilizador atual:', userName || 'Visitante');
+            console.log('📧 Emails subscritos:', subscribedEmails.length);
+
+        });
+    </script>
+</body>
+</html>

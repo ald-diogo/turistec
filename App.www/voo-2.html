@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Malanje Virtual Experience 3D - Digital Twin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* ===== RESET E BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background: #0a0e17;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* ===== VÍDEO DE FUNDO ===== */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.3;
+        }
+        .video-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 23, 0.8);
+            z-index: 1;
+        }
+        .container-fluid {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ===== GLASSMORPHISM ===== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.4s ease;
+        }
+
+        /* ===== CABEÇALHO ===== */
+        .cinematic-header {
+            padding: 15px 0 20px;
+            background: linear-gradient(180deg, rgba(10, 14, 23, 0.95) 0%, transparent 100%);
+        }
+        .cinematic-header .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Georgia', serif;
+        }
+        .cinematic-header .subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+        }
+
+        /* ===== AVATAR DO GUIA ===== */
+        .guide-avatar-3d {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #f6d365, #fda085);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.4rem;
+            color: #0a0e17;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 40px rgba(253, 160, 133, 0.2);
+            animation: pulseGlow 2.5s infinite;
+            position: relative;
+        }
+        .guide-avatar-3d::after {
+            content: '🎙️';
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            font-size: 1rem;
+            background: #0a0e17;
+            border-radius: 50%;
+            padding: 2px;
+        }
+        @keyframes pulseGlow {
+            0%,
+            100% { box-shadow: 0 0 30px rgba(253, 160, 133, 0.15); }
+            50% { box-shadow: 0 0 60px rgba(253, 160, 133, 0.4); }
+        }
+
+        /* ===== AVATAR DO TURISTA (Mapa) ===== */
+        .tourist-avatar-marker {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #60a5fa, #2563eb);
+            border: 3px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 0 30px rgba(96, 165, 250, 0.4);
+            animation: floatMarker 2s ease-in-out infinite;
+            color: #fff;
+        }
+        @keyframes floatMarker {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        /* ===== JORNADA ===== */
+        .journey-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            flex-wrap: wrap;
+        }
+        .journey-step {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 600;
+            transition: all 0.5s ease;
+            border: 2px solid transparent;
+            color: rgba(255, 255, 255, 0.25);
+            position: relative;
+        }
+        .journey-step.active {
+            background: #f6d365;
+            color: #0a0e17;
+            border-color: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(246, 211, 101, 0.3);
+        }
+        .journey-step.completed {
+            background: #4ade80;
+            color: #0a0e17;
+        }
+
+        /* ===== CHAT ===== */
+        .guide-chat {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 14px;
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            min-height: 160px;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .guide-chat::-webkit-scrollbar { width: 3px; }
+        .guide-chat::-webkit-scrollbar-thumb { background: rgba(246, 211, 101, 0.2); border-radius: 10px; }
+
+        .message {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            animation: slideIn 0.4s ease;
+        }
+        .message .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .message.guide .avatar {
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            color: #0a0e17;
+        }
+        .message.user .avatar {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .message .bubble {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 6px 12px;
+            border-radius: 10px;
+            max-width: 80%;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .message.guide .bubble {
+            border-top-left-radius: 3px;
+            background: rgba(246, 211, 101, 0.06);
+            border-color: rgba(246, 211, 101, 0.08);
+        }
+        .message.user .bubble {
+            border-top-right-radius: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            margin-left: auto;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            padding: 2px 6px;
+        }
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            animation: typingAnim 1.4s infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingAnim {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.2; }
+            30% { transform: translateY(-6px); opacity: 1; }
+        }
+
+        /* ===== MAPA ===== */
+        #map {
+            height: 320px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .leaflet-control-zoom a {
+            background: rgba(255, 255, 255, 0.06) !important;
+            backdrop-filter: blur(8px) !important;
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        }
+        .leaflet-popup-content-wrapper {
+            background: rgba(10, 14, 23, 0.92) !important;
+            backdrop-filter: blur(20px) !important;
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            border-radius: 12px !important;
+        }
+        .leaflet-popup-tip {
+            background: rgba(10, 14, 23, 0.92) !important;
+        }
+
+        /* ===== DESTINOS ===== */
+        .destination-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            transition: all 0.5s ease;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .destination-card .card-img-overlay {
+            background: linear-gradient(0deg, rgba(10, 14, 23, 0.85) 0%, transparent 70%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 10px;
+        }
+        .destination-card img {
+            transition: transform 0.6s ease;
+            height: 90px;
+            object-fit: cover;
+        }
+        .destination-card:hover img { transform: scale(1.06); }
+        .destination-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(246, 211, 101, 0.15);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ===== BOTÕES ===== */
+        .btn-glow {
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            color: #0a0e17;
+            border: none;
+            font-weight: 600;
+            padding: 8px 22px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(253, 160, 133, 0.2);
+            font-size: 0.9rem;
+        }
+        .btn-glow:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 35px rgba(253, 160, 133, 0.4);
+            color: #0a0e17;
+        }
+        .btn-outline-glow {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            padding: 6px 16px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+        .btn-outline-glow:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #f6d365;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .chat-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #fff;
+            border-radius: 50px;
+            padding: 8px 16px;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        .chat-input:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #f6d365;
+            box-shadow: 0 0 20px rgba(246, 211, 101, 0.05);
+            color: #fff;
+            outline: none;
+        }
+        .chat-input::placeholder { color: rgba(255, 255, 255, 0.25); }
+
+        .guide-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.1);
+            font-size: 0.75rem;
+            color: #4ade80;
+        }
+        .guide-status .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: blinkDot 1.5s infinite;
+        }
+        @keyframes blinkDot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        .user-location-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.75rem;
+        }
+        .user-location-badge .bi { color: #f6d365; }
+
+        /* ===== MODAL AVATAR ===== */
+        .avatar-modal .modal-content {
+            background: rgba(10, 14, 23, 0.96);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+        }
+        .avatar-modal .modal-header { border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+        .avatar-modal .btn-close { filter: invert(1); }
+        .avatar-option {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+            text-align: center;
+        }
+        .avatar-option:hover {
+            border-color: rgba(246, 211, 101, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .avatar-option.selected {
+            border-color: #f6d365;
+            background: rgba(246, 211, 101, 0.06);
+        }
+        .avatar-option .preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 auto 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* ===== CINEMÁTICA ===== */
+        .cinematic-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.88);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            animation: fadeInCinematic 0.8s ease;
+        }
+        .cinematic-overlay.active { display: flex; }
+        @keyframes fadeInCinematic {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .cinematic-content {
+            max-width: 650px;
+            text-align: center;
+            padding: 30px;
+        }
+        .cinematic-content .big-icon {
+            font-size: 4.5rem;
+            margin-bottom: 16px;
+            animation: floatIcon 2s ease-in-out infinite;
+        }
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .cinematic-content h2 {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .cinematic-content p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+        }
+
+        /* ===== CONTROLES DE MOVIMENTO (Videojogo) ===== */
+        .controls-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            z-index: 100;
+            display: none;
+            gap: 15px;
+            align-items: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .controls-hint .key {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 2px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-weight: 700;
+            color: #f6d365;
+            font-size: 0.7rem;
+        }
+        .controls-hint.active { display: flex; }
+
+        /* ===== STATS ===== */
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .stats-bar .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .stats-bar .stat-item .bi { color: #f6d365; font-size: 0.8rem; }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 768px) {
+            .cinematic-header .logo { font-size: 1.4rem; }
+            #map { height: 220px; }
+            .guide-avatar-3d { width: 48px; height: 48px; font-size: 1.8rem; }
+            .journey-step { width: 28px; height: 28px; font-size: 0.55rem; }
+            .destination-card img { height: 65px; }
+            .controls-hint { font-size: 0.65rem; padding: 6px 12px; flex-wrap: wrap; justify-content: center; }
+            .stats-bar { font-size: 0.6rem; gap: 8px; flex-wrap: wrap; }
+        }
+
+        /* ===== SCROLL ===== */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.01); }
+        ::-webkit-scrollbar-thumb { background: rgba(246, 211, 101, 0.15); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== VÍDEO DE FUNDO ===== -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-african-savanna-at-sunset-32878-large.mp4" type="video/mp4" />
+        </video>
+    </div>
+
+    <!-- ===== CINEMÁTICA ===== -->
+    <div class="cinematic-overlay" id="cinematicArrival">
+        <div class="cinematic-content">
+            <div class="big-icon">✈️</div>
+            <h2>Bem-vindo a Malanje!</h2>
+            <p>O seu avião aterrou com sucesso. A aventura virtual está prestes a começar.</p>
+            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.3);">
+                <i class="bi bi-clock"></i> A preparar o ambiente...
+            </p>
+            <div class="mt-3">
+                <div class="spinner-border text-warning" role="status" style="width: 35px; height: 35px;">
+                    <span class="visually-hidden">A carregar...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONTROLES DO VIDEOJOGO ===== -->
+    <div class="controls-hint" id="controlsHint">
+        <span><span class="key">W</span> Andar</span>
+        <span><span class="key">S</span> Trás</span>
+        <span><span class="key">A</span> Esquerda</span>
+        <span><span class="key">D</span> Direita</span>
+        <span><span class="key">E</span> Interagir</span>
+        <span><span class="key">Shift</span> Correr</span>
+        <span><i class="bi bi-mouse"></i> Olhar</span>
+    </div>
+
+    <!-- ===== CONTEÚDO PRINCIPAL ===== -->
+    <div class="container-fluid py-2">
+
+        <!-- ===== CABEÇALHO ===== -->
+        <div class="cinematic-header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="guide-avatar-3d" id="guideAvatar" title="Guia Virtual">🧭</div>
+                        <div>
+                            <div class="logo">🌍 Malanje Virtual Experience</div>
+                            <div class="subtitle">Digital Twin · Província de Malanje</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                        <div class="guide-status"><span class="dot"></span> Guia Online</div>
+                        <div class="user-location-badge">
+                            <i class="bi bi-geo-alt"></i>
+                            <span id="locationText">A localizar...</span>
+                        </div>
+                        <button class="btn btn-glow btn-sm" id="btnStartJourney">
+                            <i class="bi bi-play-fill"></i> Iniciar
+                        </button>
+                        <button class="btn btn-outline-glow btn-sm" id="btnAvatarConfig">
+                            <i class="bi bi-person-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== STATS + JORNADA ===== -->
+        <div class="row mb-2">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="journey-indicator" id="journeyIndicator">
+                        <div class="journey-step active" data-step="0">🏠</div>
+                        <div class="journey-step" data-step="1">📋</div>
+                        <div class="journey-step" data-step="2">✈️</div>
+                        <div class="journey-step" data-step="3">🚗</div>
+                        <div class="journey-step" data-step="4">🗺️</div>
+                        <div class="journey-step" data-step="5">🏁</div>
+                    </div>
+                    <div class="stats-bar">
+                        <span class="stat-item"><i class="bi bi-signpost"></i> <span id="statKm">0</span> km</span>
+                        <span class="stat-item"><i class="bi bi-pin"></i> <span id="statPlaces">0</span> locais</span>
+                        <span class="stat-item"><i class="bi bi-camera"></i> <span id="statPhotos">0</span> fotos</span>
+                        <span class="stat-item"><i class="bi bi-star"></i> Nível <span id="statLevel">1</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CONTEÚDO ===== -->
+        <div class="row g-3">
+
+            <!-- COLUNA ESQUERDA: CHAT -->
+            <div class="col-lg-5">
+                <div class="glass-card p-3 h-100">
+
+                    <!-- Avatar do Turista -->
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div id="touristAvatarDisplay" style="width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #60a5fa, #2563eb);display:flex;align-items:center;justify-content:center;font-size:1.6rem;border:2px solid rgba(255,255,255,0.15);">🧑</div>
+                        <div>
+                            <h6 class="mb-0" id="touristNameDisplay">Viajante</h6>
+                            <small class="text-muted" id="touristStatus">● A explorar</small>
+                        </div>
+                        <div class="ms-auto">
+                            <span class="badge" style="background:rgba(246,211,101,0.1);color:#f6d365;font-size:0.7rem;">
+                                <i class="bi bi-star-fill"></i> Nível 1
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="mb-0"><i class="bi bi-chat-dots text-warning"></i> Guia Virtual</h6>
+                        <small class="text-muted" id="chatStatus">● Conectado</small>
+                    </div>
+
+                    <div class="guide-chat" id="guideChat">
+                        <div class="message guide">
+                            <div class="avatar">🧭</div>
+                            <div class="bubble">
+                                Olá, viajante! Sou o seu Guia de Malanje.
+                                <br /><small class="text-muted">Use as teclas WASD para se mover.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <div class="d-flex gap-2">
+                            <input type="text" class="chat-input" id="chatInput" placeholder="Fale com o guia..." />
+                            <button class="btn btn-glow" id="btnSendMessage" style="padding:6px 16px;">
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2 d-flex gap-2 flex-wrap">
+                            <button class="btn btn-sm btn-outline-glow suggestion-btn" data-msg="O que visitar em Malanje?">
+                                <i class="bi bi-compass"></i> O que visitar?
+                            </button>
+                            <button class="btn btn-sm btn-outline-glow suggestion-btn" data-msg="Conte-me sobre as Quedas de Kalandula">
+                                <i class="bi bi-water"></i> Kalandula
+                            </button>
+                            <button class="btn btn-sm btn-outline-glow suggestion-btn" data-msg="Onde fica a Palanca Negra?">
+                                <i class="bi bi-tree"></i> Palanca
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Personagens NPCs -->
+                    <div class="mt-2">
+                        <small class="text-muted"><i class="bi bi-people"></i> Personagens próximos:</small>
+                        <div class="d-flex gap-2 flex-wrap mt-1">
+                            <span class="badge" style="background:rgba(246,211,101,0.08);color:rgba(255,255,255,0.6);font-weight:400;">🧑‍🌾 Artesão</span>
+                            <span class="badge" style="background:rgba(246,211,101,0.08);color:rgba(255,255,255,0.6);font-weight:400;">👨‍🌾 Agricultor</span>
+                            <span class="badge" style="background:rgba(246,211,101,0.08);color:rgba(255,255,255,0.6);font-weight:400;">📜 Historiador</span>
+                            <span class="badge" style="background:rgba(246,211,101,0.08);color:rgba(255,255,255,0.6);font-weight:400;">🌿 Guarda</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- COLUNA DIREITA: MAPA + DESTINOS -->
+            <div class="col-lg-7">
+
+                <!-- MAPA -->
+                <div class="glass-card p-2 mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="mb-0"><i class="bi bi-map text-warning"></i> Mapa Interativo</h6>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-outline-glow" id="btnRecenter"><i class="bi bi-crosshair"></i></button>
+                            <button class="btn btn-sm btn-outline-glow" id="btnRoute"><i class="bi bi-arrow-right-circle"></i></button>
+                            <button class="btn btn-sm btn-outline-glow" id="btnFollowMe"><i class="bi bi-person-walking"></i></button>
+                            <button class="btn btn-sm btn-outline-glow" id="btnToggleCamera"><i class="bi bi-eye"></i></button>
+                        </div>
+                    </div>
+                    <div id="map"></div>
+                    <div class="mt-1 small text-muted" style="font-size:0.65rem;">
+                        <i class="bi bi-info-circle"></i> Clique nos marcadores ou use WASD para se mover
+                    </div>
+                </div>
+
+                <!-- DESTINOS -->
+                <div class="row g-1">
+                    <div class="col-3">
+                        <div class="destination-card glass-card p-0" data-dest="kalandula">
+                            <img src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=300&h=160&fit=crop" alt="Kalandula" />
+                            <div class="card-img-overlay"><small class="fw-bold">🌊 Kalandula</small></div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="destination-card glass-card p-0" data-dest="pungo">
+                            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=300&h=160&fit=crop" alt="Pungo" />
+                            <div class="card-img-overlay"><small class="fw-bold">⛰️ Pungo</small></div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="destination-card glass-card p-0" data-dest="cangandala">
+                            <img src="https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=300&h=160&fit=crop" alt="Cangandala" />
+                            <div class="card-img-overlay"><small class="fw-bold">🦒 Cangandala</small></div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="destination-card glass-card p-0" data-dest="carumbo">
+                            <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=300&h=160&fit=crop" alt="Carumbo" />
+                            <div class="card-img-overlay"><small class="fw-bold">🏞️ Carumbo</small></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ===== RODAPÉ ===== -->
+        <div class="row mt-3">
+            <div class="col-12 text-center">
+                <hr style="border-color: rgba(255,255,255,0.03);" />
+                <small class="text-muted" style="font-size:0.7rem;">
+                    <i class="bi bi-pin-map"></i> Malanje Virtual Experience 3D ·
+                    <span id="footerLocation">GPS: -9.5, 16.5</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL AVATAR ===== -->
+    <div class="modal fade avatar-modal" id="avatarModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">🧑‍🎨 Criar o seu Avatar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted" style="font-size:0.85rem;">Personalize o seu personagem para a viagem virtual.</p>
+
+                    <label class="fw-bold small text-muted">Género</label>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <div class="avatar-option gender-option selected" data-gender="male">
+                                <div class="preview" style="background:rgba(96,165,250,0.15);">👨</div>
+                                <small>Homem</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="avatar-option gender-option" data-gender="female">
+                                <div class="preview" style="background:rgba(244,114,182,0.15);">👩</div>
+                                <small>Mulher</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="fw-bold small text-muted">Estilo</label>
+                    <div class="row g-2 mb-2">
+                        <div class="col-4">
+                            <div class="avatar-option style-option selected" data-style="explorer">
+                                <div class="preview">🎒</div>
+                                <small style="font-size:0.65rem;">Explorador</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="avatar-option style-option" data-style="adventurer">
+                                <div class="preview">🧗</div>
+                                <small style="font-size:0.65rem;">Aventureiro</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="avatar-option style-option" data-style="photographer">
+                                <div class="preview">📸</div>
+                                <small style="font-size:0.65rem;">Fotógrafo</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="fw-bold small text-muted">Nome do Viajante</label>
+                        <input type="text" class="form-control" id="touristNameInput" value="Viajante" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);color:#fff;font-size:0.9rem;" />
+                    </div>
+
+                    <button class="btn btn-glow w-100" id="btnSaveAvatar">
+                        <i class="bi bi-check-lg"></i> Iniciar Viagem
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ============================================================
+            // 1. AVATAR
+            // ============================================================
+            const avatarModal = new bootstrap.Modal(document.getElementById('avatarModal'), { backdrop: 'static' });
+            let userGender = 'male',
+                userStyle = 'explorer',
+                userName = 'Viajante';
+
+            document.querySelectorAll('.gender-option').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('.gender-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    userGender = this.dataset.gender;
+                });
+            });
+            document.querySelectorAll('.style-option').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('.style-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    userStyle = this.dataset.style;
+                });
+            });
+
+            document.getElementById('btnSaveAvatar').addEventListener('click', function() {
+                userName = document.getElementById('touristNameInput').value || 'Viajante';
+                updateTouristAvatar();
+                avatarModal.hide();
+                document.getElementById('controlsHint').classList.add('active');
+                setTimeout(() => {
+                    addGuideMessage(`Olá, ${userName}! Use WASD para explorar. 🎮`, 'guide');
+                    addGuideMessage('Pressione E para interagir com personagens e objetos.', 'guide');
+                }, 600);
+                setTimeout(() => showCinematic(), 1800);
+            });
+
+            function updateTouristAvatar() {
+                const emoji = userGender === 'male' ? '👨' : '👩';
+                const styleEmojis = { explorer: '🎒', adventurer: '🧗', photographer: '📸' };
+                document.getElementById('touristAvatarDisplay').textContent = emoji;
+                document.getElementById('touristNameDisplay').textContent = userName;
+                if (touristMarker) {
+                    const iconHtml = `<div class="tourist-avatar-marker">${emoji}</div>`;
+                    touristMarker.setIcon(L.divIcon({
+                        className: 'tourist-marker-icon',
+                        html: iconHtml,
+                        iconSize: [28, 28],
+                        iconAnchor: [14, 14]
+                    }));
+                }
+            }
+
+            // ============================================================
+            // 2. MAPA
+            // ============================================================
+            const map = L.map('map').setView([-9.5, 16.5], 8);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 18
+            }).addTo(map);
+
+            const destinations = [
+                { name: 'Quedas de Kalandula', lat: -9.075, lng: 16.007, icon: '🌊',
+                info: 'Queda de 105m, uma das maiores de África.' },
+                { name: 'Pedras Negras de Pungo Andongo', lat: -9.691, lng: 15.578, icon: '⛰️',
+                    info: 'Formações rochosas com significado histórico.' },
+                { name: 'Parque Nacional da Cangandala', lat: -9.787, lng: 16.475, icon: '🦒',
+                    info: 'Habitat da Palanca Negra Gigante.' },
+                { name: 'Lagoa do Carumbo', lat: -8.398, lng: 17.383, icon: '🏞️',
+                    info: 'Lagoa com rica biodiversidade.' }
+            ];
+
+            const destIcon = L.divIcon({
+                className: 'dest-icon',
+                html: '<div style="background:rgba(246,211,101,0.85);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:1rem;border:2px solid #fff;box-shadow:0 4px 15px rgba(0,0,0,0.3);">📍</div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            destinations.forEach(d => {
+                L.marker([d.lat, d.lng], { icon: destIcon })
+                    .addTo(map)
+                    .bindPopup(`
+                            <div style="font-size:0.85rem;">
+                                <h6>${d.icon} ${d.name}</h6>
+                                <p style="font-size:0.75rem;">${d.info}</p>
+                                <button class="btn btn-sm btn-warning visit-dest" data-lat="${d.lat}" data-lng="${d.lng}" data-name="${d.name}">
+                                    <i class="bi bi-play-fill"></i> Visitar
+                                </button>
+                            </div>
+                        `);
+            });
+
+            // ============================================================
+            // 3. GPS + MOVIMENTO (WASD)
+            // ============================================================
+            let touristLat = -9.5,
+                touristLng = 16.5;
+            let touristMarker = null;
+            let routeLine = null;
+            let cameraMode = 'third'; // 'third' | 'first'
+
+            // Estado do movimento
+            const keys = { w: false, a: false, s: false, d: false, shift: false };
+            let moveInterval = null;
+            const MOVE_SPEED = 0.003;
+            const RUN_SPEED = 0.006;
+
+            function initTouristMarker() {
+                const emoji = userGender === 'male' ? '👨' : '👩';
+                const iconHtml = `<div class="tourist-avatar-marker">${emoji}</div>`;
+                const icon = L.divIcon({
+                    className: 'tourist-marker-icon',
+                    html: iconHtml,
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14]
+                });
+                touristMarker = L.marker([touristLat, touristLng], { icon }).addTo(map);
+                L.circle([touristLat, touristLng], {
+                    radius: 500,
+                    color: '#60a5fa',
+                    fillColor: '#60a5fa',
+                    fillOpacity: 0.04,
+                    weight: 1,
+                    dashArray: '4,4'
+                }).addTo(map);
+                updateLocationDisplay();
+            }
+
+            function updateLocationDisplay() {
+                document.getElementById('locationText').textContent =
+                    `${touristLat.toFixed(4)}, ${touristLng.toFixed(4)}`;
+                document.getElementById('footerLocation').textContent =
+                    `📍 ${touristLat.toFixed(4)}, ${touristLng.toFixed(4)}`;
+                // Atualizar km percorridos (simulado)
+                const km = Math.floor(Math.random() * 50 + 10);
+                document.getElementById('statKm').textContent = km;
+                const places = Math.floor(Math.random() * 5 + 1);
+                document.getElementById('statPlaces').textContent = places;
+            }
+
+            function moveTourist(dx, dy) {
+                const speed = keys.shift ? RUN_SPEED : MOVE_SPEED;
+                touristLat += dx * speed;
+                touristLng += dy * speed;
+                if (touristMarker) {
+                    touristMarker.setLatLng([touristLat, touristLng]);
+                }
+                updateLocationDisplay();
+                // Atualizar visão do mapa baseado no modo
+                if (cameraMode === 'third') {
+                    map.setView([touristLat, touristLng], 13);
+                } else {
+                    map.setView([touristLat, touristLng], 15);
+                }
+                // Verificar proximidade com destinos
+                checkProximity();
+            }
+
+            function checkProximity() {
+                destinations.forEach(d => {
+                    const dist = Math.sqrt(
+                        Math.pow(touristLat - d.lat, 2) +
+                        Math.pow(touristLng - d.lng, 2)
+                    );
+                    if (dist < 0.02) {
+                        // Está perto de um destino
+                        document.getElementById('chatStatus').textContent = `● Visitando ${d.name}`;
+                        addGuideMessage(`📍 Está perto de ${d.name}! Pressione E para explorar.`, 'guide');
+                    }
+                });
+            }
+
+            // Controles WASD
+            document.addEventListener('keydown', function(e) {
+                const key = e.key.toLowerCase();
+                if (['w', 'a', 's', 'd', 'shift'].includes(key) || key === 'e') {
+                    e.preventDefault();
+                }
+                if (key === 'w') keys.w = true;
+                if (key === 'a') keys.a = true;
+                if (key === 's') keys.s = true;
+                if (key === 'd') keys.d = true;
+                if (key === 'shift') keys.shift = true;
+                if (key === 'e') handleInteract();
+
+                if (keys.w || keys.a || keys.s || keys.d) {
+                    if (!moveInterval) {
+                        moveInterval = setInterval(() => {
+                            let dx = 0,
+                                dy = 0;
+                            if (keys.w) dy = -1;
+                            if (keys.s) dy = 1;
+                            if (keys.a) dx = -1;
+                            if (keys.d) dx = 1;
+                            if (dx !== 0 || dy !== 0) {
+                                // Normalizar
+                                const len = Math.sqrt(dx * dx + dy * dy);
+                                dx /= len;
+                                dy /= len;
+                                moveTourist(dx, dy);
+                            }
+                        }, 50);
+                    }
+                }
+            });
+
+            document.addEventListener('keyup', function(e) {
+                const key = e.key.toLowerCase();
+                if (key === 'w') keys.w = false;
+                if (key === 'a') keys.a = false;
+                if (key === 's') keys.s = false;
+                if (key === 'd') keys.d = false;
+                if (key === 'shift') keys.shift = false;
+
+                if (!keys.w && !keys.a && !keys.s && !keys.d) {
+                    if (moveInterval) {
+                        clearInterval(moveInterval);
+                        moveInterval = null;
+                    }
+                }
+            });
+
+            // Interagir (E)
+            function handleInteract() {
+                let found = false;
+                destinations.forEach(d => {
+                    const dist = Math.sqrt(
+                        Math.pow(touristLat - d.lat, 2) +
+                        Math.pow(touristLng - d.lng, 2)
+                    );
+                    if (dist < 0.025) {
+                        found = true;
+                        addGuideMessage(`📖 Explorando ${d.name}: ${d.info}`, 'guide');
+                        // Simular interação com NPC
+                        const npcs = ['🧑‍🌾 Artesão', '👨‍🌾 Agricultor', '📜 Historiador', '🌿 Guarda'];
+                        const npc = npcs[Math.floor(Math.random() * npcs.length)];
+                        addGuideMessage(`💬 ${npc} diz: "Bem-vindo! Conheça mais sobre ${d.name}."`, 'guide');
+                        // Incrementar estatísticas
+                        const photos = parseInt(document.getElementById('statPhotos').textContent) + 1;
+                        document.getElementById('statPhotos').textContent = photos;
+                        const level = Math.floor(photos / 3) + 1;
+                        document.getElementById('statLevel').textContent = level;
+                    }
+                });
+                if (!found) {
+                    addGuideMessage('🔍 Não há nada para interagir aqui. Explore mais!', 'guide');
+                }
+            }
+
+            // ============================================================
+            // 4. GPS REAL
+            // ============================================================
+            function startRealGPS() {
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(pos) {
+                            touristLat = pos.coords.latitude;
+                            touristLng = pos.coords.longitude;
+                            if (touristMarker) {
+                                touristMarker.setLatLng([touristLat, touristLng]);
+                            }
+                            map.setView([touristLat, touristLng], 13);
+                            updateLocationDisplay();
+                            addGuideMessage('📍 GPS ativado! A usar localização real.', 'guide');
+                        },
+                        function() {
+                            addGuideMessage('🌐 A usar localização simulada.', 'guide');
+                        }, { enableHighAccuracy: true }
+                    );
+                }
+            }
+
+            // ============================================================
+            // 5. CHAT
+            // ============================================================
+            const chatContainer = document.getElementById('guideChat');
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('btnSendMessage');
+
+            function addGuideMessage(text, type = 'guide') {
+                const div = document.createElement('div');
+                div.className = `message ${type}`;
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar';
+                avatar.textContent = type === 'guide' ? '🧭' : '👤';
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.innerHTML = text;
+                div.appendChild(avatar);
+                div.appendChild(bubble);
+                chatContainer.appendChild(div);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                // Limitar mensagens
+                while (chatContainer.children.length > 30) {
+                    chatContainer.removeChild(chatContainer.firstChild);
+                }
+            }
+
+            function addTyping() {
+                const div = document.createElement('div');
+                div.className = 'message guide';
+                div.id = 'typingIndicator';
+                div.innerHTML = `
+                        <div class="avatar">🧭</div>
+                        <div class="bubble">
+                            <div class="typing-indicator"><span></span><span></span><span></span></div>
+                        </div>
+                    `;
+                chatContainer.appendChild(div);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            function removeTyping() {
+                const el = document.getElementById('typingIndicator');
+                if (el) el.remove();
+            }
+
+            function getGuideResponse(msg) {
+                const m = msg.toLowerCase();
+                if (m.includes('olá') || m.includes('oi')) return `Olá, ${userName}! Use WASD para explorar. 🌟`;
+                if (m.includes('kalandula') || m.includes('queda')) return 'Quedas de Kalandula: 105m de altura! 🌊';
+                if (m.includes('pungo') || m.includes('pedras')) return 'Pedras Negras: segredos do Reino de Ndongo. ⛰️';
+                if (m.includes('palanca') || m.includes('cangandala')) return 'Palanca Negra: símbolo de Angola! 🦒';
+                if (m.includes('carumbo') || m.includes('lagoa')) return 'Lagoa do Carumbo: paraíso escondido. 🏞️';
+                if (m.includes('comida') || m.includes('gastronomia')) return 'Prove o Muamba de Galinha! 🍲';
+                if (m.includes('história')) return 'Malanje: história rica desde o Reino de Ndongo. 📜';
+                if (m.includes('obrigado') || m.includes('valeu')) return 'Continue explorando! 😊';
+                if (m.includes('adeus') || m.includes('tchau')) return 'Até breve, ${userName}! 👋';
+                return `Que interessante! Pressione E para interagir com personagens. 🌟`;
+            }
+
+            function handleUserMessage() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                addGuideMessage(text, 'user');
+                chatInput.value = '';
+                addTyping();
+                setTimeout(() => {
+                    removeTyping();
+                    const response = getGuideResponse(text);
+                    addGuideMessage(response, 'guide');
+                    updateJourneyStep(text);
+                }, 600 + Math.random() * 600);
+            }
+
+            sendBtn.addEventListener('click', handleUserMessage);
+            chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleUserMessage(); });
+
+            document.querySelectorAll('.suggestion-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    chatInput.value = this.dataset.msg;
+                    handleUserMessage();
+                });
+            });
+
+            // ============================================================
+            // 6. JORNADA
+            // ============================================================
+            let currentStep = 0;
+
+            function updateJourneyStep(msg) {
+                const m = msg.toLowerCase();
+                const steps = document.querySelectorAll('.journey-step');
+                if (m.includes('plane') || m.includes('hotel')) currentStep = Math.max(currentStep, 1);
+                if (m.includes('kalandula') || m.includes('queda')) currentStep = Math.max(currentStep, 2);
+                if (m.includes('cheg') || m.includes('aqui')) currentStep = Math.max(currentStep, 3);
+                if (m.includes('explor') || m.includes('visitar')) currentStep = Math.max(currentStep, 4);
+                if (m.includes('adeus') || m.includes('fim')) currentStep = Math.max(currentStep, 5);
+                steps.forEach((el, i) => {
+                    el.classList.remove('active', 'completed');
+                    if (i < currentStep) el.classList.add('completed');
+                    if (i === currentStep) el.classList.add('active');
+                });
+            }
+
+            // ============================================================
+            // 7. CINEMÁTICA
+            // ============================================================
+            function showCinematic() {
+                const overlay = document.getElementById('cinematicArrival');
+                overlay.classList.add('active');
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 12;
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            overlay.classList.remove('active');
+                            addGuideMessage('✈️ Chegámos a Malanje! Explore usando WASD.', 'guide');
+                            moveTouristTo(-9.5, 16.5, () => {
+                                addGuideMessage('📍 No coração de Malanje. O que deseja ver?', 'guide');
+                            });
+                        }, 1000);
+                    }
+                }, 180);
+            }
+
+            function moveTouristTo(lat, lng, callback) {
+                const steps = 15;
+                const latStep = (lat - touristLat) / steps;
+                const lngStep = (lng - touristLng) / steps;
+                let step = 0;
+                const interval = setInterval(() => {
+                    step++;
+                    touristLat += latStep;
+                    touristLng += lngStep;
+                    if (touristMarker) touristMarker.setLatLng([touristLat, touristLng]);
+                    updateLocationDisplay();
+                    if (step >= steps) {
+                        clearInterval(interval);
+                        touristLat = lat;
+                        touristLng = lng;
+                        if (touristMarker) touristMarker.setLatLng([touristLat, touristLng]);
+                        updateLocationDisplay();
+                        if (callback) callback();
+                    }
+                }, 80);
+            }
+
+            // ============================================================
+            // 8. DESTINOS
+            // ============================================================
+            document.querySelectorAll('.destination-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const dest = this.dataset.dest;
+                    const d = destinations.find(dd => dd.name.toLowerCase().includes(dest));
+                    if (d) {
+                        addGuideMessage(`🚀 A caminho de ${d.name}...`, 'guide');
+                        map.setView([d.lat, d.lng], 12);
+                        moveTouristTo(d.lat, d.lng, () => {
+                            addGuideMessage(`📍 Chegámos a ${d.name}! ${d.icon}`, 'guide');
+                            addGuideMessage(d.info, 'guide');
+                            document.getElementById('statPlaces').textContent =
+                                parseInt(document.getElementById('statPlaces').textContent) + 1;
+                        });
+                    }
+                });
+            });
+
+            // ============================================================
+            // 9. CONTROLES
+            // ============================================================
+            document.getElementById('btnRecenter').addEventListener('click', function() {
+                map.setView([touristLat, touristLng], 12);
+                addGuideMessage('📍 A centralizar na sua posição.', 'guide');
+            });
+
+            document.getElementById('btnRoute').addEventListener('click', function() {
+                if (routeLine) { map.removeLayer(routeLine);
+                    routeLine = null; }
+                const dest = destinations[0];
+                const points = [
+                    [touristLat, touristLng],
+                    [dest.lat, dest.lng]
+                ];
+                routeLine = L.polyline(points, {
+                    color: '#f6d365',
+                    weight: 3,
+                    opacity: 0.7,
+                    dashArray: '10,6'
+                }).addTo(map);
+                map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+                addGuideMessage('🗺️ Rota para as Quedas de Kalandula!', 'guide');
+            });
+
+            document.getElementById('btnFollowMe').addEventListener('click', function() {
+                map.setView([touristLat, touristLng], 14);
+                addGuideMessage('👣 A seguir os seus passos.', 'guide');
+            });
+
+            document.getElementById('btnToggleCamera').addEventListener('click', function() {
+                cameraMode = cameraMode === 'third' ? 'first' : 'third';
+                map.setView([touristLat, touristLng], cameraMode === 'third' ? 13 : 16);
+                addGuideMessage(`📷 Modo ${cameraMode === 'third' ? 'Terceira Pessoa' : 'Primeira Pessoa'}`, 'guide');
+            });
+
+            // ============================================================
+            // 10. CLICK NOS POPUPS
+            // ============================================================
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('visit-dest')) {
+                    const lat = parseFloat(e.target.dataset.lat);
+                    const lng = parseFloat(e.target.dataset.lng);
+                    const name = e.target.dataset.name;
+                    addGuideMessage(`🎯 A visitar ${name}...`, 'guide');
+                    moveTouristTo(lat, lng, () => {
+                        addGuideMessage(`📍 Chegámos a ${name}!`, 'guide');
+                    });
+                    map.setView([lat, lng], 13);
+                }
+            });
+
+            // ============================================================
+            // 11. INICIALIZAÇÃO
+            // ============================================================
+            avatarModal.show();
+            initTouristMarker();
+            startRealGPS();
+
+            document.getElementById('btnStartJourney').addEventListener('click', function() {
+                addGuideMessage('🚀 A iniciar a aventura por Malanje!', 'guide');
+                addGuideMessage('Use WASD para andar. Pressione E para interagir.', 'guide');
+                showCinematic();
+                document.getElementById('controlsHint').classList.add('active');
+            });
+
+            document.getElementById('btnAvatarConfig').addEventListener('click', function() {
+                avatarModal.show();
+            });
+
+            console.log('🌍 Malanje Virtual Experience 3D - Digital Twin');
+            console.log(`👤 Viajante: ${userName} | Modo: ${cameraMode}`);
+            console.log('🎮 Controles: WASD (andar) | Shift (correr) | E (interagir)');
+        });
+    </script>
+</body>
+</html>

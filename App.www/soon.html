@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processamento - Guias Turísticos</title>
+    <!-- Font Awesome para os ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('images/guias.png') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Container principal */
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Overlay de processamento - VERSÃO TRANSPARENTE E SUTIL */
+        .processing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3); /* Fundo semi-transparente suave */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(2px); /* Desfoque muito sutil */
+        }
+
+        /* Caixa de processamento - DESIGN DISCRETO E TRANSPARENTE */
+        .processing-box {
+            background: rgba(255, 255, 255, 0.95); /* Branco quase transparente */
+            backdrop-filter: blur(10px);
+            padding: 25px 35px;
+            border-radius: 60px; /* Mais arredondado, moderno e discreto */
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); /* Sombra suave */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeInScale 0.3s ease-out;
+            min-width: 200px;
+        }
+
+        /* Animação mais sutil */
+        @keyframes fadeInScale {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Spinner circular minimalista */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            position: relative;
+            display: inline-block;
+        }
+
+        .spinner:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-top: 2px solid #667eea;
+            border-right: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Título - mais discreto */
+        .processing-title {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 500;
+            margin-left: 15px;
+            display: inline-block;
+            vertical-align: middle;
+            letter-spacing: 0.5px;
+        }
+
+        /* Layout em linha para tornar mais compacto */
+        .processing-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        /* Texto adicional opcional - bem sutil */
+        .processing-text {
+            color: rgba(102, 126, 234, 0.6);
+            font-size: 12px;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .processing-box {
+                padding: 18px 25px;
+            }
+            
+            .processing-title {
+                font-size: 16px;
+            }
+            
+            .spinner {
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        /* Efeito hover suave na caixa */
+        .processing-box:hover {
+            background: rgba(255, 255, 255, 0.98);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Container vazio - sem botão -->
+    </div>
+
+    <!-- Overlay de processamento - Versão transparente -->
+    <div id="processingOverlay" class="processing-overlay">
+        <div class="processing-box">
+            <div class="processing-content">
+                <div class="spinner"></div>
+                <div class="processing-title">BREVEMENTE</div>
+            </div>
+            <div class="processing-text">Aguarde um momento...</div>
+        </div>
+    </div>
+
+    <script>
+        // Aguarda o DOM carregar completamente
+        document.addEventListener('DOMContentLoaded', function() {
+            // Seleciona o overlay
+            const processingOverlay = document.getElementById('processingOverlay');
+            
+            // Variável para controlar o timeout
+            let timeoutId = null;
+            
+            // Função para esconder o processamento
+            function esconderProcessamento() {
+                processingOverlay.style.display = 'none';
+                
+                // Limpa o timeout se existir
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                    timeoutId = null;
+                }
+            }
+            
+            // Inicia o processamento automaticamente ao carregar a página
+            // Configura o timeout para esconder após 5 segundos
+            timeoutId = setTimeout(function() {
+                esconderProcessamento();
+            }, 5000); // 5000 milissegundos = 5 segundos
+            
+            // Opcional: Fechar o overlay se clicar fora da caixa de processamento
+            processingOverlay.addEventListener('click', function(e) {
+                // Se clicou no overlay (fundo) e não na caixa de processamento
+                if (e.target === processingOverlay) {
+                    esconderProcessamento();
+                }
+            });
+            
+            // Previne que o overlay feche ao clicar dentro da caixa
+            const processingBox = document.querySelector('.processing-box');
+            if (processingBox) {
+                processingBox.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Evita que o clique propague para o overlay
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,3025 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Turístico - Malanje</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* ============================================================
+                   ESTILO GERAL - GLASSMORPHISM
+                   ============================================================ */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-image: url('images/mapa-tur.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.40);
+            z-index: 0;
+            transition: all 0.3s ease;
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================================
+                   TEMA CLARO
+                   ============================================================ */
+        body.light-theme::before {
+            background: rgba(255, 255, 255, 0.88);
+        }
+
+        body.light-theme .page-title,
+        body.light-theme .page-title .badge,
+        body.light-theme .info-card .card-title,
+        body.light-theme .nav-tabs .nav-link,
+        body.light-theme .filter-section h6,
+        body.light-theme .activity-table th,
+        body.light-theme .activity-table td,
+        body.light-theme .modal-content,
+        body.light-theme .modal .form-label,
+        body.light-theme .attraction-card .attraction-name,
+        body.light-theme .attraction-card .attraction-desc,
+        body.light-theme .legend-text,
+        body.light-theme .tab-content,
+        body.light-theme .chart-container h6 {
+            color: #1a1a2e !important;
+        }
+
+        body.light-theme .nav-tabs .nav-link {
+            background: rgba(255, 255, 255, 0.5);
+            color: #1a1a2e !important;
+        }
+
+        body.light-theme .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.8);
+            color: #0d6efd !important;
+        }
+
+        body.light-theme .tab-content,
+        body.light-theme .info-card,
+        body.light-theme .filter-section,
+        body.light-theme .chart-container,
+        body.light-theme .activity-table,
+        body.light-theme .attraction-card,
+        body.light-theme .map-container,
+        body.light-theme .modal-content {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(15px);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .filter-section .form-control,
+        body.light-theme .filter-section .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-theme .filter-section .form-control::placeholder {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-theme #currentDateTime {
+            background: rgba(255, 255, 255, 0.8);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .quick-actions .btn-outline-secondary {
+            background: rgba(108, 117, 125, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .quick-actions .btn-outline-dark {
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-theme .page-title .badge {
+            background: rgba(13, 110, 253, 0.15) !important;
+            color: #0d6efd !important;
+        }
+
+        body.light-theme .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .dashboard-btn {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .attraction-card .badge {
+            background: rgba(0, 0, 0, 0.1) !important;
+            color: #1a1a2e !important;
+        }
+
+        /* ============================================================
+                   DROPDOWN DE IDIOMA
+                   ============================================================ */
+        .language-dropdown .dropdown-toggle {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .language-dropdown .dropdown-toggle:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .language-dropdown .dropdown-menu {
+            background: rgba(30, 30, 50, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 12px;
+            padding: 8px 0;
+            min-width: 180px;
+        }
+
+        .language-dropdown .dropdown-item {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 10px 20px;
+            font-family: 'Times New Roman', Times, serif;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .language-dropdown .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.10);
+            color: #fff;
+        }
+
+        .language-dropdown .dropdown-item.active {
+            background: rgba(13, 110, 253, 0.25);
+            color: #fff;
+        }
+
+        .language-dropdown .dropdown-item .flag-icon {
+            font-size: 1.2rem;
+        }
+
+        body.light-theme .language-dropdown .dropdown-toggle {
+            background: rgba(255, 255, 255, 0.6);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .language-dropdown .dropdown-toggle:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        body.light-theme .language-dropdown .dropdown-menu {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .language-dropdown .dropdown-item {
+            color: #1a1a2e;
+        }
+
+        body.light-theme .language-dropdown .dropdown-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-theme .language-dropdown .dropdown-item.active {
+            background: rgba(13, 110, 253, 0.15);
+        }
+
+        /* ============================================================
+                   MAPA - ESTILO PRINCIPAL
+                   ============================================================ */
+        .map-container {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            height: 550px;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .leaflet-control-zoom a {
+            background: rgba(255, 255, 255, 0.15) !important;
+            backdrop-filter: blur(8px) !important;
+            color: #fff !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: rgba(30, 30, 50, 0.95) !important;
+            backdrop-filter: blur(15px) !important;
+            border-radius: 12px !important;
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            min-width: 280px;
+            max-width: 320px;
+        }
+
+        .leaflet-popup-tip {
+            background: rgba(30, 30, 50, 0.95) !important;
+        }
+
+        .leaflet-popup-content {
+            color: #fff !important;
+            font-family: 'Times New Roman', Times, serif;
+            padding: 8px 0 !important;
+        }
+
+        body.light-theme .leaflet-popup-content-wrapper {
+            background: rgba(255, 255, 255, 0.95) !important;
+            color: #1a1a2e !important;
+        }
+
+        body.light-theme .leaflet-popup-tip {
+            background: rgba(255, 255, 255, 0.95) !important;
+        }
+
+        body.light-theme .leaflet-popup-content {
+            color: #1a1a2e !important;
+        }
+
+        .popup-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        /* ============================================================
+                   LISTA DE ATRAÇÕES COM IMAGENS
+                   ============================================================ */
+        .attraction-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+            cursor: pointer;
+            display: flex;
+            gap: 15px;
+            overflow: hidden;
+        }
+
+        .attraction-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.10);
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .attraction-card .attraction-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .attraction-card .attraction-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .attraction-card .attraction-name {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.05rem;
+        }
+
+        .attraction-card .attraction-desc {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .attraction-card .attraction-rating {
+            color: #ffc107;
+            font-size: 0.85rem;
+        }
+
+        .attraction-card .badge {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: normal;
+        }
+
+        .attraction-card .attraction-distance {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        /* ============================================================
+                   NAVEGAÇÃO - TABS
+                   ============================================================ */
+        .nav-tabs .nav-link {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 17px;
+            color: #fff;
+            border: none;
+            padding: 12px 22px;
+            margin-right: 5px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(15px);
+            color: #fff;
+            border-bottom: 3px solid #0d6efd;
+            font-weight: bold;
+            box-shadow: 0 -2px 20px rgba(13, 110, 253, 0.25);
+        }
+
+        .tab-content {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(15px);
+            border-radius: 0 8px 8px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        /* ============================================================
+                   FILTROS
+                   ============================================================ */
+        .filter-section {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            transition: all 0.3s ease;
+        }
+
+        .filter-section h6 {
+            color: #fff;
+        }
+
+        .filter-section .form-control,
+        .filter-section .form-select {
+            font-family: 'Times New Roman', Times, serif;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff;
+        }
+
+        .filter-section .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .filter-section .form-control:focus,
+        .filter-section .form-select:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(13, 110, 253, 0.4);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.10);
+            color: #fff;
+        }
+
+        .filter-section .form-select option {
+            background: #2c3e50;
+            color: #fff;
+        }
+
+        /* ============================================================
+                   INFO CARD
+                   ============================================================ */
+        .info-card {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            transition: all 0.3s ease;
+        }
+
+        .info-card .card-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* ============================================================
+                   CHART CONTAINER
+                   ============================================================ */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .chart-container h6 {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+
+        /* ============================================================
+                   QUICK ACTIONS
+                   ============================================================ */
+        .quick-actions .btn {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 3px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        .quick-actions .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .quick-actions .btn-primary {
+            background: rgba(13, 110, 253, 0.5);
+        }
+        .quick-actions .btn-success {
+            background: rgba(25, 135, 84, 0.5);
+        }
+        .quick-actions .btn-info {
+            background: rgba(13, 202, 240, 0.5);
+        }
+        .quick-actions .btn-warning {
+            background: rgba(255, 193, 7, 0.5);
+        }
+        .quick-actions .btn-danger {
+            background: rgba(220, 53, 69, 0.5);
+        }
+        .quick-actions .btn-outline-secondary {
+            background: rgba(108, 117, 125, 0.20);
+            color: #fff;
+        }
+        .quick-actions .btn-outline-dark {
+            background: rgba(33, 37, 41, 0.20);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ============================================================
+                   HEADER
+                   ============================================================ */
+        .page-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.20);
+        }
+
+        .page-title .bi {
+            animation: bounce 2s infinite;
+        }
+
+        .page-title .badge {
+            background: rgba(13, 110, 253, 0.35);
+            backdrop-filter: blur(5px);
+        }
+
+        @keyframes bounce {
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-8px);
+            }
+            60% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: rotate(30deg);
+        }
+
+        .dashboard-btn {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .dashboard-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        #currentDateTime {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: rgba(13, 110, 253, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-primary:hover {
+            background: rgba(13, 110, 253, 0.7);
+        }
+
+        /* ============================================================
+                   MODAL
+                   ============================================================ */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .modal .btn-close {
+            filter: invert(1);
+        }
+
+        .modal .form-label {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .modal .form-control,
+        .modal .form-select {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .modal .form-control:focus,
+        .modal .form-select:focus {
+            background: rgba(255, 255, 255, 0.10);
+            border-color: rgba(13, 110, 253, 0.4);
+        }
+
+        .modal .form-select option {
+            background: #2c3e50;
+            color: #fff;
+        }
+
+        .modal-detalhe-imagem {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        /* ============================================================
+                   ESTATÍSTICAS
+                   ============================================================ */
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+        }
+
+        body.light-theme .stat-number {
+            color: #1a1a2e;
+        }
+
+        body.light-theme .stat-label {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        /* ============================================================
+                   RESPONSIVIDADE
+                   ============================================================ */
+        @media (max-width: 768px) {
+            .map-container {
+                height: 350px;
+            }
+            .tab-content {
+                padding: 15px;
+            }
+            .page-title {
+                font-size: 1.3rem;
+            }
+            .header-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .nav-tabs .nav-link {
+                font-size: 14px;
+                padding: 10px 14px;
+            }
+            .attraction-card {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .attraction-card .attraction-image {
+                width: 60px;
+                height: 60px;
+            }
+            .attraction-card .attraction-distance {
+                white-space: normal;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+
+        <!-- ============================================================
+        CABEÇALHO
+        ============================================================ -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap header-actions">
+                    <h2 class="page-title">
+                        <i class="bi bi-map text-success"></i>
+                        <span id="pageTitleText">Mapa Turístico - Malanje</span>
+                        <span class="badge bg-success ms-2 pulse-icon">EXPLORE</span>
+                    </h2>
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="#" class="dashboard-btn" id="btnDashboard">
+                            <i class="bi bi-grid-3x3-gap-fill"></i> <span id="dashboardText">Dashboard</span>
+                        </a>
+                        <button class="theme-toggle-btn" id="themeToggle">
+                            <i class="bi bi-moon-stars" id="themeIcon"></i>
+                        </button>
+                        <span class="badge bg-info text-dark" id="currentDateTime">
+                            <i class="bi bi-clock"></i>
+                            <span id="dateTimeDisplay">Carregando...</span>
+                        </span>
+                        
+                        <!-- DROPDOWN DE IDIOMA -->
+                        <div class="language-dropdown dropdown">
+                            <button class="dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-globe2"></i>
+                                <span id="currentLanguage">PT</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                                <li>
+                                    <a class="dropdown-item active" href="#" data-lang="pt" data-flag="🇵🇹">
+                                        <span class="flag-icon">🇵🇹</span> Português
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-lang="en" data-flag="🇬🇧">
+                                        <span class="flag-icon">🇬🇧</span> English
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-lang="es" data-flag="🇪🇸">
+                                        <span class="flag-icon">🇪🇸</span> Español
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-lang="fr" data-flag="🇫🇷">
+                                        <span class="flag-icon">🇫🇷</span> Français
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-lang="zh" data-flag="🇨🇳">
+                                        <span class="flag-icon">🇨🇳</span> 中文
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <button class="btn btn-outline-primary" id="btnExport">
+                            <i class="bi bi-download"></i> <span id="exportText">Exportar</span>
+                        </button>
+                        <div class="input-group" style="width: 220px;">
+                            <input type="text" id="quickSearch" class="form-control" placeholder="Buscar atração...">
+                            <button class="btn btn-outline-primary" type="button" id="btnSearch">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        ESTATÍSTICAS RÁPIDAS
+        ============================================================ -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-6">
+                <div class="info-card text-center fade-in">
+                    <div class="stat-number" id="totalAtracoes">0</div>
+                    <div class="stat-label"><i class="bi bi-pin-map"></i> <span id="statsAttractions">Atrações</span></div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="info-card text-center fade-in">
+                    <div class="stat-number" id="totalCategorias">0</div>
+                    <div class="stat-label"><i class="bi bi-tags"></i> <span id="statsCategories">Categorias</span></div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="info-card text-center fade-in">
+                    <div class="stat-number" id="avaliacaoMedia">0</div>
+                    <div class="stat-label"><i class="bi bi-star-fill text-warning"></i> <span id="statsRating">Avaliação Média</span></div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="info-card text-center fade-in">
+                    <div class="stat-number" id="distanciaMedia">0</div>
+                    <div class="stat-label"><i class="bi bi-pin"></i> <span id="statsDistance">Distância Média (km)</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        TABS - MAPA E LISTA
+        ============================================================ -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="mapa-tab" data-bs-toggle="tab" data-bs-target="#mapa" type="button" role="tab">
+                    <i class="bi bi-map"></i> <span id="tabMap">Mapa Interativo</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="lista-tab" data-bs-toggle="tab" data-bs-target="#lista" type="button" role="tab">
+                    <i class="bi bi-list-ul"></i> <span id="tabList">Lista de Atrações</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="estatisticas-tab" data-bs-toggle="tab" data-bs-target="#estatisticas" type="button" role="tab">
+                    <i class="bi bi-bar-chart"></i> <span id="tabStats">Estatísticas</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="roteiros-tab" data-bs-toggle="tab" data-bs-target="#roteiros" type="button" role="tab">
+                    <i class="bi bi-route"></i> <span id="tabRoutes">Roteiros Sugeridos</span>
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+
+            <!-- ============================================================
+            MAPA INTERATIVO
+            ============================================================ -->
+            <div class="tab-pane fade show active" id="mapa" role="tabpanel">
+
+                <div class="filter-section">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <h6><i class="bi bi-funnel"></i> <span id="filterTitle">Filtros do Mapa</span></h6>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="filtroCategoria" class="form-select">
+                                <option value="todas" id="filterAllCategories">Todas as Categorias</option>
+                                <option value="natureza">🌿 <span id="catNature">Natureza</span></option>
+                                <option value="cultura">🏛️ <span id="catCulture">Cultura</span></option>
+                                <option value="aventura">🧗 <span id="catAdventure">Aventura</span></option>
+                                <option value="hospedagem">🏨 <span id="catLodging">Hospedagem</span></option>
+                                <option value="gastronomia">🍽️ <span id="catGastronomy">Gastronomia</span></option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="filtroAvaliacao" class="form-select">
+                                <option value="0" id="filterAllRatings">Todas as Avaliações</option>
+                                <option value="4">4+ <span id="filterStars">Estrelas</span></option>
+                                <option value="3">3+ <span id="filterStars2">Estrelas</span></option>
+                                <option value="2">2+ <span id="filterStars3">Estrelas</span></option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" id="filtroDistancia" placeholder="Raio (km)">
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-primary w-100" id="btnAplicarFiltros">
+                                <i class="bi bi-check"></i> <span id="applyFiltersBtn">Aplicar Filtros</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="map-container">
+                            <div id="map"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-info-circle"></i> <span id="aboutAttraction">Sobre a Atração</span></h6>
+                            <div id="infoAtracao">
+                                <p style="color: rgba(255,255,255,0.6);" id="clickMarkerMsg">
+                                    Clique em um marcador no mapa para ver os detalhes.
+                                </p>
+                                <div id="infoDetalhes" style="display:none;"></div>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-compass"></i> <span id="legendTitle">Legendas</span></h6>
+                            <div id="legendaMapa">
+                                <div><span style="color:#4CAF50;">●</span> <span class="legend-text" style="color:rgba(255,255,255,0.7);" id="legendNature">Natureza</span></div>
+                                <div><span style="color:#FF9800;">●</span> <span class="legend-text" style="color:rgba(255,255,255,0.7);" id="legendCulture">Cultura</span></div>
+                                <div><span style="color:#E91E63;">●</span> <span class="legend-text" style="color:rgba(255,255,255,0.7);" id="legendAdventure">Aventura</span></div>
+                                <div><span style="color:#2196F3;">●</span> <span class="legend-text" style="color:rgba(255,255,255,0.7);" id="legendLodging">Hospedagem</span></div>
+                                <div><span style="color:#FF5722;">●</span> <span class="legend-text" style="color:rgba(255,255,255,0.7);" id="legendGastronomy">Gastronomia</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+            LISTA DE ATRAÇÕES
+            ============================================================ -->
+            <div class="tab-pane fade" id="lista" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div id="listaAtracoes">
+                            <!-- Renderizado via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+            ESTATÍSTICAS
+            ============================================================ -->
+            <div class="tab-pane fade" id="estatisticas" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h6><i class="bi bi-pie-chart"></i> <span id="chartDistribution">Distribuição por Categoria</span></h6>
+                            <div style="height: 180px; display: flex; justify-content: center; align-items: center;">
+                                <div style="width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(
+                                    #4CAF50 0% 30%,
+                                    #FF9800 30% 52%,
+                                    #E91E63 52% 68%,
+                                    #2196F3 68% 85%,
+                                    #FF5722 85% 100%
+                                );" id="pieCategorias"></div>
+                            </div>
+                            <div class="d-flex flex-wrap justify-content-around mt-2" id="legendaPieCategorias"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h6><i class="bi bi-graph-up"></i> <span id="chartRatings">Avaliações por Atração</span></h6>
+                            <div style="height: 150px; display: flex; align-items: flex-end; padding: 10px;" id="graficoAvaliacoes"></div>
+                            <div class="d-flex justify-content-between" id="legendaAvaliacoes"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="activity-table table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th id="tableAttraction">Atração</th>
+                                        <th id="tableCategory">Categoria</th>
+                                        <th id="tableRating">Avaliação</th>
+                                        <th id="tableVisits">Visitas (Mês)</th>
+                                        <th id="tableDistance">Distância (km)</th>
+                                        <th id="tableStatus">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="estatisticasBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+            ROTEIROS SUGERIDOS
+            ============================================================ -->
+            <div class="tab-pane fade" id="roteiros" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-clock"></i> <span id="route1Title">Roteiro 1 - Maravilhas de Malanje</span></h6>
+                            <p style="color:rgba(255,255,255,0.7);" id="route1Duration">Duração: 2 dias</p>
+                            <div style="color:rgba(255,255,255,0.6);">
+                                <div id="route1Stop1">📍 Quedas de Kalandula</div>
+                                <div id="route1Stop2">📍 Pedras Negras de Pungo Andongo</div>
+                                <div id="route1Stop3">📍 Parque Nacional da Cangandala</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary mt-3 btn-roteiro" data-roteiro="1"><span id="viewRouteBtn">Ver Roteiro</span></button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-clock"></i> <span id="route2Title">Roteiro 2 - Natureza e Aventura</span></h6>
+                            <p style="color:rgba(255,255,255,0.7);" id="route2Duration">Duração: 3 dias</p>
+                            <div style="color:rgba(255,255,255,0.6);">
+                                <div id="route2Stop1">📍 Rápidos do Kwanza</div>
+                                <div id="route2Stop2">📍 Barragem de Kapanda</div>
+                                <div id="route2Stop3">📍 Foz do Amor</div>
+                                <div id="route2Stop4">📍 Nascente do Amor</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary mt-3 btn-roteiro" data-roteiro="2"><span id="viewRouteBtn2">Ver Roteiro</span></button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-clock"></i> <span id="route3Title">Roteiro 3 - Cultural</span></h6>
+                            <p style="color:rgba(255,255,255,0.7);" id="route3Duration">Duração: 1 dia</p>
+                            <div style="color:rgba(255,255,255,0.6);">
+                                <div id="route3Stop1">📍 Museu Regional de Malanje</div>
+                                <div id="route3Stop2">📍 Centro Cultural de Malanje</div>
+                                <div id="route3Stop3">📍 Arte e Artesanato Local</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary mt-3 btn-roteiro" data-roteiro="3"><span id="viewRouteBtn3">Ver Roteiro</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /tab-content -->
+
+        <!-- ============================================================
+        AÇÕES RÁPIDAS
+        ============================================================ -->
+        <div class="quick-actions mt-4 d-flex flex-wrap gap-2">
+            <button class="btn btn-primary" id="btnMinhaLocalizacao">
+                <i class="bi bi-geo-alt"></i> <span id="actionLocation">Minha Localização</span>
+            </button>
+            <button class="btn btn-success" id="btnRotas">
+                <i class="bi bi-arrow-left-right"></i> <span id="actionRoute">Calcular Rota</span>
+            </button>
+            <button class="btn btn-info" id="btnModoOffline">
+                <i class="bi bi-wifi-off"></i> <span id="actionOffline">Modo Offline</span>
+            </button>
+            <button class="btn btn-warning" id="btnCamadas">
+                <i class="bi bi-layers"></i> <span id="actionLayers">Camadas</span>
+            </button>
+            <button class="btn btn-outline-primary" id="btnAtualizar">
+                <i class="bi bi-arrow-repeat"></i> <span id="actionRefresh">Atualizar Dados</span>
+            </button>
+            <button class="btn btn-outline-dark" id="btnVoltar">
+              <a href="company.html"><i class="bi bi-arrow-left">
+                  </i> <span id="actionBack">Voltar</span></a>  
+                
+            </button>
+        </div>
+
+    </div><!-- /container-fluid -->
+
+    <!-- ============================================================
+    MODAL - EXPORTAR
+    ============================================================ -->
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-download"></i> <span id="exportModalTitle">Exportar Mapa</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="exportForm">
+                        <div class="mb-3">
+                            <label class="form-label" id="exportFormatLabel">Formato</label>
+                            <select class="form-select" id="exportFormato">
+                                <option value="pdf">PDF</option>
+                                <option value="imagem"><span id="exportImage">Imagem (PNG)</span></option>
+                                <option value="geojson">GeoJSON</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="exportIncludeLabel">Incluir</label>
+                            <select class="form-select" id="exportIncluir">
+                                <option value="completo" id="exportFull">Mapa Completo</option>
+                                <option value="atracoes" id="exportAttractionsOnly">Apenas Atrações</option>
+                                <option value="rotas" id="exportRoutesOnly">Apenas Rotas</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="exportQualityLabel">Qualidade</label>
+                            <select class="form-select" id="exportQualidade">
+                                <option value="alta" id="exportHigh">Alta</option>
+                                <option value="media" selected id="exportMedium">Média</option>
+                                <option value="baixa" id="exportLow">Baixa</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                        <i class="bi bi-closed"></i> <span id="exportCancel">Cancelar</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="btnExportConfirm">
+                        <i class="bi bi-download"></i> <span id="exportConfirmBtn">Exportar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL - DETALHES DA ATRAÇÃO
+    ============================================================ -->
+    <div class="modal fade" id="detalhesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detalhesTitulo"><i class="bi bi-pin-map"></i> <span id="detailAttraction">Atração</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalhesConteudo">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal"><span id="detailClose">Fechar</span></button>
+                    <button type="button" class="btn btn-outline-primary" id="btnRotaModal"><span id="detailHowToGet">Como Chegar</span></button>
+                    <button type="button" class="btn btn-outline-success" id="btnAdicionarRoteiro"><span id="detailAddRoute">Adicionar ao Roteiro</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL - ROTEIRO DETALHADO
+    ============================================================ -->
+    <div class="modal fade" id="roteiroModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-route"></i> <span id="routeDetailTitle">Roteiro Detalhado</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="roteiroConteudo">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal"><span id="routeDetailClose">Fechar</span></button>
+                    <button type="button" class="btn btn-outline-success" id="btnSalvarRoteiro"><span id="routeDetailSave">Salvar Roteiro</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL - CAMADAS
+    ============================================================ -->
+    <div class="modal fade" id="camadasModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-layers"></i> <span id="layersTitle">Camadas do Mapa</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="camada" id="camadaPadrao" value="padrao" checked>
+                        <label class="form-check-label" for="camadaPadrao" id="layerDefault">🌍 Mapa Padrão</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="camada" id="camadaSatelite" value="satelite">
+                        <label class="form-check-label" for="camadaSatelite" id="layerSatellite">🛰️ Satélite</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="camada" id="camadaTerreno" value="terreno">
+                        <label class="form-check-label" for="camadaTerreno" id="layerTerrain">⛰️ Relevo</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="camada" id="camadaTransito" value="transito">
+                        <label class="form-check-label" for="camadaTransito" id="layerTraffic">🚦 Trânsito</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="camada" id="camadaPontos" value="pontos">
+                        <label class="form-check-label" for="camadaPontos" id="layerPoints">📍 Pontos Turísticos</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><span id="layerCancel">Cancelar</span></button>
+                    <button type="button" class="btn btn-primary" id="btnAplicarCamada"><span id="layerApply">Aplicar Camada</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL - CALCULAR ROTA
+    ============================================================ -->
+    <div class="modal fade" id="rotaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-arrow-left-right"></i> <span id="routeCalcTitle">Calcular Rota</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" id="routeOriginLabel">📍 Origem</label>
+                        <select class="form-select" id="rotaOrigem">
+                            <option value="atual" id="routeCurrentLocation">Minha Localização Atual</option>
+                            <option value="malanje" id="routeCenter">Centro de Malanje</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" id="routeDestLabel">📍 Destino</label>
+                        <select class="form-select" id="rotaDestino">
+                            <option value="" id="routeSelectAttraction">Selecione uma atração...</option>
+                            <!-- Preenchido via JavaScript -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" id="routeTransportLabel">🚗 Meio de Transporte</label>
+                        <select class="form-select" id="rotaTransporte">
+                            <option value="carro" id="transportCar">Carro</option>
+                            <option value="moto" id="transportMotorcycle">Moto</option>
+                            <option value="bicicleta" id="transportBicycle">Bicicleta</option>
+                            <option value="a pé" id="transportWalk">A pé</option>
+                        </select>
+                    </div>
+                    <div id="rotaResultado" style="display:none;" class="mt-3 p-3" style="background:rgba(255,255,255,0.05);border-radius:8px;">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><span id="routeCalcCancel">Cancelar</span></button>
+                    <button type="button" class="btn btn-success" id="btnCalcularRota"><span id="routeCalcBtn">Calcular Rota</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL - MODO OFFLINE
+    ============================================================ -->
+    <div class="modal fade" id="offlineModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-wifi-off"></i> <span id="offlineTitle">Modo Offline</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="bi bi-wifi-off" style="font-size:3rem;color:#ffc107;"></i>
+                    </div>
+                    <p id="offlineDescription">O Modo Offline permite que você use o mapa mesmo sem conexão com a internet.</p>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="offlineCache">
+                        <label class="form-check-label" for="offlineCache" id="offlineCacheLabel">✅ Manter mapa em cache</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="offlineAtracoes" checked>
+                        <label class="form-check-label" for="offlineAtracoes" id="offlineAttractionsLabel">✅ Carregar atrações offline</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="offlineRotas">
+                        <label class="form-check-label" for="offlineRotas" id="offlineRoutesLabel">❌ Rotas offline (não disponível)</label>
+                    </div>
+                    <div class="mt-3 p-2" style="background:rgba(255,255,255,0.05);border-radius:8px;">
+                        <small style="color:rgba(255,255,255,0.5);" id="offlineCacheSize">📦 Tamanho do cache: 4.2 MB</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal"><span id="offlineCancel">Cancelar</span></button>
+                    <button type="button" class="btn btn-outline-info" id="btnAtivarOffline">
+                        <i class="bi bi-wifi-off"></i> <span id="offlineActivate">Activar Modo Offline</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js">
+    </script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script>
+        $(document).ready(function() {
+
+            // ============================================================
+            // SISTEMA DE IDIOMAS
+            // ============================================================
+            
+            const translations = {
+                pt: {
+                    pageTitle: 'Mapa Turístico - Malanje',
+                    dashboard: 'Dashboard',
+                    export: 'Exportar',
+                    tabMap: 'Mapa Interativo',
+                    tabList: 'Lista de Atrações',
+                    tabStats: 'Estatísticas',
+                    tabRoutes: 'Roteiros Sugeridos',
+                    filterTitle: 'Filtros do Mapa',
+                    filterAllCategories: 'Todas as Categorias',
+                    catNature: 'Natureza',
+                    catCulture: 'Cultura',
+                    catAdventure: 'Aventura',
+                    catLodging: 'Hospedagem',
+                    catGastronomy: 'Gastronomia',
+                    filterAllRatings: 'Todas as Avaliações',
+                    filterStars: 'Estrelas',
+                    filterStars2: 'Estrelas',
+                    filterStars3: 'Estrelas',
+                    applyFiltersBtn: 'Aplicar Filtros',
+                    aboutAttraction: 'Sobre a Atração',
+                    clickMarkerMsg: 'Clique em um marcador no mapa para ver os detalhes.',
+                    legendTitle: 'Legendas',
+                    legendNature: 'Natureza',
+                    legendCulture: 'Cultura',
+                    legendAdventure: 'Aventura',
+                    legendLodging: 'Hospedagem',
+                    legendGastronomy: 'Gastronomia',
+                    statsAttractions: 'Atrações',
+                    statsCategories: 'Categorias',
+                    statsRating: 'Avaliação Média',
+                    statsDistance: 'Distância Média (km)',
+                    chartDistribution: 'Distribuição por Categoria',
+                    chartRatings: 'Avaliações por Atração',
+                    tableAttraction: 'Atração',
+                    tableCategory: 'Categoria',
+                    tableRating: 'Avaliação',
+                    tableVisits: 'Visitas (Mês)',
+                    tableDistance: 'Distância (km)',
+                    tableStatus: 'Status',
+                    actionLocation: 'Minha Localização',
+                    actionRoute: 'Calcular Rota',
+                    actionOffline: 'Modo Offline',
+                    actionLayers: 'Camadas',
+                    actionRefresh: 'Atualizar Dados',
+                    actionBack: 'Voltar',
+                    route1Title: 'Roteiro 1 - Maravilhas de Malanje',
+                    route1Duration: 'Duração: 2 dias',
+                    route1Stop1: '📍 Quedas de Kalandula',
+                    route1Stop2: '📍 Pedras Negras de Pungo Andongo',
+                    route1Stop3: '📍 Parque Nacional da Cangandala',
+                    route2Title: 'Roteiro 2 - Natureza e Aventura',
+                    route2Duration: 'Duração: 3 dias',
+                    route2Stop1: '📍 Rápidos do Kwanza',
+                    route2Stop2: '📍 Barragem de Kapanda',
+                    route2Stop3: '📍 Foz do Amor',
+                    route2Stop4: '📍 Nascente do Amor',
+                    route3Title: 'Roteiro 3 - Cultural',
+                    route3Duration: 'Duração: 1 dia',
+                    route3Stop1: '📍 Museu Regional de Malanje',
+                    route3Stop2: '📍 Centro Cultural de Malanje',
+                    route3Stop3: '📍 Arte e Artesanato Local',
+                    viewRouteBtn: 'Ver Roteiro',
+                    viewRouteBtn2: 'Ver Roteiro',
+                    viewRouteBtn3: 'Ver Roteiro',
+                    exportModalTitle: 'Exportar Mapa',
+                    exportFormatLabel: 'Formato',
+                    exportImage: 'Imagem (PNG)',
+                    exportIncludeLabel: 'Incluir',
+                    exportFull: 'Mapa Completo',
+                    exportAttractionsOnly: 'Apenas Atrações',
+                    exportRoutesOnly: 'Apenas Rotas',
+                    exportQualityLabel: 'Qualidade',
+                    exportHigh: 'Alta',
+                    exportMedium: 'Média',
+                    exportLow: 'Baixa',
+                    exportCancel: 'Cancelar',
+                    exportConfirmBtn: 'Exportar',
+                    detailAttraction: 'Atração',
+                    detailClose: 'Fechar',
+                    detailHowToGet: 'Como Chegar',
+                    detailAddRoute: 'Adicionar ao Roteiro',
+                    routeDetailTitle: 'Roteiro Detalhado',
+                    routeDetailClose: 'Fechar',
+                    routeDetailSave: 'Salvar Roteiro',
+                    layersTitle: 'Camadas do Mapa',
+                    layerDefault: '🌍 Mapa Padrão',
+                    layerSatellite: '🛰️ Satélite',
+                    layerTerrain: '⛰️ Relevo',
+                    layerTraffic: '🚦 Trânsito',
+                    layerPoints: '📍 Pontos Turísticos',
+                    layerCancel: 'Cancelar',
+                    layerApply: 'Aplicar Camada',
+                    routeCalcTitle: 'Calcular Rota',
+                    routeOriginLabel: '📍 Origem',
+                    routeCurrentLocation: 'Minha Localização Atual',
+                    routeCenter: 'Centro de Malanje',
+                    routeDestLabel: '📍 Destino',
+                    routeSelectAttraction: 'Selecione uma atração...',
+                    routeTransportLabel: '🚗 Meio de Transporte',
+                    transportCar: 'Carro',
+                    transportMotorcycle: 'Moto',
+                    transportBicycle: 'Bicicleta',
+                    transportWalk: 'A pé',
+                    routeCalcCancel: 'Cancelar',
+                    routeCalcBtn: 'Calcular Rota',
+                    offlineTitle: 'Modo Offline',
+                    offlineDescription: 'O Modo Offline permite que você use o mapa mesmo sem conexão com a internet.',
+                    offlineCacheLabel: '✅ Manter mapa em cache',
+                    offlineAttractionsLabel: '✅ Carregar atrações offline',
+                    offlineRoutesLabel: '❌ Rotas offline (não disponível)',
+                    offlineCacheSize: '📦 Tamanho do cache: 4.2 MB',
+                    offlineCancel: 'Cancelar',
+                    offlineActivate: 'Activar Modo Offline'
+                },
+                en: {
+                    pageTitle: 'Tourist Map - Malanje',
+                    dashboard: 'Dashboard',
+                    export: 'Export',
+                    tabMap: 'Interactive Map',
+                    tabList: 'Attractions List',
+                    tabStats: 'Statistics',
+                    tabRoutes: 'Suggested Routes',
+                    filterTitle: 'Map Filters',
+                    filterAllCategories: 'All Categories',
+                    catNature: 'Nature',
+                    catCulture: 'Culture',
+                    catAdventure: 'Adventure',
+                    catLodging: 'Lodging',
+                    catGastronomy: 'Gastronomy',
+                    filterAllRatings: 'All Ratings',
+                    filterStars: 'Stars',
+                    filterStars2: 'Stars',
+                    filterStars3: 'Stars',
+                    applyFiltersBtn: 'Apply Filters',
+                    aboutAttraction: 'About the Attraction',
+                    clickMarkerMsg: 'Click on a marker on the map to see details.',
+                    legendTitle: 'Legend',
+                    legendNature: 'Nature',
+                    legendCulture: 'Culture',
+                    legendAdventure: 'Adventure',
+                    legendLodging: 'Lodging',
+                    legendGastronomy: 'Gastronomy',
+                    statsAttractions: 'Attractions',
+                    statsCategories: 'Categories',
+                    statsRating: 'Average Rating',
+                    statsDistance: 'Avg Distance (km)',
+                    chartDistribution: 'Distribution by Category',
+                    chartRatings: 'Ratings by Attraction',
+                    tableAttraction: 'Attraction',
+                    tableCategory: 'Category',
+                    tableRating: 'Rating',
+                    tableVisits: 'Visits (Month)',
+                    tableDistance: 'Distance (km)',
+                    tableStatus: 'Status',
+                    actionLocation: 'My Location',
+                    actionRoute: 'Calculate Route',
+                    actionOffline: 'Offline Mode',
+                    actionLayers: 'Layers',
+                    actionRefresh: 'Refresh Data',
+                    actionBack: 'Back',
+                    route1Title: 'Route 1 - Wonders of Malanje',
+                    route1Duration: 'Duration: 2 days',
+                    route1Stop1: '📍 Kalandula Falls',
+                    route1Stop2: '📍 Black Stones of Pungo Andongo',
+                    route1Stop3: '📍 Cangandala National Park',
+                    route2Title: 'Route 2 - Nature and Adventure',
+                    route2Duration: 'Duration: 3 days',
+                    route2Stop1: '📍 Kwanza Rapids',
+                    route2Stop2: '📍 Kapanda Dam',
+                    route2Stop3: '📍 Love Estuary',
+                    route2Stop4: '📍 Love Spring',
+                    route3Title: 'Route 3 - Cultural',
+                    route3Duration: 'Duration: 1 day',
+                    route3Stop1: '📍 Malanje Regional Museum',
+                    route3Stop2: '📍 Malanje Cultural Center',
+                    route3Stop3: '📍 Local Arts and Crafts',
+                    viewRouteBtn: 'View Route',
+                    viewRouteBtn2: 'View Route',
+                    viewRouteBtn3: 'View Route',
+                    exportModalTitle: 'Export Map',
+                    exportFormatLabel: 'Format',
+                    exportImage: 'Image (PNG)',
+                    exportIncludeLabel: 'Include',
+                    exportFull: 'Full Map',
+                    exportAttractionsOnly: 'Attractions Only',
+                    exportRoutesOnly: 'Routes Only',
+                    exportQualityLabel: 'Quality',
+                    exportHigh: 'High',
+                    exportMedium: 'Medium',
+                    exportLow: 'Low',
+                    exportCancel: 'Cancel',
+                    exportConfirmBtn: 'Export',
+                    detailAttraction: 'Attraction',
+                    detailClose: 'Close',
+                    detailHowToGet: 'How to Get There',
+                    detailAddRoute: 'Add to Route',
+                    routeDetailTitle: 'Detailed Route',
+                    routeDetailClose: 'Close',
+                    routeDetailSave: 'Save Route',
+                    layersTitle: 'Map Layers',
+                    layerDefault: '🌍 Default Map',
+                    layerSatellite: '🛰️ Satellite',
+                    layerTerrain: '⛰️ Terrain',
+                    layerTraffic: '🚦 Traffic',
+                    layerPoints: '📍 Tourist Points',
+                    layerCancel: 'Cancel',
+                    layerApply: 'Apply Layer',
+                    routeCalcTitle: 'Calculate Route',
+                    routeOriginLabel: '📍 Origin',
+                    routeCurrentLocation: 'My Current Location',
+                    routeCenter: 'Malanje Center',
+                    routeDestLabel: '📍 Destination',
+                    routeSelectAttraction: 'Select an attraction...',
+                    routeTransportLabel: '🚗 Transport',
+                    transportCar: 'Car',
+                    transportMotorcycle: 'Motorcycle',
+                    transportBicycle: 'Bicycle',
+                    transportWalk: 'Walk',
+                    routeCalcCancel: 'Cancel',
+                    routeCalcBtn: 'Calculate Route',
+                    offlineTitle: 'Offline Mode',
+                    offlineDescription: 'Offline Mode allows you to use the map even without an internet connection.',
+                    offlineCacheLabel: '✅ Keep map in cache',
+                    offlineAttractionsLabel: '✅ Load attractions offline',
+                    offlineRoutesLabel: '❌ Offline routes (unavailable)',
+                    offlineCacheSize: '📦 Cache size: 4.2 MB',
+                    offlineCancel: 'Cancel',
+                    offlineActivate: 'Activate Offline Mode'
+                },
+                es: {
+                    pageTitle: 'Mapa Turístico - Malanje',
+                    dashboard: 'Panel',
+                    export: 'Exportar',
+                    tabMap: 'Mapa Interactivo',
+                    tabList: 'Lista de Atracciones',
+                    tabStats: 'Estadísticas',
+                    tabRoutes: 'Rutas Sugeridas',
+                    filterTitle: 'Filtros del Mapa',
+                    filterAllCategories: 'Todas las Categorías',
+                    catNature: 'Naturaleza',
+                    catCulture: 'Cultura',
+                    catAdventure: 'Aventura',
+                    catLodging: 'Alojamiento',
+                    catGastronomy: 'Gastronomía',
+                    filterAllRatings: 'Todas las Valoraciones',
+                    filterStars: 'Estrellas',
+                    filterStars2: 'Estrellas',
+                    filterStars3: 'Estrellas',
+                    applyFiltersBtn: 'Aplicar Filtros',
+                    aboutAttraction: 'Sobre la Atracción',
+                    clickMarkerMsg: 'Haz clic en un marcador en el mapa para ver los detalles.',
+                    legendTitle: 'Leyendas',
+                    legendNature: 'Naturaleza',
+                    legendCulture: 'Cultura',
+                    legendAdventure: 'Aventura',
+                    legendLodging: 'Alojamiento',
+                    legendGastronomy: 'Gastronomía',
+                    statsAttractions: 'Atracciones',
+                    statsCategories: 'Categorías',
+                    statsRating: 'Valoración Media',
+                    statsDistance: 'Distancia Media (km)',
+                    chartDistribution: 'Distribución por Categoría',
+                    chartRatings: 'Valoraciones por Atracción',
+                    tableAttraction: 'Atracción',
+                    tableCategory: 'Categoría',
+                    tableRating: 'Valoración',
+                    tableVisits: 'Visitas (Mes)',
+                    tableDistance: 'Distancia (km)',
+                    tableStatus: 'Estado',
+                    actionLocation: 'Mi Ubicación',
+                    actionRoute: 'Calcular Ruta',
+                    actionOffline: 'Modo Offline',
+                    actionLayers: 'Capas',
+                    actionRefresh: 'Actualizar Datos',
+                    actionBack: 'Volver',
+                    route1Title: 'Ruta 1 - Maravillas de Malanje',
+                    route1Duration: 'Duración: 2 días',
+                    route1Stop1: '📍 Cascadas de Kalandula',
+                    route1Stop2: '📍 Piedras Negras de Pungo Andongo',
+                    route1Stop3: '📍 Parque Nacional de Cangandala',
+                    route2Title: 'Ruta 2 - Naturaleza y Aventura',
+                    route2Duration: 'Duración: 3 días',
+                    route2Stop1: '📍 Rápidos del Kwanza',
+                    route2Stop2: '📍 Presa de Kapanda',
+                    route2Stop3: '📍 Estuario del Amor',
+                    route2Stop4: '📍 Manantial del Amor',
+                    route3Title: 'Ruta 3 - Cultural',
+                    route3Duration: 'Duración: 1 día',
+                    route3Stop1: '📍 Museo Regional de Malanje',
+                    route3Stop2: '📍 Centro Cultural de Malanje',
+                    route3Stop3: '📍 Arte y Artesanía Local',
+                    viewRouteBtn: 'Ver Ruta',
+                    viewRouteBtn2: 'Ver Ruta',
+                    viewRouteBtn3: 'Ver Ruta',
+                    exportModalTitle: 'Exportar Mapa',
+                    exportFormatLabel: 'Formato',
+                    exportImage: 'Imagen (PNG)',
+                    exportIncludeLabel: 'Incluir',
+                    exportFull: 'Mapa Completo',
+                    exportAttractionsOnly: 'Solo Atracciones',
+                    exportRoutesOnly: 'Solo Rutas',
+                    exportQualityLabel: 'Calidad',
+                    exportHigh: 'Alta',
+                    exportMedium: 'Media',
+                    exportLow: 'Baja',
+                    exportCancel: 'Cancelar',
+                    exportConfirmBtn: 'Exportar',
+                    detailAttraction: 'Atracción',
+                    detailClose: 'Cerrar',
+                    detailHowToGet: 'Cómo Llegar',
+                    detailAddRoute: 'Agregar a la Ruta',
+                    routeDetailTitle: 'Ruta Detallada',
+                    routeDetailClose: 'Cerrar',
+                    routeDetailSave: 'Guardar Ruta',
+                    layersTitle: 'Capas del Mapa',
+                    layerDefault: '🌍 Mapa Predeterminado',
+                    layerSatellite: '🛰️ Satélite',
+                    layerTerrain: '⛰️ Relieve',
+                    layerTraffic: '🚦 Tráfico',
+                    layerPoints: '📍 Puntos Turísticos',
+                    layerCancel: 'Cancelar',
+                    layerApply: 'Aplicar Capa',
+                    routeCalcTitle: 'Calcular Ruta',
+                    routeOriginLabel: '📍 Origen',
+                    routeCurrentLocation: 'Mi Ubicación Actual',
+                    routeCenter: 'Centro de Malanje',
+                    routeDestLabel: '📍 Destino',
+                    routeSelectAttraction: 'Selecciona una atracción...',
+                    routeTransportLabel: '🚗 Transporte',
+                    transportCar: 'Coche',
+                    transportMotorcycle: 'Moto',
+                    transportBicycle: 'Bicicleta',
+                    transportWalk: 'A pie',
+                    routeCalcCancel: 'Cancelar',
+                    routeCalcBtn: 'Calcular Ruta',
+                    offlineTitle: 'Modo Offline',
+                    offlineDescription: 'El Modo Offline te permite usar el mapa incluso sin conexión a internet.',
+                    offlineCacheLabel: '✅ Mantener mapa en caché',
+                    offlineAttractionsLabel: '✅ Cargar atracciones offline',
+                    offlineRoutesLabel: '❌ Rutas offline (no disponible)',
+                    offlineCacheSize: '📦 Tamaño del caché: 4.2 MB',
+                    offlineCancel: 'Cancelar',
+                    offlineActivate: 'Activar Modo Offline'
+                },
+                fr: {
+                    pageTitle: 'Carte Touristique - Malanje',
+                    dashboard: 'Tableau de Bord',
+                    export: 'Exporter',
+                    tabMap: 'Carte Interactive',
+                    tabList: 'Liste des Attractions',
+                    tabStats: 'Statistiques',
+                    tabRoutes: 'Itinéraires Suggérés',
+                    filterTitle: 'Filtres de la Carte',
+                    filterAllCategories: 'Toutes les Catégories',
+                    catNature: 'Nature',
+                    catCulture: 'Culture',
+                    catAdventure: 'Aventure',
+                    catLodging: 'Hébergement',
+                    catGastronomy: 'Gastronomie',
+                    filterAllRatings: 'Toutes les Évaluations',
+                    filterStars: 'Étoiles',
+                    filterStars2: 'Étoiles',
+                    filterStars3: 'Étoiles',
+                    applyFiltersBtn: 'Appliquer les Filtres',
+                    aboutAttraction: 'À Propos de l\'Attraction',
+                    clickMarkerMsg: 'Cliquez sur un marqueur sur la carte pour voir les détails.',
+                    legendTitle: 'Légendes',
+                    legendNature: 'Nature',
+                    legendCulture: 'Culture',
+                    legendAdventure: 'Aventure',
+                    legendLodging: 'Hébergement',
+                    legendGastronomy: 'Gastronomie',
+                    statsAttractions: 'Attractions',
+                    statsCategories: 'Catégories',
+                    statsRating: 'Évaluation Moyenne',
+                    statsDistance: 'Distance Moyenne (km)',
+                    chartDistribution: 'Distribution par Catégorie',
+                    chartRatings: 'Évaluations par Attraction',
+                    tableAttraction: 'Attraction',
+                    tableCategory: 'Catégorie',
+                    tableRating: 'Évaluation',
+                    tableVisits: 'Visites (Mois)',
+                    tableDistance: 'Distance (km)',
+                    tableStatus: 'Statut',
+                    actionLocation: 'Ma Position',
+                    actionRoute: 'Calculer l\'Itinéraire',
+                    actionOffline: 'Mode Hors Ligne',
+                    actionLayers: 'Couches',
+                    actionRefresh: 'Actualiser les Données',
+                    actionBack: 'Retour',
+                    route1Title: 'Itinéraire 1 - Merveilles de Malanje',
+                    route1Duration: 'Durée: 2 jours',
+                    route1Stop1: '📍 Chutes de Kalandula',
+                    route1Stop2: '📍 Pierres Noires de Pungo Andongo',
+                    route1Stop3: '📍 Parc National de Cangandala',
+                    route2Title: 'Itinéraire 2 - Nature et Aventure',
+                    route2Duration: 'Durée: 3 jours',
+                    route2Stop1: '📍 Rapides du Kwanza',
+                    route2Stop2: '📍 Barrage de Kapanda',
+                    route2Stop3: '📍 Estuaire de l\'Amour',
+                    route2Stop4: '📍 Source de l\'Amour',
+                    route3Title: 'Itinéraire 3 - Culturel',
+                    route3Duration: 'Durée: 1 jour',
+                    route3Stop1: '📍 Musée Régional de Malanje',
+                    route3Stop2: '📍 Centre Culturel de Malanje',
+                    route3Stop3: '📍 Art et Artisanat Local',
+                    viewRouteBtn: 'Voir l\'Itinéraire',
+                    viewRouteBtn2: 'Voir l\'Itinéraire',
+                    viewRouteBtn3: 'Voir l\'Itinéraire',
+                    exportModalTitle: 'Exporter la Carte',
+                    exportFormatLabel: 'Format',
+                    exportImage: 'Image (PNG)',
+                    exportIncludeLabel: 'Inclure',
+                    exportFull: 'Carte Complète',
+                    exportAttractionsOnly: 'Attractions Uniquement',
+                    exportRoutesOnly: 'Itinéraires Uniquement',
+                    exportQualityLabel: 'Qualité',
+                    exportHigh: 'Haute',
+                    exportMedium: 'Moyenne',
+                    exportLow: 'Basse',
+                    exportCancel: 'Annuler',
+                    exportConfirmBtn: 'Exporter',
+                    detailAttraction: 'Attraction',
+                    detailClose: 'Fermer',
+                    detailHowToGet: 'Comment y Aller',
+                    detailAddRoute: 'Ajouter à l\'Itinéraire',
+                    routeDetailTitle: 'Itinéraire Détaillé',
+                    routeDetailClose: 'Fermer',
+                    routeDetailSave: 'Enregistrer l\'Itinéraire',
+                    layersTitle: 'Couches de la Carte',
+                    layerDefault: '🌍 Carte Par Défaut',
+                    layerSatellite: '🛰️ Satellite',
+                    layerTerrain: '⛰️ Relief',
+                    layerTraffic: '🚦 Trafic',
+                    layerPoints: '📍 Points Touristiques',
+                    layerCancel: 'Annuler',
+                    layerApply: 'Appliquer la Couche',
+                    routeCalcTitle: 'Calculer l\'Itinéraire',
+                    routeOriginLabel: '📍 Origine',
+                    routeCurrentLocation: 'Ma Position Actuelle',
+                    routeCenter: 'Centre de Malanje',
+                    routeDestLabel: '📍 Destination',
+                    routeSelectAttraction: 'Sélectionnez une attraction...',
+                    routeTransportLabel: '🚗 Transport',
+                    transportCar: 'Voiture',
+                    transportMotorcycle: 'Moto',
+                    transportBicycle: 'Vélo',
+                    transportWalk: 'À pied',
+                    routeCalcCancel: 'Annuler',
+                    routeCalcBtn: 'Calculer l\'Itinéraire',
+                    offlineTitle: 'Mode Hors Ligne',
+                    offlineDescription: 'Le Mode Hors Ligne vous permet d\'utiliser la carte même sans connexion internet.',
+                    offlineCacheLabel: '✅ Garder la carte en cache',
+                    offlineAttractionsLabel: '✅ Charger les attractions hors ligne',
+                    offlineRoutesLabel: '❌ Itinéraires hors ligne (indisponible)',
+                    offlineCacheSize: '📦 Taille du cache: 4.2 MB',
+                    offlineCancel: 'Annuler',
+                    offlineActivate: 'Activer le Mode Hors Ligne'
+                },
+                zh: {
+                    pageTitle: '旅游地图 - 马兰热',
+                    dashboard: '仪表板',
+                    export: '导出',
+                    tabMap: '互动地图',
+                    tabList: '景点列表',
+                    tabStats: '统计数据',
+                    tabRoutes: '推荐路线',
+                    filterTitle: '地图筛选',
+                    filterAllCategories: '所有类别',
+                    catNature: '自然',
+                    catCulture: '文化',
+                    catAdventure: '冒险',
+                    catLodging: '住宿',
+                    catGastronomy: '美食',
+                    filterAllRatings: '所有评分',
+                    filterStars: '星',
+                    filterStars2: '星',
+                    filterStars3: '星',
+                    applyFiltersBtn: '应用筛选',
+                    aboutAttraction: '关于景点',
+                    clickMarkerMsg: '点击地图上的标记查看详情。',
+                    legendTitle: '图例',
+                    legendNature: '自然',
+                    legendCulture: '文化',
+                    legendAdventure: '冒险',
+                    legendLodging: '住宿',
+                    legendGastronomy: '美食',
+                    statsAttractions: '景点',
+                    statsCategories: '类别',
+                    statsRating: '平均评分',
+                    statsDistance: '平均距离（公里）',
+                    chartDistribution: '按类别分布',
+                    chartRatings: '景点评分',
+                    tableAttraction: '景点',
+                    tableCategory: '类别',
+                    tableRating: '评分',
+                    tableVisits: '访问量（月）',
+                    tableDistance: '距离（公里）',
+                    tableStatus: '状态',
+                    actionLocation: '我的位置',
+                    actionRoute: '计算路线',
+                    actionOffline: '离线模式',
+                    actionLayers: '图层',
+                    actionRefresh: '刷新数据',
+                    actionBack: '返回',
+                    route1Title: '路线1 - 马兰热奇观',
+                    route1Duration: '持续时间：2天',
+                    route1Stop1: '📍 卡兰杜拉瀑布',
+                    route1Stop2: '📍 蓬戈安东戈黑石',
+                    route1Stop3: '📍 坎甘达拉国家公园',
+                    route2Title: '路线2 - 自然与冒险',
+                    route2Duration: '持续时间：3天',
+                    route2Stop1: '📍 宽扎河急流',
+                    route2Stop2: '📍 卡潘达大坝',
+                    route2Stop3: '📍 爱情河口',
+                    route2Stop4: '📍 爱情泉源',
+                    route3Title: '路线3 - 文化之旅',
+                    route3Duration: '持续时间：1天',
+                    route3Stop1: '📍 马兰热地区博物馆',
+                    route3Stop2: '📍 马兰热文化中心',
+                    route3Stop3: '📍 当地艺术与手工艺',
+                    viewRouteBtn: '查看路线',
+                    viewRouteBtn2: '查看路线',
+                    viewRouteBtn3: '查看路线',
+                    exportModalTitle: '导出地图',
+                    exportFormatLabel: '格式',
+                    exportImage: '图片（PNG）',
+                    exportIncludeLabel: '包含',
+                    exportFull: '完整地图',
+                    exportAttractionsOnly: '仅景点',
+                    exportRoutesOnly: '仅路线',
+                    exportQualityLabel: '质量',
+                    exportHigh: '高',
+                    exportMedium: '中',
+                    exportLow: '低',
+                    exportCancel: '取消',
+                    exportConfirmBtn: '导出',
+                    detailAttraction: '景点',
+                    detailClose: '关闭',
+                    detailHowToGet: '如何到达',
+                    detailAddRoute: '添加到路线',
+                    routeDetailTitle: '详细路线',
+                    routeDetailClose: '关闭',
+                    routeDetailSave: '保存路线',
+                    layersTitle: '地图图层',
+                    layerDefault: '🌍 默认地图',
+                    layerSatellite: '🛰️ 卫星',
+                    layerTerrain: '⛰️ 地形',
+                    layerTraffic: '🚦 交通',
+                    layerPoints: '📍 旅游点',
+                    layerCancel: '取消',
+                    layerApply: '应用图层',
+                    routeCalcTitle: '计算路线',
+                    routeOriginLabel: '📍 起点',
+                    routeCurrentLocation: '我当前的位置',
+                    routeCenter: '马兰热市中心',
+                    routeDestLabel: '📍 目的地',
+                    routeSelectAttraction: '选择景点...',
+                    routeTransportLabel: '🚗 交通工具',
+                    transportCar: '汽车',
+                    transportMotorcycle: '摩托车',
+                    transportBicycle: '自行车',
+                    transportWalk: '步行',
+                    routeCalcCancel: '取消',
+                    routeCalcBtn: '计算路线',
+                    offlineTitle: '离线模式',
+                    offlineDescription: '离线模式允许您在没有网络连接的情况下使用地图。',
+                    offlineCacheLabel: '✅ 将地图保存在缓存中',
+                    offlineAttractionsLabel: '✅ 离线加载景点',
+                    offlineRoutesLabel: '❌ 离线路线（不可用）',
+                    offlineCacheSize: '📦 缓存大小：4.2 MB',
+                    offlineCancel: '取消',
+                    offlineActivate: '激活离线模式'
+                }
+            };
+
+            let currentLang = 'pt';
+
+            function applyLanguage(lang) {
+                currentLang = lang;
+                const t = translations[lang];
+
+                // Atualiza textos da página
+                $('#pageTitleText').text(t.pageTitle);
+                $('#dashboardText').text(t.dashboard);
+                $('#exportText').text(t.export);
+                $('#tabMap').text(t.tabMap);
+                $('#tabList').text(t.tabList);
+                $('#tabStats').text(t.tabStats);
+                $('#tabRoutes').text(t.tabRoutes);
+                $('#filterTitle').text(t.filterTitle);
+                $('#filterAllCategories').text(t.filterAllCategories);
+                $('#catNature').text(t.catNature);
+                $('#catCulture').text(t.catCulture);
+                $('#catAdventure').text(t.catAdventure);
+                $('#catLodging').text(t.catLodging);
+                $('#catGastronomy').text(t.catGastronomy);
+                $('#filterAllRatings').text(t.filterAllRatings);
+                $('#filterStars').text(t.filterStars);
+                $('#filterStars2').text(t.filterStars2);
+                $('#filterStars3').text(t.filterStars3);
+                $('#applyFiltersBtn').text(t.applyFiltersBtn);
+                $('#aboutAttraction').text(t.aboutAttraction);
+                $('#clickMarkerMsg').text(t.clickMarkerMsg);
+                $('#legendTitle').text(t.legendTitle);
+                $('#legendNature').text(t.legendNature);
+                $('#legendCulture').text(t.legendCulture);
+                $('#legendAdventure').text(t.legendAdventure);
+                $('#legendLodging').text(t.legendLodging);
+                $('#legendGastronomy').text(t.legendGastronomy);
+                $('#statsAttractions').text(t.statsAttractions);
+                $('#statsCategories').text(t.statsCategories);
+                $('#statsRating').text(t.statsRating);
+                $('#statsDistance').text(t.statsDistance);
+                $('#chartDistribution').text(t.chartDistribution);
+                $('#chartRatings').text(t.chartRatings);
+                $('#tableAttraction').text(t.tableAttraction);
+                $('#tableCategory').text(t.tableCategory);
+                $('#tableRating').text(t.tableRating);
+                $('#tableVisits').text(t.tableVisits);
+                $('#tableDistance').text(t.tableDistance);
+                $('#tableStatus').text(t.tableStatus);
+                $('#actionLocation').text(t.actionLocation);
+                $('#actionRoute').text(t.actionRoute);
+                $('#actionOffline').text(t.actionOffline);
+                $('#actionLayers').text(t.actionLayers);
+                $('#actionRefresh').text(t.actionRefresh);
+                $('#actionBack').text(t.actionBack);
+                $('#route1Title').text(t.route1Title);
+                $('#route1Duration').text(t.route1Duration);
+                $('#route1Stop1').text(t.route1Stop1);
+                $('#route1Stop2').text(t.route1Stop2);
+                $('#route1Stop3').text(t.route1Stop3);
+                $('#route2Title').text(t.route2Title);
+                $('#route2Duration').text(t.route2Duration);
+                $('#route2Stop1').text(t.route2Stop1);
+                $('#route2Stop2').text(t.route2Stop2);
+                $('#route2Stop3').text(t.route2Stop3);
+                $('#route2Stop4').text(t.route2Stop4);
+                $('#route3Title').text(t.route3Title);
+                $('#route3Duration').text(t.route3Duration);
+                $('#route3Stop1').text(t.route3Stop1);
+                $('#route3Stop2').text(t.route3Stop2);
+                $('#route3Stop3').text(t.route3Stop3);
+                $('.btn-roteiro').each(function(index) {
+                    $(this).find('span').text(t.viewRouteBtn);
+                });
+                $('#exportModalTitle').text(t.exportModalTitle);
+                $('#exportFormatLabel').text(t.exportFormatLabel);
+                $('#exportImage').text(t.exportImage);
+                $('#exportIncludeLabel').text(t.exportIncludeLabel);
+                $('#exportFull').text(t.exportFull);
+                $('#exportAttractionsOnly').text(t.exportAttractionsOnly);
+                $('#exportRoutesOnly').text(t.exportRoutesOnly);
+                $('#exportQualityLabel').text(t.exportQualityLabel);
+                $('#exportHigh').text(t.exportHigh);
+                $('#exportMedium').text(t.exportMedium);
+                $('#exportLow').text(t.exportLow);
+                $('#exportCancel').text(t.exportCancel);
+                $('#exportConfirmBtn').text(t.exportConfirmBtn);
+                $('#detailAttraction').text(t.detailAttraction);
+                $('#detailClose').text(t.detailClose);
+                $('#detailHowToGet').text(t.detailHowToGet);
+                $('#detailAddRoute').text(t.detailAddRoute);
+                $('#routeDetailTitle').text(t.routeDetailTitle);
+                $('#routeDetailClose').text(t.routeDetailClose);
+                $('#routeDetailSave').text(t.routeDetailSave);
+                $('#layersTitle').text(t.layersTitle);
+                $('#layerDefault').text(t.layerDefault);
+                $('#layerSatellite').text(t.layerSatellite);
+                $('#layerTerrain').text(t.layerTerrain);
+                $('#layerTraffic').text(t.layerTraffic);
+                $('#layerPoints').text(t.layerPoints);
+                $('#layerCancel').text(t.layerCancel);
+                $('#layerApply').text(t.layerApply);
+                $('#routeCalcTitle').text(t.routeCalcTitle);
+                $('#routeOriginLabel').text(t.routeOriginLabel);
+                $('#routeCurrentLocation').text(t.routeCurrentLocation);
+                $('#routeCenter').text(t.routeCenter);
+                $('#routeDestLabel').text(t.routeDestLabel);
+                $('#routeSelectAttraction').text(t.routeSelectAttraction);
+                $('#routeTransportLabel').text(t.routeTransportLabel);
+                $('#transportCar').text(t.transportCar);
+                $('#transportMotorcycle').text(t.transportMotorcycle);
+                $('#transportBicycle').text(t.transportBicycle);
+                $('#transportWalk').text(t.transportWalk);
+                $('#routeCalcCancel').text(t.routeCalcCancel);
+                $('#routeCalcBtn').text(t.routeCalcBtn);
+                $('#offlineTitle').text(t.offlineTitle);
+                $('#offlineDescription').text(t.offlineDescription);
+                $('#offlineCacheLabel').text(t.offlineCacheLabel);
+                $('#offlineAttractionsLabel').text(t.offlineAttractionsLabel);
+                $('#offlineRoutesLabel').text(t.offlineRoutesLabel);
+                $('#offlineCacheSize').text(t.offlineCacheSize);
+                $('#offlineCancel').text(t.offlineCancel);
+                $('#offlineActivate').text(t.offlineActivate);
+
+                // Atualiza o texto do botão de idioma
+                const langNames = {
+                    pt: '🇵🇹 PT',
+                    en: '🇬🇧 EN',
+                    es: '🇪🇸 ES',
+                    fr: '🇫🇷 FR',
+                    zh: '🇨🇳 中文'
+                };
+                $('#currentLanguage').text(langNames[lang] || 'PT');
+
+                // Atualiza dropdown ativo
+                $('.language-dropdown .dropdown-item').removeClass('active');
+                $(`.language-dropdown .dropdown-item[data-lang="${lang}"]`).addClass('active');
+            }
+
+            // Evento de clique nos itens do dropdown de idioma
+            $('.language-dropdown .dropdown-item').click(function(e) {
+                e.preventDefault();
+                const lang = $(this).data('lang');
+                applyLanguage(lang);
+                localStorage.setItem('sicami-language', lang);
+            });
+
+            // Carregar idioma salvo
+            const savedLang = localStorage.getItem('sicami-language');
+            if (savedLang && translations[savedLang]) {
+                applyLanguage(savedLang);
+            } else {
+                applyLanguage('pt');
+            }
+
+            // ============================================================
+            // BANCO DE DADOS - ATRAÇÕES TURÍSTICAS DE MALANJE COM IMAGENS
+            // ============================================================
+
+            const atracoes = [{
+                id: 1,
+                nome: 'Quedas de Kalandula',
+                categoria: 'natureza',
+                lat: -9.0833,
+                lng: 16.1667,
+                descricao: 'Uma das maiores quedas d\'água de Angola, com 105 metros de altura e 400 metros de largura. Considerada uma das maiores atrações turísticas do país.',
+                avaliacao: 4.9,
+                visitas: 3200,
+                distancia: 85,
+                horario: '08:00 - 17:00',
+                melhorEpoca: 'Época das chuvas (Nov-Mar) para maior volume de água',
+                imagem: 'images/kalandula.png',
+                thumbnail: 'images/kalandula.png'
+            }, {
+                id: 2,
+                nome: 'Pedras Negras de Pungo Andongo',
+                categoria: 'natureza',
+                lat: -9.3833,
+                lng: 15.7667,
+                descricao: 'Formações rochosas impressionantes em meio à savana. Oferece uma vista panorâmica única da província de Malanje.',
+                avaliacao: 4.8,
+                visitas: 2100,
+                distancia: 115,
+                horario: '06:00 - 18:00',
+                melhorEpoca: 'Todo o ano, evitar dias de chuva intensa',
+                imagem: 'images/pungo-an-dongo.png',
+                thumbnail: 'images/pungo-an-dongo.png'
+            }, {
+                id: 3,
+                nome: 'Parque Nacional da Cangandala',
+                categoria: 'natureza',
+                lat: -9.7667,
+                lng: 16.7500,
+                descricao: 'Importante área de conservação, lar do antílope sable gigante (Palanca Negra). Perfeito para ecoturismo e observação de fauna.',
+                avaliacao: 4.7,
+                visitas: 850,
+                distancia: 145,
+                horario: '07:00 - 17:00',
+                melhorEpoca: 'Estação seca (Mai-Set) para melhor visualização',
+                imagem: 'images/parque-cangandala.png',
+                thumbnail: 'images/parque-cangandala.png'
+            }, {
+                id: 4,
+                nome: 'Rápidos do Kwanza',
+                categoria: 'aventura',
+                lat: -9.5333,
+                lng: 16.0333,
+                descricao: 'Trecho do rio Kwanza com corredeiras emocionantes. Ideal para rafting, pesca esportiva e observação de aves.',
+                avaliacao: 4.6,
+                visitas: 680,
+                distancia: 95,
+                horario: '08:00 - 16:00',
+                melhorEpoca: 'Estação seca (Jun-Ago) para melhor navegação',
+                imagem: 'images/rapidos.png',
+                thumbnail: 'images/rapidos.png'
+            }, {
+                id: 5,
+                nome: 'Barragem de Kapanda',
+                categoria: 'natureza',
+                lat: -9.4000,
+                lng: 16.1333,
+                descricao: 'Grande barragem hidroelétrica no rio Kwanza. Oferece uma vista impressionante e é um importante ponto de interesse.',
+                avaliacao: 4.4,
+                visitas: 1200,
+                distancia: 75,
+                horario: '09:00 - 16:00',
+                melhorEpoca: 'Todo o ano',
+                imagem: 'images/capanda.png',
+                thumbnail: 'images/capanda.png'
+            }, {
+                id: 6,
+                nome: 'Foz do Amor',
+                categoria: 'natureza',
+                lat: -9.3167,
+                lng: 16.0333,
+                descricao: 'Ponto turístico romântico com paisagem deslumbrante. Conhecido como um dos lugares mais bonitos da região.',
+                avaliacao: 4.5,
+                visitas: 950,
+                distancia: 90,
+                horario: '07:00 - 18:00',
+                melhorEpoca: 'Todo o ano',
+                imagem: 'images/foz-amor.png',
+                thumbnail: 'images/foz-amor.png'
+            }, {
+                id: 7,
+                nome: 'Nascente do Amor',
+                categoria: 'natureza',
+                lat: -9.2833,
+                lng: 16.0500,
+                descricao: 'Nascente de água cristalina em meio à natureza exuberante. Local perfeito para trilhas e contato com a natureza.',
+                avaliacao: 4.3,
+                visitas: 780,
+                distancia: 92,
+                horario: '06:00 - 17:00',
+                melhorEpoca: 'Estação seca para trilhas',
+                imagem: 'images/foz-3.png',
+                thumbnail: 'images/foz-3.png'
+            }, {
+                id: 8,
+                nome: 'Museu Regional de Malanje',
+                categoria: 'cultura',
+                lat: -9.5333,
+                lng: 16.3500,
+                descricao: 'Museu que conta a história da província de Malanje, com exposições sobre a cultura, tradições e arte local.',
+                avaliacao: 4.2,
+                visitas: 450,
+                distancia: 0,
+                horario: '09:00 - 17:00 (Seg-Sex)',
+                melhorEpoca: 'Todo o ano',
+                imagem: 'images/museum.jpg',
+                thumbnail: 'images/museum.jpg'
+            }, {
+                id: 9,
+                nome: 'Hotel Malanje Palace',
+                categoria: 'hospedagem',
+                lat: -9.5500,
+                lng: 16.3333,
+                descricao: 'Hotel de luxo com vista panorâmica para a cidade. Oferece conforto e gastronomia de qualidade.',
+                avaliacao: 4.4,
+                visitas: 0,
+                distancia: 2,
+                horario: '24 horas',
+                melhorEpoca: 'Todo o ano',
+                imagem: 'images/Hotel-Palace.jpg',
+                thumbnail: 'images/Hotel-Palace.jpg'
+            }, {
+                id: 10,
+                nome: 'Restaurante Típico Malanje',
+                categoria: 'gastronomia',
+                lat: -9.5450,
+                lng: 16.3400,
+                descricao: 'Culinária tradicional angolana com pratos típicos da região. Destaque para o Muamba de Galinha e Calulu.',
+                avaliacao: 4.6,
+                visitas: 0,
+                distancia: 1.5,
+                horario: '11:00 - 22:00',
+                melhorEpoca: 'Todo o ano',
+                imagem: 'images/RESTAURANTE-KALANDULA.png',
+                thumbnail: 'images/RESTAURANTE-KALANDULA.png'
+            }];
+
+            // ============================================================
+            // INICIALIZAÇÃO DO MAPA
+            // ============================================================
+
+            let map;
+            let markers = [];
+            let currentPopup = null;
+            let mapInitialized = false;
+            let selectedAttraction = null;
+            let offlineMode = false;
+
+            // Coordenadas de Malanje (centro aproximado)
+            const MALANJE_CENTER = [-9.5333, 16.3500];
+
+            function initMap() {
+                if (mapInitialized) return;
+
+                map = L.map('map', {
+                    zoomControl: false,
+                    attributionControl: true
+                }).setView(MALANJE_CENTER, 10);
+
+                L.control.zoom({
+                    position: 'topright'
+                }).addTo(map);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; CartoDB',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                }).addTo(map);
+
+                mapInitialized = true;
+                carregarAtracoes();
+            }
+
+            // ============================================================
+            // CARREGAR ATRAÇÕES NO MAPA
+            // ============================================================
+
+            function carregarAtracoes() {
+                markers.forEach(m => map.removeLayer(m));
+                markers = [];
+
+                const cores = {
+                    'natureza': '#4CAF50',
+                    'cultura': '#FF9800',
+                    'aventura': '#E91E63',
+                    'hospedagem': '#2196F3',
+                    'gastronomia': '#FF5722'
+                };
+
+                const filtroCategoria = $('#filtroCategoria').val();
+                const filtroAvaliacao = parseFloat($('#filtroAvaliacao').val()) || 0;
+
+                const atracoesFiltradas = atracoes.filter(a => {
+                    if (filtroCategoria !== 'todas' && a.categoria !== filtroCategoria) return false;
+                    if (filtroAvaliacao > 0 && a.avaliacao < filtroAvaliacao) return false;
+                    return true;
+                });
+
+                atracoesFiltradas.forEach(a => {
+                    const cor = cores[a.categoria] || '#FF6B6B';
+
+                    const customIcon = L.divIcon({
+                        html: `<div style="
+                            background: ${cor};
+                            border-radius: 50%;
+                            width: 44px;
+                            height: 44px;
+                            overflow: hidden;
+                            border: 3px solid rgba(255,255,255,0.6);
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        ">
+                            <img src="${a.thumbnail}" style="width:44px;height:44px;object-fit:cover;border-radius:50%;">
+                        </div>`,
+                        className: 'custom-marker',
+                        iconSize: [44, 44],
+                        iconAnchor: [22, 44],
+                        popupAnchor: [0, -44]
+                    });
+
+                    const marker = L.marker([a.lat, a.lng], { icon: customIcon })
+                        .addTo(map)
+                        .bindPopup(`
+                            <div style="font-family: 'Times New Roman', Times, serif;">
+                                <img src="${a.thumbnail}" class="popup-image" alt="${a.nome}">
+                                <strong style="font-size:1.1rem;">${a.nome}</strong>
+                                <div style="margin: 5px 0; color: #ffc107;">${'★'.repeat(Math.round(a.avaliacao))}${'☆'.repeat(5 - Math.round(a.avaliacao))} ${a.avaliacao}</div>
+                                <div style="color: rgba(255,255,255,0.6); font-size:0.85rem;">${a.descricao.substring(0, 80)}...</div>
+                                <button class="btn btn-sm btn-primary mt-2" onclick="verDetalhes(${a.id})">
+                                    <i class="bi bi-info-circle"></i> Ver mais
+                                </button>
+                            </div>
+                        `, {
+                            maxWidth: 320,
+                            className: 'custom-popup'
+                        });
+
+                    marker.on('popupopen', function() {
+                        if (currentPopup && currentPopup !== this) {
+                            currentPopup.closePopup();
+                        }
+                        currentPopup = this;
+                        selectedAttraction = a;
+                        exibirInfoAtracao(a);
+                    });
+
+                    markers.push(marker);
+                });
+
+                if (atracoesFiltradas.length > 0) {
+                    const group = L.featureGroup(markers);
+                    map.fitBounds(group.getBounds(), { padding: [50, 50] });
+                }
+
+                atualizarEstatisticas(atracoesFiltradas);
+                renderizarListaAtracoes(atracoesFiltradas);
+                renderizarEstatisticasTabela(atracoesFiltradas);
+                atualizarIndicadores(atracoesFiltradas);
+                preencherDestinosRotas(atracoesFiltradas);
+            }
+
+            // ============================================================
+            // FUNÇÕES DE DETALHES
+            // ============================================================
+
+            window.verDetalhes = function(id) {
+                const atracao = atracoes.find(a => a.id === id);
+                if (!atracao) return;
+                selectedAttraction = atracao;
+
+                const t = translations[currentLang];
+                $('#detalhesTitulo').html(`<i class="bi bi-pin-map"></i> ${atracao.nome}`);
+
+                const conteudo = `
+                    <div class="row">
+                        <div class="col-md-12">
+                            <img src="${atracao.imagem}" class="modal-detalhe-imagem" alt="${atracao.nome}">
+                            <p><strong>${t.detailAttraction || 'Descrição'}:</strong> ${atracao.descricao}</p>
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <strong>${t.tableCategory || 'Categoria'}:</strong><br>
+                                    <span class="badge" style="background:${getCategoriaCor(atracao.categoria)};">${atracao.categoria.toUpperCase()}</span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>${t.tableRating || 'Avaliação'}:</strong><br>
+                                    <span style="color:#ffc107;">${'★'.repeat(Math.round(atracao.avaliacao))}${'☆'.repeat(5 - Math.round(atracao.avaliacao))}</span>
+                                    <span>${atracao.avaliacao}</span>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <strong>Horário:</strong><br>
+                                    ${atracao.horario}
+                                </div>
+                                <div class="col-6">
+                                    <strong>${t.tableDistance || 'Distância'}:</strong><br>
+                                    ${atracao.distancia} km
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <strong>Melhor Época:</strong><br>
+                                    ${atracao.melhorEpoca}
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <strong>${t.tableVisits || 'Visitas mensais'}:</strong><br>
+                                    ${atracao.visitas} visitantes
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                $('#detalhesConteudo').html(conteudo);
+                $('#detalhesModal').modal('show');
+            };
+
+            function getCategoriaCor(categoria) {
+                const cores = {
+                    'natureza': '#4CAF50',
+                    'cultura': '#FF9800',
+                    'aventura': '#E91E63',
+                    'hospedagem': '#2196F3',
+                    'gastronomia': '#FF5722'
+                };
+                return cores[categoria] || '#6c757d';
+            }
+
+            function exibirInfoAtracao(atracao) {
+                $('#infoDetalhes').show().html(`
+                    <img src="${atracao.thumbnail}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:10px;">
+                    <h5 style="color:#fff; margin-top:5px;">${atracao.nome}</h5>
+                    <p style="color:rgba(255,255,255,0.7); font-size:0.9rem;">${atracao.descricao.substring(0, 100)}...</p>
+                    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; font-size:0.85rem;">
+                        <span style="color:#ffc107;">${'★'.repeat(Math.round(atracao.avaliacao))} ${atracao.avaliacao}</span>
+                        <span style="color:rgba(255,255,255,0.5);">📍 ${atracao.distancia} km</span>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="verDetalhes(${atracao.id})">
+                        <i class="bi bi-info-circle"></i> Detalhes
+                    </button>
+                `);
+            }
+
+            // ============================================================
+            // RENDERIZAÇÃO DA LISTA COM IMAGENS
+            // ============================================================
+
+            function renderizarListaAtracoes(lista) {
+                const container = $('#listaAtracoes');
+                container.empty();
+
+                if (lista.length === 0) {
+                    container.html(`
+                        <div class="text-center" style="color:rgba(255,255,255,0.5); padding:40px;">
+                            <i class="bi bi-search" style="font-size:3rem;"></i>
+                            <p>Nenhuma atração encontrada com os filtros atuais.</p>
+                        </div>
+                    `);
+                    return;
+                }
+
+                lista.forEach(a => {
+                    const cor = getCategoriaCor(a.categoria);
+                    container.append(`
+                        <div class="attraction-card" onclick="verDetalhes(${a.id})">
+                            <img src="${a.thumbnail}" class="attraction-image" alt="${a.nome}" loading="lazy">
+                            <div class="attraction-info">
+                                <div class="attraction-name">${a.nome}</div>
+                                <div class="attraction-desc">${a.descricao.substring(0, 60)}...</div>
+                                <div class="attraction-rating">${'★'.repeat(Math.round(a.avaliacao))}${'☆'.repeat(5 - Math.round(a.avaliacao))} ${a.avaliacao}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <span class="badge" style="background:${cor};">${a.categoria}</span>
+                                <div class="attraction-distance">📍 ${a.distancia} km</div>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
+            // ============================================================
+            // ESTATÍSTICAS
+            // ============================================================
+
+            function atualizarEstatisticas(lista) {
+                const categorias = {};
+                lista.forEach(a => {
+                    categorias[a.categoria] = (categorias[a.categoria] || 0) + 1;
+                });
+
+                const total = lista.length;
+                const cores = ['#4CAF50', '#FF9800', '#E91E63', '#2196F3', '#FF5722'];
+                const labels = ['Natureza', 'Cultura', 'Aventura', 'Hospedagem', 'Gastronomia'];
+                const keys = ['natureza', 'cultura', 'aventura', 'hospedagem', 'gastronomia'];
+
+                let conic = '';
+                let acum = 0;
+                const legenda = $('#legendaPieCategorias');
+                legenda.empty();
+
+                keys.forEach((k, idx) => {
+                    const valor = categorias[k] || 0;
+                    const pct = total > 0 ? (valor / total) * 100 : 0;
+                    const inicio = acum;
+                    acum += pct;
+                    if (pct > 0) {
+                        conic += `, ${cores[idx % cores.length]} ${inicio}% ${acum}%`;
+                    }
+                    legenda.append(`
+                        <span style="color:rgba(255,255,255,0.8);">
+                            <span style="color:${cores[idx % cores.length]};">●</span> ${labels[idx]} (${Math.round(pct)}%)
+                        </span>
+                    `);
+                });
+
+                if (conic) {
+                    $('#pieCategorias').css('background', `conic-gradient(${conic.substring(2)})`);
+                } else {
+                    $('#pieCategorias').css('background', '#444');
+                }
+
+                const container = $('#graficoAvaliacoes');
+                container.empty();
+
+                const top5 = [...lista].sort((a, b) => b.avaliacao - a.avaliacao).slice(0, 5);
+                const max = Math.max(...top5.map(a => a.avaliacao), 1);
+
+                top5.forEach(a => {
+                    const altura = Math.max(5, (a.avaliacao / 5) * 100);
+                    const cor = a.avaliacao >= 4.5 ? '#28a745' : a.avaliacao >= 4 ? '#ffc107' : '#dc3545';
+
+                    container.append(`
+                        <div style="width: ${100/top5.length - 2}%; margin:0 1%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;">
+                            <div style="width:100%; background:${cor}; height:${altura}%; border-radius:4px; min-height:15px;">
+                                <span style="display:block; text-align:center; color:#fff; font-size:0.6rem; padding-top:2px;">${a.avaliacao}</span>
+                            </div>
+                            <small style="color:rgba(255,255,255,0.6); margin-top:5px; font-size:0.6rem;">${a.nome.substring(0, 8)}</small>
+                        </div>
+                    `);
+                });
+            }
+
+            function renderizarEstatisticasTabela(lista) {
+                const body = $('#estatisticasBody');
+                body.empty();
+
+                const sorted = [...lista].sort((a, b) => b.visitas - a.visitas);
+
+                sorted.forEach(a => {
+                    const status = a.visitas > 1000 ? 'Popular' : a.visitas > 500 ? 'Regular' : 'Baixa Procura';
+                    const statusClass = status === 'Popular' ? 'bg-success' :
+                        status === 'Regular' ? 'bg-warning' : 'bg-secondary';
+
+                    body.append(`
+                        <tr>
+                            <td><strong>${a.nome}</strong></td>
+                            <td><span class="badge" style="background:${getCategoriaCor(a.categoria)};">${a.categoria}</span></td>
+                            <td><span style="color:#ffc107;">${'★'.repeat(Math.round(a.avaliacao))} ${a.avaliacao}</span></td>
+                            <td>${a.visitas}</td>
+                            <td>${a.distancia} km</td>
+                            <td><span class="badge ${statusClass}">${status}</span></td>
+                        </tr>
+                    `);
+                });
+            }
+
+            function atualizarIndicadores(lista) {
+                const total = lista.length;
+                const categorias = new Set(lista.map(a => a.categoria));
+                const avgAvaliacao = total > 0 ? (lista.reduce((s, a) => s + a.avaliacao, 0) / total) : 0;
+                const avgDistancia = total > 0 ? (lista.reduce((s, a) => s + a.distancia, 0) / total) : 0;
+
+                $('#totalAtracoes').text(total);
+                $('#totalCategorias').text(categorias.size);
+                $('#avaliacaoMedia').text(avgAvaliacao.toFixed(1));
+                $('#distanciaMedia').text(avgDistancia.toFixed(1));
+            }
+
+            // ============================================================
+            // PREENCHER DESTINOS DAS ROTAS
+            // ============================================================
+
+            function preencherDestinosRotas(lista) {
+                const select = $('#rotaDestino');
+                select.find('option:not(:first)').remove();
+                lista.forEach(a => {
+                    select.append(`<option value="${a.id}">${a.nome}</option>`);
+                });
+            }
+
+            // ============================================================
+            // FUNÇÕES DOS BOTÕES - AÇÕES RÁPIDAS
+            // ============================================================
+
+            // 1. Minha Localização
+            $('#btnMinhaLocalizacao').click(function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(pos) {
+                            const lat = pos.coords.latitude;
+                            const lng = pos.coords.longitude;
+                            map.setView([lat, lng], 14);
+
+                            L.marker([lat, lng], {
+                                icon: L.divIcon({
+                                    html: `<div style="
+                                        background: #0d6efd;
+                                        border-radius: 50%;
+                                        width: 20px;
+                                        height: 20px;
+                                        border: 3px solid #fff;
+                                        box-shadow: 0 0 20px rgba(13,110,253,0.5);
+                                        animation: pulse 1.5s ease-in-out infinite;
+                                    "></div>`,
+                                    className: 'custom-marker',
+                                    iconSize: [20, 20],
+                                    iconAnchor: [10, 10]
+                                })
+                            }).addTo(map)
+                                .bindPopup('📍 Sua localização atual');
+
+                            $('#infoAtracao').html(`
+                                <div style="color:#fff;">
+                                    <h6><i class="bi bi-geo-alt text-primary"></i> Sua Localização</h6>
+                                    <p style="color:rgba(255,255,255,0.7);">
+                                        📍 Lat: ${lat.toFixed(4)}<br>
+                                        📍 Lng: ${lng.toFixed(4)}
+                                    </p>
+                                </div>
+                            `);
+                        },
+                        function(err) {
+                            $('#infoAtracao').html(`
+                                <div style="color:#dc3545;">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    Não foi possível obter sua localização. Verifique as permissões.
+                                </div>
+                            `);
+                        }
+                    );
+                } else {
+                    $('#infoAtracao').html(`
+                        <div style="color:#dc3545;">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Seu navegador não suporta geolocalização.
+                        </div>
+                    `);
+                }
+            });
+
+            // 2. Calcular Rota - abre modal
+            $('#btnRotas').click(function() {
+                $('#rotaModal').modal('show');
+            });
+
+            // 2.1 Calcular Rota - ação
+            $('#btnCalcularRota').click(function() {
+                const destinoId = $('#rotaDestino').val();
+                const transporte = $('#rotaTransporte').val();
+                const origem = $('#rotaOrigem').val();
+
+                if (!destinoId) {
+                    $('#rotaResultado').show().html(`
+                        <div style="color:#ffc107;">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Por favor, selecione um destino.
+                        </div>
+                    `);
+                    return;
+                }
+
+                const destino = atracoes.find(a => a.id == destinoId);
+                if (!destino) return;
+
+                const tempoBase = destino.distancia / 60;
+                const tempo = transporte === 'carro' ? tempoBase * 0.8 :
+                    transporte === 'moto' ? tempoBase * 0.7 :
+                    transporte === 'bicicleta' ? tempoBase * 3 :
+                    tempoBase * 4;
+
+                const resultado = `
+                    <div style="color:#28a745;">
+                        <h6><i class="bi bi-check-circle"></i> Rota Calculada!</h6>
+                        <hr>
+                        <div><strong>📍 Origem:</strong> ${origem === 'atual' ? 'Sua Localização' : 'Centro de Malanje'}</div>
+                        <div><strong>📍 Destino:</strong> ${destino.nome}</div>
+                        <div><strong>🚗 Transporte:</strong> ${transporte}</div>
+                        <div><strong>📏 Distância:</strong> ${destino.distancia} km</div>
+                        <div><strong>⏱️ Tempo estimado:</strong> ${tempo.toFixed(1)} horas</div>
+                        <div><strong>🛣️ Recomendação:</strong> ${destino.distancia > 50 ? 'Veículo 4x4 recomendado' : 'Qualquer veículo'}</div>
+                        <button class="btn btn-sm btn-primary mt-2" onclick="map.setView([${destino.lat}, ${destino.lng}], 12)">
+                            <i class="bi bi-geo-alt"></i> Ver no Mapa
+                        </button>
+                    </div>
+                `;
+
+                $('#rotaResultado').show().html(resultado);
+            });
+
+            // 3. Modo Offline
+            $('#btnModoOffline').click(function() {
+                $('#offlineModal').modal('show');
+            });
+
+            $('#btnAtivarOffline').click(function() {
+                offlineMode = true;
+                $('#offlineModal').modal('hide');
+                $('#infoAtracao').html(`
+                    <div style="color:#ffc107;">
+                        <i class="bi bi-wifi-off"></i>
+                        <strong>Modo Offline Ativado</strong>
+                        <p style="color:rgba(255,255,255,0.7);font-size:0.85rem;">
+                            ✅ Mapa em cache<br>
+                            ✅ Atrações disponíveis offline<br>
+                            ❌ Trânsito e atualizações desativados
+                        </p>
+                    </div>
+                `);
+            });
+
+            // 4. Camadas
+            $('#btnCamadas').click(function() {
+                $('#camadasModal').modal('show');
+            });
+
+            $('#btnAplicarCamada').click(function() {
+                const camada = $('input[name="camada"]:checked').val();
+                let tileUrl;
+                let attribution;
+
+                switch (camada) {
+                    case 'satelite':
+                        tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+                        attribution = '&copy; Esri, Maxar, Earthstar Geographics';
+                        break;
+                    case 'terreno':
+                        tileUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
+                        attribution = '&copy; OpenTopoMap';
+                        break;
+                    case 'transito':
+                        tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+                        attribution = '&copy; OpenStreetMap, CartoDB';
+                        break;
+                    case 'pontos':
+                        tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+                        attribution = '&copy; OpenStreetMap, CartoDB';
+                        break;
+                    default:
+                        tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+                        attribution = '&copy; OpenStreetMap, CartoDB';
+                }
+
+                // Remover camadas existentes e adicionar nova
+                map.eachLayer(function(layer) {
+                    if (layer instanceof L.TileLayer) {
+                        map.removeLayer(layer);
+                    }
+                });
+
+                L.tileLayer(tileUrl, {
+                    attribution: attribution,
+                    maxZoom: 19
+                }).addTo(map);
+
+                $('#camadasModal').modal('hide');
+                $('#infoAtracao').html(`
+                    <div style="color:#28a745;">
+                        <i class="bi bi-check-circle"></i>
+                        Camada alterada com sucesso!
+                        <p style="color:rgba(255,255,255,0.7);font-size:0.85rem;">
+                            🔹 ${camada.charAt(0).toUpperCase() + camada.slice(1)} ativada
+                        </p>
+                    </div>
+                `);
+            });
+
+            // 5. Atualizar Dados
+            $('#btnAtualizar').click(function() {
+                // Simular atualização com pequenas variações
+                const novasVisitas = atracoes.map(a => ({
+                    ...a,
+                    visitas: a.visitas + Math.floor(Math.random() * 50 - 25)
+                }));
+                Object.assign(atracoes, novasVisitas);
+
+                carregarAtracoes();
+                $('#infoAtracao').html(`
+                    <div style="color:#28a745;">
+                        <i class="bi bi-check-circle"></i>
+                        Dados atualizados com sucesso!
+                        <p style="color:rgba(255,255,255,0.7);font-size:0.85rem;">
+                            📊 ${atracoes.length} atrações sincronizadas<br>
+                            ⭐ Avaliações atualizadas
+                        </p>
+                    </div>
+                `);
+            });
+
+            // 6. Voltar
+            $('#btnVoltar').click(function() {
+                if (confirm('Deseja realmente sair do mapa?')) {
+                    alert('🔙 Retornando ao menu principal...');
+                }
+            });
+
+            // ============================================================
+            // FUNÇÕES DOS BOTÕES - MODAL DE DETALHES
+            // ============================================================
+
+            // Como Chegar (do modal de detalhes)
+            $('#btnRotaModal').click(function() {
+                if (!selectedAttraction) {
+                    alert('Selecione uma atração primeiro.');
+                    return;
+                }
+                $('#detalhesModal').modal('hide');
+                setTimeout(() => {
+                    $('#rotaDestino').val(selectedAttraction.id);
+                    $('#rotaModal').modal('show');
+                }, 300);
+            });
+
+            // Adicionar ao Roteiro
+            $('#btnAdicionarRoteiro').click(function() {
+                if (!selectedAttraction) {
+                    alert('Selecione uma atração primeiro.');
+                    return;
+                }
+                $('#detalhesModal').modal('hide');
+                setTimeout(() => {
+                    alert(`✅ "${selectedAttraction.nome}" adicionado ao seu roteiro!\n\n` +
+                        `📋 Roteiro atual:\n` +
+                        `1. ${selectedAttraction.nome}\n` +
+                        `💡 Clique em "Roteiros Sugeridos" para ver roteiros completos.`);
+                }, 300);
+            });
+
+            // ============================================================
+            // FUNÇÕES DOS BOTÕES - ROTEIROS SUGERIDOS
+            // ============================================================
+
+            const roteirosDetalhados = {
+                1: {
+                    titulo: 'Roteiro 1 - Maravilhas de Malanje',
+                    duracao: '2 dias',
+                    descricao: 'Descubra as maravilhas naturais de Malanje com este roteiro de 2 dias.',
+                    paradas: [
+                        '🌊 Quedas de Kalandula - A maior queda d\'água de Angola',
+                        '🗿 Pedras Negras de Pungo Andongo - Formações rochosas impressionantes',
+                        '🦒 Parque Nacional da Cangandala - Lar da Palanca Negra'
+                    ],
+                    dicas: 'Leve protetor solar, água e câmera fotográfica. Recomenda-se veículo 4x4.'
+                },
+                2: {
+                    titulo: 'Roteiro 2 - Natureza e Aventura',
+                    duracao: '3 dias',
+                    descricao: 'Um roteiro repleto de aventura e contato com a natureza exuberante de Malanje.',
+                    paradas: [
+                        '🚣 Rápidos do Kwanza - Rafting e pesca esportiva',
+                        '🏗️ Barragem de Kapanda - Vista impressionante',
+                        '💕 Foz do Amor - Paisagem romântica',
+                        '💧 Nascente do Amor - Águas cristalinas'
+                    ],
+                    dicas: 'Leve roupas leves, calçados adequados para trilhas e equipamento de proteção.'
+                },
+                3: {
+                    titulo: 'Roteiro 3 - Cultural',
+                    duracao: '1 dia',
+                    descricao: 'Explore a rica cultura e história da província de Malanje.',
+                    paradas: [
+                        '🏛️ Museu Regional de Malanje - História e cultura local',
+                        '🎭 Centro Cultural de Malanje - Arte e apresentações',
+                        '🎨 Arte e Artesanato Local - Produtos típicos'
+                    ],
+                    dicas: 'Aproveite para comprar artesanato local e provar a gastronomia típica.'
+                }
+            };
+
+            $('.btn-roteiro').click(function() {
+                const roteiroId = $(this).data('roteiro');
+                const roteiro = roteirosDetalhados[roteiroId];
+                const t = translations[currentLang];
+
+                if (!roteiro) return;
+
+                const conteudo = `
+                    <h5>${roteiro.titulo}</h5>
+                    <p><strong>⏱️ Duração:</strong> ${roteiro.duracao}</p>
+                    <p><strong>📝 Descrição:</strong> ${roteiro.descricao}</p>
+                    <hr>
+                    <h6>📍 Pontos de Parada:</h6>
+                    <ul>
+                        ${roteiro.paradas.map(p => `<li>${p}</li>`).join('')}
+                    </ul>
+                    <hr>
+                    <h6>💡 Dicas:</h6>
+                    <p>${roteiro.dicas}</p>
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-success" onclick="alert('🗺️ Roteiro salvo com sucesso!')">
+                            <i class="bi bi-bookmark-plus"></i> ${t.routeDetailSave || 'Salvar Roteiro'}
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="alert('🔄 Carregando roteiro no mapa...')">
+                            <i class="bi bi-map"></i> ${t.viewRouteBtn || 'Ver no Mapa'}
+                        </button>
+                    </div>
+                `;
+
+                $('#roteiroConteudo').html(conteudo);
+                $('#roteiroModal').modal('show');
+            });
+
+            // Salvar Roteiro do modal
+            $('#btnSalvarRoteiro').click(function() {
+                alert('✅ Roteiro salvo com sucesso na sua lista de roteiros!');
+                $('#roteiroModal').modal('hide');
+            });
+
+            // ============================================================
+            // FUNÇÕES DOS BOTÕES - EXPORTAR
+            // ============================================================
+
+            $('#btnExport').click(function() {
+                $('#exportModal').modal('show');
+            });
+
+            $('#btnExportConfirm').click(function() {
+                const formato = $('#exportFormato').val();
+                const incluir = $('#exportIncluir').val();
+                const qualidade = $('#exportQualidade').val();
+
+                $('#exportModal').modal('hide');
+
+                let mensagem = `📊 Mapa Exportado com Sucesso!\n\n`;
+                mensagem += `📄 Formato: ${formato.toUpperCase()}\n`;
+                mensagem += `📋 Conteúdo: ${incluir === 'completo' ? 'Mapa Completo' : incluir === 'atracoes' ? 'Apenas Atrações' : 'Apenas Rotas'}\n`;
+                mensagem += `🔍 Qualidade: ${qualidade.toUpperCase()}\n\n`;
+
+                if (formato === 'pdf') {
+                    mensagem += `📄 Arquivo PDF gerado com ${atracoes.length} atrações e mapa interativo.`;
+                } else if (formato === 'imagem') {
+                    mensagem += `🖼️ Imagem PNG gerada com resolução ${qualidade === 'alta' ? '1920x1080' : qualidade === 'media' ? '1280x720' : '800x600'}.`;
+                } else {
+                    mensagem += `🌐 Arquivo GeoJSON gerado com todos os pontos de interesse.`;
+                }
+
+                alert(mensagem);
+            });
+
+            // ============================================================
+            // FUNÇÕES DOS BOTÕES - BUSCA
+            // ============================================================
+
+            $('#btnSearch').click(function() {
+                const term = $('#quickSearch').val().toLowerCase();
+                if (!term) {
+                    renderizarListaAtracoes(atracoes);
+                    return;
+                }
+
+                const filtered = atracoes.filter(a =>
+                    a.nome.toLowerCase().includes(term) ||
+                    a.descricao.toLowerCase().includes(term) ||
+                    a.categoria.includes(term)
+                );
+                renderizarListaAtracoes(filtered);
+
+                if (filtered.length > 0) {
+                    $('#lista-tab').tab('show');
+                } else {
+                    alert('🔍 Nenhuma atração encontrada com o termo: "' + term + '"');
+                }
+            });
+
+            $('#quickSearch').keypress(function(e) {
+                if (e.which === 13) {
+                    $('#btnSearch').click();
+                }
+            });
+
+            // ============================================================
+            // FUNÇÕES DOS BOTÕES - DASHBOARD
+            // ============================================================
+
+            $('#btnDashboard').click(function(e) {
+                e.preventDefault();
+                alert('🔙 Redirecionando para o Dashboard Principal...\n\n' +
+                    '📊 SICAMMI - Sistema de Apoio ao Turismo\n' +
+                    '📍 Malanje, Angola');
+            });
+
+            // ============================================================
+            // EVENTOS - TABS
+            // ============================================================
+
+            $('#mapa-tab').on('shown.bs.tab', function() {
+                setTimeout(initMap, 100);
+            });
+
+            // ============================================================
+            // INICIALIZAÇÃO
+            // ============================================================
+
+            setTimeout(initMap, 300);
+
+            function updateDateTime() {
+                const now = new Date();
+                $('#dateTimeDisplay').text(
+                    now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR')
+                );
+            }
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+
+            // Tema
+            let isDarkTheme = true;
+
+            function toggleTheme() {
+                isDarkTheme = !isDarkTheme;
+                if (isDarkTheme) {
+                    $('body').removeClass('light-theme');
+                    $('#themeIcon').removeClass('bi-sun-fill').addClass('bi-moon-stars');
+                } else {
+                    $('body').addClass('light-theme');
+                    $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+                }
+                localStorage.setItem('sicami-theme-mapa', isDarkTheme ? 'dark' : 'light');
+            }
+
+            const savedTheme = localStorage.getItem('sicami-theme-mapa');
+            if (savedTheme === 'light') {
+                isDarkTheme = false;
+                $('body').addClass('light-theme');
+                $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+            }
+            $('#themeToggle').click(toggleTheme);
+
+            // Filtros
+            $('#btnAplicarFiltros').click(function() {
+                carregarAtracoes();
+                $('#lista-tab').tab('show');
+                $('#infoAtracao').html(`
+                    <div style="color:#28a745;">
+                        <i class="bi bi-check-circle"></i>
+                        Filtros aplicados com sucesso!
+                        <p style="color:rgba(255,255,255,0.7);font-size:0.85rem;">
+                            🔹 Categoria: ${$('#filtroCategoria').val()}<br>
+                            🔹 Avaliação: ${$('#filtroAvaliacao').val() === '0' ? 'Todas' : $('#filtroAvaliacao').val() + '+ estrelas'}<br>
+                            🔹 Raio: ${$('#filtroDistancia').val() || 'Ilimitado'} km
+                        </p>
+                    </div>
+                `);
+            });
+
+            console.log('✅ Mapa Turístico - Malanje carregado com todos os botões funcionais!');
+            console.log(`📍 ${atracoes.length} atrações turísticas disponíveis`);
+            console.log(`🎯 ${Object.keys(roteirosDetalhados).length} roteiros sugeridos`);
+            console.log(`🌐 Sistema de idiomas ativo: ${currentLang}`);
+
+        });
+    </script>
+</body>
+</html>

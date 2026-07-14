@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Assistente de Mobilidade Turística - Malanje</title>
+    <!-- Bootstrap 5 + Icons + Font Awesome + Google Fonts (Times New Roman fallback) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Maps API (com Geolocalização) -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7KQyPq07cB0Eh8nM5q6T3WqY5oJQpKpE&libraries=places,geometry&callback=initMap" async defer></script>
+    <style>
+        * {
+            font-family: 'Times New Roman', Times, serif;
+        }
+        body {
+            background: #f4f7fc;
+            margin: 0;
+            padding: 0;
+        }
+        /* header com gradiente premium */
+        .header-premium {
+            background: linear-gradient(135deg, #0b3b2f, #1b5e3f);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .card-transport {
+            border-radius: 20px;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .card-transport:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .btn-whatsapp {
+            background-color: #25d366;
+            border-color: #25d366;
+            color: white;
+        }
+        .btn-whatsapp:hover {
+            background-color: #1da851;
+            color: white;
+        }
+        .btn-call {
+            background-color: #007bff;
+            color: white;
+        }
+        .destino-ativo {
+            background-color: #1b5e3f;
+            color: white;
+            border-radius: 30px;
+            padding: 6px 15px;
+            font-weight: bold;
+        }
+        .map-container {
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border: 2px solid #fff;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+        .sidebar-info {
+            background: white;
+            border-radius: 24px;
+            padding: 1rem;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+        .badge-gps {
+            background-color: #0b3b2f;
+            color: white;
+            font-size: 0.8rem;
+        }
+        .tempo-chegada {
+            font-size: 0.85rem;
+            color: #2c7a4d;
+            font-weight: bold;
+        }
+        .btn-google-maps {
+            background-color: #34a853;
+            border: none;
+        }
+        footer {
+            background-color: #0a2e24;
+            color: #cddcd9;
+            font-size: 0.9rem;
+        }
+        .assistente-msg {
+            background: #e9f5ef;
+            border-left: 6px solid #1b5e3f;
+            border-radius: 16px;
+        }
+        @media (max-width: 768px) {
+            #map {
+                height: 300px;
+            }
+        }
+        .terminal-item {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 0;
+        }
+        i.fa, i.fab {
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-premium text-center">
+    <div class="container">
+        <h1><i class="fas fa-map-marked-alt"></i> Guia de Mobilidade Turística | Malanje</h1>
+        <p class="mb-0">Assistente Inteligente – transporte, navegação e segurança para os seus percursos</p>
+    </div>
+</div>
+
+<div class="container my-4">
+    <!-- Linha de status GPS e boas vindas -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+        <div class="mb-2 mb-sm-0">
+            <i class="fas fa-location-dot text-success"></i> <span id="statusLocalizacao">📍 A localizar GPS...</span>
+        </div>
+        <div>
+            <span class="badge bg-dark p-2"><i class="fas fa-phone-alt"></i> Emergência: 111 | Polícia: 113</span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- COLUDA ESQUERDA: Seleção de destino + Info Transporte + Terminais -->
+        <div class="col-lg-4">
+            <div class="sidebar-info mb-4">
+                <h4><i class="fas fa-umbrella-beach"></i> Destinos Turísticos</h4>
+                <div class="d-flex flex-wrap gap-2 my-3" id="listaDestinos">
+                    <!-- Destinos predefinidos -->
+                    <button class="btn btn-outline-success destino-btn" data-nome="Quedas de Calandula" data-lat="-9.0747" data-lng="15.9301" data-distancia="85">🌊 Quedas de Calandula</button>
+                    <button class="btn btn-outline-success destino-btn" data-nome="Pedras Negras de Pungo Andongo" data-lat="-9.6800" data-lng="15.5760" data-distancia="116">⛰️ Pedras Negras</button>
+                    <button class="btn btn-outline-success destino-btn" data-nome="Parque Nacional da Cangandala" data-lat="-9.7925" data-lng="16.0492" data-distancia="42">🦒 Parque Cangandala</button>
+                    <button class="btn btn-outline-success destino-btn" data-nome="Lagoa do Carumbo" data-lat="-9.3333" data-lng="17.3167" data-distancia="145">🏞️ Lagoa do Carumbo</button>
+                    <button class="btn btn-outline-success destino-btn" data-nome="Palácio do Rei Ngola" data-lat="-9.5400" data-lng="16.3440" data-distancia="29">🏛️ Palácio do Rei Ngola</button>
+                </div>
+                <div id="destinoSelecionadoInfo" class="alert alert-light border mt-2">
+                    <i class="fas fa-info-circle"></i> Nenhum destino selecionado. Clique num ponto turístico.
+                </div>
+                <!-- Botão Levar-me até lá -->
+                <button id="btnLevarAteLa" class="btn btn-success w-100 mt-2" disabled>
+                    <i class="fas fa-taxi"></i> Levar-me até lá (GPS + Transporte)
+                </button>
+            </div>
+
+            <!-- EMPRESAS DE TÁXI (Kubinga, MOBI, Allo Taxi) -->
+            <div class="sidebar-info mb-4">
+                <h4><i class="fas fa-car-side"></i> Solicitar Transporte</h4>
+                <div id="listaTaxi" class="row g-2">
+                    <!-- Cards serão injetados via JS -->
+                </div>
+                <div class="mt-2 small text-muted">* Clique no ícone para ligar ou WhatsApp direto.</div>
+            </div>
+
+            <!-- TERMINAIS E PONTOS DE TRANSPORTE -->
+            <div class="sidebar-info">
+                <h4><i class="fas fa-bus"></i> Terminais e Estações</h4>
+                <div id="terminaisLista"></div>
+                <div class="mt-2 text-center">
+                    <small><i class="fas fa-train"></i> Mobilidade intermunicipal e regional</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUNA DIREITA: Mapa + Navegação + Serviços próximos + assistente -->
+        <div class="col-lg-8">
+            <div class="map-container mb-3">
+                <div id="map"></div>
+            </div>
+            <!-- Dados da rota e assistente -->
+            <div class="row g-2 align-items-stretch">
+                <div class="col-md-7">
+                    <div class="card p-3 h-100 shadow-sm">
+                        <h5><i class="fas fa-route"></i> Rota & Navegação</h5>
+                        <div id="infoRota">
+                            <p class="text-muted">🚗 Selecione um destino para calcular rota e distância.</p>
+                        </div>
+                        <button id="abrirGoogleMaps" class="btn btn-google-maps text-white mt-2" disabled>
+                            <i class="fab fa-google"></i> Abrir rota no Google Maps
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="card p-3 h-100 shadow-sm">
+                        <h5><i class="fas fa-star-of-life"></i> Assistente de Viagem</h5>
+                        <div id="assistenteMensagem" class="assistente-msg p-2">
+                            🤖 Bem-vindo! Escolha um destino e veja recomendações de táxi, tempo e distância.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SERVIÇOS PRÓXIMOS AO DESTINO (hotéis, restaurantes, farmácias, etc) -->
+            <div class="mt-4 card p-3">
+                <h5><i class="fas fa-concierge-bell"></i> Serviços Próximos ao Destino</h5>
+                <div class="row" id="servicosProximos">
+                    <div class="col-12 text-muted">🔍 Selecione um destino para ver hotéis, restaurantes e serviços.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center py-3 mt-4">
+    <p class="mb-0"><i class="fas fa-shield-alt"></i> Assistente de Mobilidade Turística Premium - Malanje | Deslocação segura e inteligente</p>
+    <small>Kubinga • MOBI • Allo Taxi Angola • Parceiros oficiais de transporte</small>
+</footer>
+
+<script>
+    // Variáveis globais
+    let map;
+    let userMarker;
+    let userLat = -9.5383;   // Coordenadas padrão: Malanje centro aproximado (latitude cidade de Malanje)
+    let userLng = 16.3435;
+    let userLocationFixed = false;
+    let directionsRenderer;
+    let selectedDest = null;   // { nome, lat, lng, distanciaEstimada }
+
+    // Empresas de transporte (dados)
+    const empresasTaxi = [
+        { nome: "Kubinga", logo: "fas fa-car", telefone: "+244 923 123 456", whatsapp: "+244923123456", tempoEspera: "5-8 min", veiculo: "Sedan / Económico", url: "https://www.kubinga.com" },
+        { nome: "MOBI", logo: "fas fa-taxi", telefone: "+244 944 000 111", whatsapp: "+244944000111", tempoEspera: "3-6 min", veiculo: "Standard / 24h", url: "https://mobi.co.ao" },
+        { nome: "Allo Taxi Angola", logo: "fas fa-taxi", telefone: "+244 222 123 456", whatsapp: "+244222123456", tempoEspera: "7-10 min", veiculo: "Executivo / Van", url: "https://www.allotaxi.co.ao" },
+        { nome: "Real Express", logo: "fas fa-bus", telefone: "+244 923 789 000", whatsapp: "+244923789000", tempoEspera: "Pré-agendamento", veiculo: "Autocarro Interprovincial", url: "#" }
+    ];
+
+    // Terminais de transporte (Parque do Cacuso, Estação Ferroviária, Macon, Real express)
+    const terminais = [
+        { nome: "Estação Ferroviária de Malanje", localizacao: "Av. Comandante Che Guevara", horario: "06h - 18h", contacto: "+244 923 456 789", rotas: "Malanje → N'dalatando / Luanda" },
+        { nome: "Parque do Cacuso", localizacao: "Bairro Cacuso, Malanje", horario: "05h - 20h", contacto: "+244 912 345 678", rotas: "Cacuso → Calandula, Cacuso → Kambo" },
+        { nome: "Macon (Terminal Interprovincial)", localizacao: "Rua 1º Congresso", horario: "06h-19h", contacto: "+244 922 554 433", rotas: "Malanje → Luanda, Malanje → Uíge" },
+        { nome: "Real Express Terminal", localizacao: "Av. 4 de Fevereiro", horario: "07h-20h", contacto: "+244 923 111 222", rotas: "Malanje → Saurimo, Luanda" }
+    ];
+
+    // Serviços próximos pré-definidos (exemplo dinâmico baseado no destino)
+    const servicosBase = {
+        "Quedas de Calandula": { hoteis: "Pousada Calandula, Residencial Cascata", restaurantes: "Restaurante Mirante, Barragem Grill", farmacia: "Farmácia Calandula Centro", hospital: "Centro de Saúde Calandula", policia: "Esquadra da Calandula", atm: "Banco BIC (próximo)" },
+        "Pedras Negras de Pungo Andongo": { hoteis: "Eco Lodge Pedras Negras, Pousada Pungo", restaurantes: "Cantinho da Montanha, Churrasqueira Pedras", farmacia: "Farmácia Pungo", hospital: "Hospital Municipal do Andongo", policia: "PN Pungo Andongo", atm: "Multicaixa Pungo" },
+        "Parque Nacional da Cangandala": { hoteis: "Cangandala Camp, Residencial Mussende", restaurantes: "Restaurante do Parque, Lanchonete Savana", farmacia: "Farmácia Cangandala", hospital: "Centro de Saúde Cangandala", policia: "Posto Fiscal Cangandala", atm: "ATM Cangandala (BP)" },
+        "Lagoa do Carumbo": { hoteis: "Pousada Carumbo, Lodge Lagoa Azul", restaurantes: "Restaurante Flutuante, Bar da Lagoa", farmacia: "Farmácia Carumbo (Caculama)", hospital: "Hospital de Caculama", policia: "Esquadra Carumbo", atm: "ATM Caculama" },
+        "Palácio do Rei Ngola": { hoteis: "Hotel Malanje, Residencial Ngola", restaurantes: "Restaurante Sabores do Rei, Churrascaria Ngola", farmacia: "Farmácia Popular", hospital: "Hospital Provincial de Malanje", policia: "Comando Provincial", atm: "Banco BAI, BPC" }
+    };
+
+    // Inicializar Mapa
+    function initMap() {
+        const malanjeCenter = { lat: -9.5383, lng: 16.3435 };
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: malanjeCenter,
+            zoom: 11,
+            styles: []
+        });
+        directionsRenderer = new google.maps.DirectionsRenderer();
+        directionsRenderer.setMap(map);
+        // Adicionar marcador genérico
+        userMarker = new google.maps.Marker({
+            position: malanjeCenter,
+            map: map,
+            title: "Sua localização (estimada)",
+            icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+        });
+        // Geolocalização real
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLat = position.coords.latitude;
+                    userLng = position.coords.longitude;
+                    const userPos = { lat: userLat, lng: userLng };
+                    map.setCenter(userPos);
+                    map.setZoom(13);
+                    userMarker.setPosition(userPos);
+                    userMarker.setTitle("Sua localização atual");
+                    document.getElementById("statusLocalizacao").innerHTML = `<i class="fas fa-check-circle"></i> Localização detectada: ${userLat.toFixed(4)}, ${userLng.toFixed(4)}`;
+                    userLocationFixed = true;
+                    // Se já tiver destino, atualizar rota
+                    if (selectedDest) calcularRotaEAssistente();
+                },
+                (error) => {
+                    console.warn(error);
+                    document.getElementById("statusLocalizacao").innerHTML = `<i class="fas fa-exclamation-triangle"></i> GPS não autorizado. Usando localização padrão (Malanje centro).`;
+                    userLocationFixed = false;
+                }
+            );
+        } else {
+            document.getElementById("statusLocalizacao").innerHTML = `<i class="fas fa-ban"></i> Navegador não suporta GPS.`;
+        }
+    }
+
+    // Calcular rota e atualizar assistente
+    function calcularRotaEAssistente() {
+        if (!selectedDest || !userLocationFixed) {
+            if (!selectedDest) return;
+            if (!userLocationFixed) {
+                document.getElementById("infoRota").innerHTML = `<p class="text-warning"><i class="fas fa-spinner"></i> Aguardando localização GPS...</p>`;
+                return;
+            }
+        }
+        const origem = new google.maps.LatLng(userLat, userLng);
+        const destino = new google.maps.LatLng(selectedDest.lat, selectedDest.lng);
+        const directionsService = new google.maps.DirectionsService();
+        directionsService.route({
+            origin: origem,
+            destination: destino,
+            travelMode: google.maps.TravelMode.DRIVING
+        }, (result, status) => {
+            if (status === "OK") {
+                directionsRenderer.setDirections(result);
+                const route = result.routes[0].legs[0];
+                const distanciaKm = (route.distance.value / 1000).toFixed(1);
+                const duracao = route.duration.text;
+                document.getElementById("infoRota").innerHTML = `
+                    <p><i class="fas fa-road"></i> <strong>Distância:</strong> ${distanciaKm} km<br>
+                    <i class="fas fa-clock"></i> <strong>Tempo estimado:</strong> ${duracao}<br>
+                    <i class="fas fa-flag-checkered"></i> <strong>Destino:</strong> ${selectedDest.nome}</p>
+                `;
+                document.getElementById("abrirGoogleMaps").disabled = false;
+                // Assistente mensagem premium
+                let msg = `🤖 Assistente: Para chegar a ${selectedDest.nome} são ${distanciaKm} km, tempo aprox. ${duracao}. `;
+                // Adicionar info sobre táxi
+                msg += `Existem táxis disponíveis na região com tempo médio de recolha de 5 a 10 minutos. Recomendamos Kubinga ou MOBI para maior conforto. `;
+                if (distanciaKm > 80) msg += `A viagem é longa, considere transporte intermunicipal ou contate Allo Taxi para veículos executivos.`;
+                else msg += `Pode solicitar recolha no botão de cada empresa. Tenha uma viagem segura!`;
+                document.getElementById("assistenteMensagem").innerHTML = `<i class="fas fa-robot"></i> ${msg}`;
+
+                // Serviços próximos ao destino com base no nome
+                mostrarServicosProximos(selectedDest.nome);
+            } else {
+                document.getElementById("infoRota").innerHTML = `<p class="text-danger">Erro ao calcular rota. Verifique coordenadas ou conectividade.</p>`;
+            }
+        });
+    }
+
+    function mostrarServicosProximos(nomeDestino) {
+        const serv = servicosBase[nomeDestino] || {
+            hoteis: "Informações gerais: Hotéis em Malanje centro", restaurantes: "Restaurantes locais disponíveis", farmacia: "Farmácias próximas", hospital: "Hospitais regionais", policia: "Esquadra mais próxima", atm: "Caixas automáticos na cidade"
+        };
+        document.getElementById("servicosProximos").innerHTML = `
+            <div class="col-md-6"><i class="fas fa-hotel"></i> <strong>Hotéis:</strong> ${serv.hoteis}</div>
+            <div class="col-md-6"><i class="fas fa-utensils"></i> <strong>Restaurantes:</strong> ${serv.restaurantes}</div>
+            <div class="col-md-4"><i class="fas fa-prescription-bottle"></i> Farmácias: ${serv.farmacia}</div>
+            <div class="col-md-4"><i class="fas fa-hospital"></i> Hospitais: ${serv.hospital}</div>
+            <div class="col-md-4"><i class="fas fa-shield-alt"></i> Polícia: ${serv.policia}</div>
+            <div class="col-md-6"><i class="fas fa-money-bill-wave"></i> ATM: ${serv.atm}</div>
+        `;
+    }
+
+    // Selecionar destino via botão
+    function selecionarDestino(nome, lat, lng, distancia) {
+        selectedDest = { nome: nome, lat: parseFloat(lat), lng: parseFloat(lng), distanciaEstimada: distancia };
+        document.getElementById("destinoSelecionadoInfo").innerHTML = `<i class="fas fa-check-circle text-success"></i> Destino ativo: <strong>${nome}</strong> (${distancia} km da cidade referência)`;
+        document.getElementById("btnLevarAteLa").disabled = false;
+        if (userLocationFixed) {
+            calcularRotaEAssistente();
+        } else {
+            document.getElementById("infoRota").innerHTML = `<p class="text-muted">⚠️ Aguardando permissão de localização para traçar rota. Recarregue ou autorize GPS.</p>`;
+        }
+        // Atualizar visual mapa, colocar marcador do destino
+        const markerDest = new google.maps.Marker({
+            position: { lat: parseFloat(lat), lng: parseFloat(lng) },
+            map: map,
+            title: nome,
+            icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+        });
+        // ajustar zoom para mostrar os dois pontos se tiver localização
+        if (userLocationFixed) {
+            const bounds = new google.maps.LatLngBounds();
+            bounds.extend({ lat: userLat, lng: userLng });
+            bounds.extend({ lat: parseFloat(lat), lng: parseFloat(lng) });
+            map.fitBounds(bounds);
+        } else {
+            map.setCenter({ lat: parseFloat(lat), lng: parseFloat(lng) });
+            map.setZoom(11);
+        }
+    }
+
+    // Abrir no Google Maps
+    function abrirGoogleMapsRoute() {
+        if (selectedDest && userLocationFixed) {
+            const url = `https://www.google.com/maps/dir/${userLat},${userLng}/${selectedDest.lat},${selectedDest.lng}`;
+            window.open(url, '_blank');
+        } else if (selectedDest) {
+            alert("Localização GPS ainda não disponível. Ative a localização.");
+        } else {
+            alert("Selecione um destino turístico.");
+        }
+    }
+
+    // Carregar empresas de táxi na interface
+    function carregarEmpresasTaxi() {
+        const container = document.getElementById("listaTaxi");
+        container.innerHTML = "";
+        empresasTaxi.forEach(emp => {
+            const col = document.createElement("div");
+            col.className = "col-12";
+            col.innerHTML = `
+                <div class="card card-transport mb-2 p-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><i class="${emp.logo} fa-2x text-primary"></i> <strong>${emp.nome}</strong><br>
+                        <small class="tempo-chegada"><i class="fas fa-hourglass-half"></i> Chegada: ${emp.tempoEspera}</small><br>
+                        <small>🚙 ${emp.veiculo}</small></div>
+                        <div class="btn-group-vertical">
+                            <a href="tel:${emp.telefone}" class="btn btn-sm btn-call mb-1"><i class="fas fa-phone-alt"></i> Ligar</a>
+                            <a href="https://wa.me/${emp.whatsapp.replace(/\+/g, '')}" target="_blank" class="btn btn-sm btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                            ${emp.url !== "#" ? `<a href="${emp.url}" target="_blank" class="btn btn-sm btn-outline-secondary mt-1"><i class="fas fa-globe"></i> Site/App</a>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(col);
+        });
+    }
+
+    function carregarTerminais() {
+        const container = document.getElementById("terminaisLista");
+        container.innerHTML = "";
+        terminais.forEach(t => {
+            const div = document.createElement("div");
+            div.className = "terminal-item";
+            div.innerHTML = `
+                <strong><i class="fas fa-map-pin"></i> ${t.nome}</strong><br>
+                <small>📍 ${t.localizacao} | 🕒 ${t.horario}</small><br>
+                <small><i class="fas fa-phone"></i> ${t.contacto}</small><br>
+                <small class="text-muted">🚌 Rotas: ${t.rotas}</small>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // função para o botão "Levar-me até lá": mostra rota e já dispara assistente com recomendações de táxi
+    function botaoLevarAteLa() {
+        if (!selectedDest) {
+            alert("Por favor, selecione um destino turístico antes.");
+            return;
+        }
+        if (!userLocationFixed) {
+            alert("Aguardando confirmação de GPS. Por favor permita a localização e tente novamente.");
+            return;
+        }
+        calcularRotaEAssistente();
+        // Rolagem para informações de transporte
+        document.getElementById("infoRota").scrollIntoView({ behavior: "smooth", block: "start" });
+        const msgPersonalizada = `🚕 Acionado modo "Levar-me até lá"! Os táxis da região podem recolher na sua localização atual. Consulte as empresas acima.`;
+        document.getElementById("assistenteMensagem").innerHTML = `<i class="fas fa-gem"></i> ${msgPersonalizada}<br>🤖 ${document.getElementById("assistenteMensagem").innerText}`;
+    }
+
+    // Inicialização dos listeners e dados
+    document.addEventListener("DOMContentLoaded", () => {
+        carregarEmpresasTaxi();
+        carregarTerminais();
+        // Destinos buttons
+        const botoesDestino = document.querySelectorAll(".destino-btn");
+        botoesDestino.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const nome = btn.getAttribute("data-nome");
+                const lat = btn.getAttribute("data-lat");
+                const lng = btn.getAttribute("data-lng");
+                const dist = btn.getAttribute("data-distancia");
+                selecionarDestino(nome, lat, lng, dist);
+            });
+        });
+        document.getElementById("abrirGoogleMaps").addEventListener("click", abrirGoogleMapsRoute);
+        document.getElementById("btnLevarAteLa").addEventListener("click", botaoLevarAteLa);
+    });
+
+    // export map callback
+    window.initMap = initMap;
+</script>
+</body>
+</html>

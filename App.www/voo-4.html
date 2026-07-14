@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Malanje Virtual Tour - Experiência Turística Completa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Georgia', serif;
+            background: #0a0e17;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.25;
+        }
+        .video-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 23, 0.85);
+            z-index: 1;
+        }
+        .container-fluid {
+            position: relative;
+            z-index: 2;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-glow {
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            color: #0a0e17;
+            border: none;
+            font-weight: 700;
+            padding: 10px 28px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 25px rgba(253, 160, 133, 0.25);
+            font-size: 0.95rem;
+        }
+        .btn-glow:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 45px rgba(253, 160, 133, 0.45);
+            color: #0a0e17;
+        }
+        .btn-outline-glow {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 20px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .btn-outline-glow:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #f6d365;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .cinematic-header {
+            padding: 15px 0 20px;
+            background: linear-gradient(180deg, rgba(10, 14, 23, 0.95) 0%, transparent 100%);
+        }
+        .cinematic-header .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Georgia', serif;
+        }
+        .cinematic-header .subtitle {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+        }
+
+        .guide-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #f6d365, #fda085);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            color: #0a0e17;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 40px rgba(253, 160, 133, 0.2);
+            animation: pulseGlow 2.5s infinite;
+            position: relative;
+        }
+        .guide-avatar::after {
+            content: '🎙️';
+            position: absolute;
+            bottom: -4px;
+            right: -4px;
+            font-size: 0.9rem;
+            background: #0a0e17;
+            border-radius: 50%;
+            padding: 2px;
+        }
+        @keyframes pulseGlow {
+            0%,
+            100% { box-shadow: 0 0 30px rgba(253, 160, 133, 0.1); }
+            50% { box-shadow: 0 0 60px rgba(253, 160, 133, 0.35); }
+        }
+
+        .guide-chat {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 14px;
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            min-height: 120px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .guide-chat::-webkit-scrollbar { width: 3px; }
+        .guide-chat::-webkit-scrollbar-thumb { background: rgba(246, 211, 101, 0.2); border-radius: 10px; }
+
+        .message {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            animation: slideIn 0.4s ease;
+        }
+        .message .avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        .message.guide .avatar {
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            color: #0a0e17;
+        }
+        .message.user .avatar {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .message .bubble {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 6px 12px;
+            border-radius: 10px;
+            max-width: 82%;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .message.guide .bubble {
+            border-top-left-radius: 3px;
+            background: rgba(246, 211, 101, 0.05);
+            border-color: rgba(246, 211, 101, 0.06);
+        }
+        .message.user .bubble {
+            border-top-right-radius: 3px;
+            background: rgba(255, 255, 255, 0.04);
+            margin-left: auto;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #map {
+            height: 250px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .leaflet-control-zoom a {
+            background: rgba(255, 255, 255, 0.06) !important;
+            backdrop-filter: blur(8px) !important;
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        }
+        .leaflet-popup-content-wrapper {
+            background: rgba(10, 14, 23, 0.95) !important;
+            backdrop-filter: blur(20px) !important;
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            border-radius: 12px !important;
+        }
+
+        .destination-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            transition: all 0.5s ease;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            height: 100%;
+        }
+        .destination-card .card-img-overlay {
+            background: linear-gradient(0deg, rgba(10, 14, 23, 0.9) 0%, transparent 60%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 12px;
+        }
+        .destination-card img {
+            transition: transform 0.6s ease;
+            height: 130px;
+            width: 100%;
+            object-fit: cover;
+        }
+        .destination-card:hover img { transform: scale(1.08); }
+        .destination-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(246, 211, 101, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .cinematic-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            animation: fadeInCinematic 0.8s ease;
+        }
+        .cinematic-overlay.active { display: flex; }
+        @keyframes fadeInCinematic {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .cinematic-content {
+            max-width: 650px;
+            text-align: center;
+            padding: 30px;
+        }
+        .cinematic-content .big-icon {
+            font-size: 4.5rem;
+            margin-bottom: 16px;
+            animation: floatIcon 2s ease-in-out infinite;
+        }
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .cinematic-content h2 {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .cinematic-content p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1rem;
+        }
+
+        .avatar-modal .modal-content {
+            background: rgba(10, 14, 23, 0.97);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+        }
+        .avatar-modal .btn-close { filter: invert(1); }
+        .avatar-option {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+            text-align: center;
+        }
+        .avatar-option:hover {
+            border-color: rgba(246, 211, 101, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .avatar-option.selected {
+            border-color: #f6d365;
+            background: rgba(246, 211, 101, 0.06);
+        }
+        .avatar-option .preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 auto 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .destination-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: none;
+        }
+        .destination-panel.active {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        .stats-bar .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .stats-bar .stat-item .bi { color: #f6d365; font-size: 0.7rem; }
+
+        .guide-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            background: rgba(74, 222, 128, 0.08);
+            border: 1px solid rgba(74, 222, 128, 0.08);
+            font-size: 0.7rem;
+            color: #4ade80;
+        }
+        .guide-status .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: blinkDot 1.5s infinite;
+        }
+        @keyframes blinkDot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        .journey-step {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.3);
+            transition: all 0.5s ease;
+        }
+        .journey-step.active {
+            background: rgba(246, 211, 101, 0.1);
+            border-color: #f6d365;
+            color: #f6d365;
+        }
+        .journey-step.completed {
+            background: rgba(74, 222, 128, 0.08);
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+
+        .step-progress {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.01); }
+        ::-webkit-scrollbar-thumb { background: rgba(246, 211, 101, 0.15); border-radius: 10px; }
+
+        @media (max-width: 768px) {
+            .cinematic-header .logo { font-size: 1.4rem; }
+            #map { height: 180px; }
+            .guide-avatar { width: 48px; height: 48px; font-size: 1.8rem; }
+            .destination-card img { height: 90px; }
+            .stats-bar { font-size: 0.6rem; gap: 6px; flex-wrap: wrap; }
+            .btn-glow { padding: 6px 14px; font-size: 0.75rem; }
+            .journey-step { font-size: 0.6rem; padding: 3px 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-african-savanna-at-sunset-32878-large.mp4" type="video/mp4" />
+        </video>
+    </div>
+
+    <!-- Cinemáticas de cada etapa -->
+    <div class="cinematic-overlay" id="cinematicArrival">
+        <div class="cinematic-content">
+            <div class="big-icon" id="cinematicIcon">✈️</div>
+            <h2 id="cinematicTitle">Bem-vindo a Malanje!</h2>
+            <p id="cinematicDesc">O seu voo aterrou com sucesso. O guia está à sua espera.</p>
+            <div class="mt-3">
+                <div class="spinner-border text-warning" role="status" style="width: 35px; height: 35px;">
+                    <span class="visually-hidden">A carregar...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid py-2">
+
+        <!-- CABEÇALHO -->
+        <div class="cinematic-header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="guide-avatar" id="guideAvatar">🧭</div>
+                        <div>
+                            <div class="logo">🌍 Malanje Virtual Tour</div>
+                            <div class="subtitle">Experiência Turística Completa</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                        <div class="guide-status"><span class="dot"></span> <span id="guideStatusText">Guia Online</span></div>
+                        <button class="btn btn-glow btn-sm" id="btnNextStep">
+                            <i class="bi bi-arrow-right-circle"></i> Próximo Passo
+                        </button>
+                        <button class="btn btn-outline-glow btn-sm" id="btnAvatarConfig">
+                            <i class="bi bi-person-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JORNADA / PROGRESSO -->
+        <div class="row mb-2">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="step-progress" id="stepProgress">
+                        <span class="journey-step active" data-step="0">🏠 Início</span>
+                        <span class="journey-step" data-step="1">✈️ Viagem</span>
+                        <span class="journey-step" data-step="2">🤝 Receção</span>
+                        <span class="journey-step" data-step="3">🏨 Hotel</span>
+                        <span class="journey-step" data-step="4">🗺️ Tour</span>
+                        <span class="journey-step" data-step="5">🏁 Regresso</span>
+                    </div>
+                    <div class="stats-bar">
+                        <span class="stat-item"><i class="bi bi-signpost"></i> <span id="statKm">0</span> km</span>
+                        <span class="stat-item"><i class="bi bi-pin"></i> <span id="statPlaces">0</span> locais</span>
+                        <span class="stat-item"><i class="bi bi-camera"></i> <span id="statPhotos">0</span> fotos</span>
+                        <span class="stat-item"><i class="bi bi-star"></i> Nível <span id="statLevel">1</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO -->
+        <div class="row g-3">
+
+            <!-- COLUNA ESQUERDA -->
+            <div class="col-lg-5">
+                <div class="glass-card p-3 h-100">
+
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div id="touristAvatarDisplay" style="width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #60a5fa, #2563eb);display:flex;align-items:center;justify-content:center;font-size:1.6rem;border:2px solid rgba(255,255,255,0.1);">🧑</div>
+                        <div>
+                            <h6 class="mb-0" id="touristNameDisplay">Viajante</h6>
+                            <small class="text-muted" id="touristLocation">📍 A preparar a viagem</small>
+                        </div>
+                        <div class="ms-auto">
+                            <span class="badge" style="background:rgba(246,211,101,0.08);color:#f6d365;font-size:0.65rem;">
+                                <i class="bi bi-star-fill"></i> Nível <span id="levelDisplay">1</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="mb-0"><i class="bi bi-chat-dots text-warning"></i> Guia Virtual</h6>
+                        <small class="text-muted" id="chatStatus">● Conectado</small>
+                    </div>
+
+                    <div class="guide-chat" id="guideChat">
+                        <div class="message guide">
+                            <div class="avatar">🧭</div>
+                            <div class="bubble">
+                                Olá! Sou o seu Guia Turístico de Malanje.
+                                <br /><small class="text-muted">Clique em "Próximo Passo" para iniciar a sua viagem.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control" id="chatInput" placeholder="Fale com o guia..." style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);color:#fff;border-radius:50px;padding:8px 16px;font-size:0.85rem;" />
+                            <button class="btn btn-glow" id="btnSendMessage" style="padding:6px 16px;">
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-sm btn-outline-glow action-btn" data-action="photo">
+                                <i class="bi bi-camera"></i> Tirar Foto
+                            </button>
+                            <button class="btn btn-sm btn-outline-glow action-btn" data-action="npc">
+                                <i class="bi bi-people"></i> Falar com NPC
+                            </button>
+                            <button class="btn btn-sm btn-outline-glow action-btn" data-action="info">
+                                <i class="bi bi-info-circle"></i> Saber Mais
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <small class="text-muted" style="font-size:0.7rem;"><i class="bi bi-people"></i> Personagens próximos:</small>
+                        <div class="d-flex gap-2 flex-wrap mt-1">
+                            <span class="badge npc-badge" style="background:rgba(246,211,101,0.06);color:rgba(255,255,255,0.5);font-weight:400;border:1px solid rgba(255,255,255,0.04);padding:4px 10px;cursor:pointer;">🧑‍🌾 Artesão</span>
+                            <span class="badge npc-badge" style="background:rgba(246,211,101,0.06);color:rgba(255,255,255,0.5);font-weight:400;border:1px solid rgba(255,255,255,0.04);padding:4px 10px;cursor:pointer;">📜 Historiador</span>
+                            <span class="badge npc-badge" style="background:rgba(246,211,101,0.06);color:rgba(255,255,255,0.5);font-weight:400;border:1px solid rgba(255,255,255,0.04);padding:4px 10px;cursor:pointer;">🌿 Guarda</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- COLUNA DIREITA -->
+            <div class="col-lg-7">
+
+                <div class="glass-card p-2 mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="mb-0"><i class="bi bi-map text-warning"></i> Mapa da Viagem</h6>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-outline-glow" id="btnRecenter"><i class="bi bi-crosshair"></i></button>
+                            <button class="btn btn-sm btn-outline-glow" id="btnRoute"><i class="bi bi-arrow-right-circle"></i> Rota</button>
+                        </div>
+                    </div>
+                    <div id="map"></div>
+                </div>
+
+                <!-- DESTINOS -->
+                <div class="row g-2">
+                    <div class="col-6 col-md-3">
+                        <div class="destination-card" data-dest="kalandula">
+                            <img src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=400&h=300&fit=crop&crop=center" alt="Kalandula" />
+                            <div class="card-img-overlay">
+                                <small class="fw-bold">🌊 Quedas Kalandula</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="destination-card" data-dest="pungo">
+                            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=300&fit=crop&crop=center" alt="Pungo" />
+                            <div class="card-img-overlay">
+                                <small class="fw-bold">⛰️ Pedras Negras</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="destination-card" data-dest="cangandala">
+                            <img src="https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400&h=300&fit=crop&crop=center" alt="Cangandala" />
+                            <div class="card-img-overlay">
+                                <small class="fw-bold">🦒 Parque Cangandala</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="destination-card" data-dest="carumbo">
+                            <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&h=300&fit=crop&crop=center" alt="Carumbo" />
+                            <div class="card-img-overlay">
+                                <small class="fw-bold">🏞️ Lagoa Carumbo</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAINEL DE INFORMAÇÕES -->
+                <div class="destination-panel mt-2" id="destinationPanel">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 id="destTitle" class="mb-1">📍 Destino</h6>
+                            <p id="destDescription" style="font-size:0.85rem;color:rgba(255,255,255,0.6);"></p>
+                        </div>
+                        <button class="btn btn-sm btn-outline-glow" id="closeDestPanel"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                    <div id="destExtraContent"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12 text-center">
+                <hr style="border-color: rgba(255,255,255,0.02);" />
+                <small class="text-muted" style="font-size:0.65rem;">
+                    <i class="bi bi-pin-map"></i> Malanje Virtual Tour · 
+                    <span id="footerLocation">Etapa: Início da viagem</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL AVATAR -->
+    <div class="modal fade avatar-modal" id="avatarModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">🧑‍🎨 Criar o seu Avatar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted" style="font-size:0.85rem;">Personalize o seu personagem para a viagem virtual.</p>
+
+                    <label class="fw-bold small text-muted">Género</label>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <div class="avatar-option gender-option selected" data-gender="male">
+                                <div class="preview" style="background:rgba(96,165,250,0.15);">👨</div>
+                                <small>Homem</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="avatar-option gender-option" data-gender="female">
+                                <div class="preview" style="background:rgba(244,114,182,0.15);">👩</div>
+                                <small>Mulher</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="fw-bold small text-muted">Estilo</label>
+                    <div class="row g-2 mb-2">
+                        <div class="col-4">
+                            <div class="avatar-option style-option selected" data-style="explorer">
+                                <div class="preview">🎒</div>
+                                <small style="font-size:0.65rem;">Explorador</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="avatar-option style-option" data-style="adventurer">
+                                <div class="preview">🧗</div>
+                                <small style="font-size:0.65rem;">Aventureiro</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="avatar-option style-option" data-style="photographer">
+                                <div class="preview">📸</div>
+                                <small style="font-size:0.65rem;">Fotógrafo</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="fw-bold small text-muted">Nome do Viajante</label>
+                        <input type="text" class="form-control" id="touristNameInput" value="Viajante" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);color:#fff;font-size:0.9rem;" />
+                    </div>
+
+                    <button class="btn btn-glow w-100" id="btnSaveAvatar">
+                        <i class="bi bi-check-lg"></i> Iniciar Viagem
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ============================================================
+            // 1. AVATAR
+            // ============================================================
+            const avatarModal = new bootstrap.Modal(document.getElementById('avatarModal'), { backdrop: 'static' });
+            let userGender = 'male',
+                userStyle = 'explorer',
+                userName = 'Viajante';
+            let currentStep = 0;
+            const totalSteps = 6;
+
+            document.querySelectorAll('.gender-option').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('.gender-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    userGender = this.dataset.gender;
+                });
+            });
+            document.querySelectorAll('.style-option').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('.style-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    userStyle = this.dataset.style;
+                });
+            });
+
+            document.getElementById('btnSaveAvatar').addEventListener('click', function() {
+                userName = document.getElementById('touristNameInput').value || 'Viajante';
+                updateTouristAvatar();
+                avatarModal.hide();
+                setTimeout(() => {
+                    addGuideMessage(`Olá, ${userName}! Bem-vindo ao Malanje Virtual Tour. 🎒`, 'guide');
+                    addGuideMessage('Clique em "Próximo Passo" para iniciar a sua viagem.', 'guide');
+                }, 600);
+                document.getElementById('touristLocation').textContent = '📍 A preparar a viagem';
+            });
+
+            function updateTouristAvatar() {
+                const emoji = userGender === 'male' ? '👨' : '👩';
+                document.getElementById('touristAvatarDisplay').textContent = emoji;
+                document.getElementById('touristNameDisplay').textContent = userName;
+            }
+
+            // ============================================================
+            // 2. DADOS DOS DESTINOS
+            // ============================================================
+            const destinationsData = [{
+                id: 'kalandula',
+                name: 'Quedas de Kalandula',
+                lat: -9.075,
+                lng: 16.007,
+                icon: '🌊',
+                description: 'Uma das maiores quedas de água de África, com 105 metros de altura e 400 metros de largura. Um espetáculo da natureza.',
+                history: 'As Quedas de Kalandula são um dos destinos mais icónicos de Angola. O nome tem origem na palavra "kalandula", que significa "lugar das águas".',
+                fauna: 'A região abriga diversas espécies de aves, incluindo o martim-pescador e a águia-pesqueira.',
+                flora: 'Vegetação típica de savana, com árvores como o Imbondeiro e a Mulemba.',
+                legend: 'Diz a lenda que as águas das quedas têm poderes curativos e que os antigos reis do Ndongo realizavam rituais neste local.',
+                images: ['https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=600&h=400&fit=crop']
+            }, {
+                id: 'pungo',
+                name: 'Pedras Negras de Pungo Andongo',
+                lat: -9.691,
+                lng: 15.578,
+                icon: '⛰️',
+                description: 'Formações rochosas imponentes que guardam segredos do Reino de Ndongo.',
+                history: 'As Pedras Negras serviram como fortaleza natural para o Rei Ngola durante a resistência contra os portugueses.',
+                fauna: 'A região é habitat de pequenos mamíferos e aves de rapina.',
+                flora: 'Vegetação rasteira e arbustos típicos da região.',
+                legend: 'Reza a história que as pedras são guardiãs dos segredos do antigo reino.',
+                images: ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&h=400&fit=crop']
+            }, {
+                id: 'cangandala',
+                name: 'Parque Nacional da Cangandala',
+                lat: -9.787,
+                lng: 16.475,
+                icon: '🦒',
+                description: 'Habitat da Palanca Negra Gigante, o símbolo nacional de Angola.',
+                history: 'O parque foi criado em 1970 para proteger a Palanca Negra Gigante, uma espécie endémica de Angola.',
+                fauna: 'Palanca Negra Gigante, antílopes, macacos, leopardos e diversas aves tropicais.',
+                flora: 'Floresta densa com árvores de grande porte e vegetação típica.',
+                legend: 'A Palanca Negra é considerada um animal sagrado pelas comunidades locais.',
+                images: ['https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=600&h=400&fit=crop']
+            }, {
+                id: 'carumbo',
+                name: 'Lagoa do Carumbo',
+                lat: -8.398,
+                lng: 17.383,
+                icon: '🏞️',
+                description: 'Uma lagoa rodeada por uma floresta densa e rica biodiversidade.',
+                history: 'A Lagoa do Carumbo é um dos ecossistemas mais preservados da região.',
+                fauna: 'Diversas espécies de aves aquáticas, peixes e pequenos mamíferos.',
+                flora: 'Vegetação luxuriante com árvores de grande porte e plantas aquáticas.',
+                legend: 'Diz-se que a lagoa é habitada por espíritos protetores da natureza.',
+                images: ['https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&h=400&fit=crop']
+            }];
+
+            // ============================================================
+            // 3. MAPA
+            // ============================================================
+            const map = L.map('map').setView([-9.5, 16.5], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 18
+            }).addTo(map);
+
+            const destIcon = L.divIcon({
+                className: 'dest-icon',
+                html: '<div style="background:rgba(246,211,101,0.9);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1rem;border:2px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,0.4);">📍</div>',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+
+            let currentDestination = null;
+
+            destinationsData.forEach(d => {
+                L.marker([d.lat, d.lng], { icon: destIcon })
+                    .addTo(map)
+                    .bindPopup(`
+                            <div style="font-size:0.85rem;">
+                                <h6>${d.icon} ${d.name}</h6>
+                                <p style="font-size:0.75rem;color:rgba(255,255,255,0.6);">${d.description.substring(0, 80)}...</p>
+                                <button class="btn btn-sm btn-warning visit-dest-btn" data-id="${d.id}">
+                                    <i class="bi bi-play-fill"></i> Visitar
+                                </button>
+                            </div>
+                        `);
+            });
+
+            // ============================================================
+            // 4. CHAT
+            // ============================================================
+            const chatContainer = document.getElementById('guideChat');
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('btnSendMessage');
+
+            function addGuideMessage(text, type = 'guide') {
+                const div = document.createElement('div');
+                div.className = `message ${type}`;
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar';
+                avatar.textContent = type === 'guide' ? '🧭' : '👤';
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.innerHTML = text;
+                div.appendChild(avatar);
+                div.appendChild(bubble);
+                chatContainer.appendChild(div);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                while (chatContainer.children.length > 25) {
+                    chatContainer.removeChild(chatContainer.firstChild);
+                }
+            }
+
+            function getGuideResponse(msg) {
+                const m = msg.toLowerCase();
+                if (m.includes('olá') || m.includes('oi')) return `Olá, ${userName}! Como está a correr a viagem? 🌍`;
+                if (m.includes('kalandula') || m.includes('queda')) return 'As Quedas de Kalandula são majestosas! 105m de altura. 💧';
+                if (m.includes('pungo') || m.includes('pedras')) return 'As Pedras Negras guardam a história do Reino de Ndongo. ⛰️';
+                if (m.includes('palanca') || m.includes('cangandala')) return 'O Parque da Cangandala protege a Palanca Negra Gigante. 🦒';
+                if (m.includes('carumbo') || m.includes('lagoa')) return 'A Lagoa do Carumbo é um paraíso de biodiversidade. 🏞️';
+                if (m.includes('foto') || m.includes('fotografia')) {
+                    const photos = parseInt(document.getElementById('statPhotos').textContent) + 1;
+                    document.getElementById('statPhotos').textContent = photos;
+                    updateLevel();
+                    return '📸 Foto tirada! Esta imagem ficará guardada no seu álbum de viagem.';
+                }
+                if (m.includes('obrigado') || m.includes('valeu')) return 'Foi um prazer! Continue explorando. 😊';
+                if (m.includes('adeus') || m.includes('tchau')) return 'Até breve, ${userName}! Malanje espera por si! 👋';
+                return `Que interessante! Posso contar-lhe sobre Kalandula, Pungo, Cangandala ou Carumbo. Qual prefere? 🌟`;
+            }
+
+            function handleUserMessage() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                addGuideMessage(text, 'user');
+                chatInput.value = '';
+                setTimeout(() => {
+                    const response = getGuideResponse(text);
+                    addGuideMessage(response, 'guide');
+                }, 500 + Math.random() * 500);
+            }
+
+            sendBtn.addEventListener('click', handleUserMessage);
+            chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleUserMessage(); });
+
+            // ============================================================
+            // 5. SISTEMA DE JORNADA (FLUXO COMPLETO)
+            // ============================================================
+            const stepData = [{
+                icon: '🏠',
+                title: 'Saída de Casa',
+                desc: 'O viajante sai da sua residência e dirige-se ao aeroporto.',
+                location: '📍 A caminho do aeroporto'
+            }, {
+                icon: '✈️',
+                title: 'Viagem de Avião',
+                desc: 'O viajante embarca no avião e viaja até Angola.',
+                location: '📍 A voar para Angola'
+            }, {
+                icon: '🤝',
+                title: 'Receção em Angola',
+                desc: 'O guia recebe o viajante no aeroporto e iniciam a viagem para Malanje.',
+                location: '📍 Receção pelo Guia'
+            }, {
+                icon: '🏨',
+                title: 'Check-in no Hotel',
+                desc: 'O viajante chega ao hotel, faz o check-in e descansa.',
+                location: '📍 Hotel em Malanje'
+            }, {
+                icon: '🗺️',
+                title: 'Tour Turístico',
+                desc: 'O guia leva o viajante a conhecer as maravilhas de Malanje.',
+                location: '📍 A explorar Malanje'
+            }, {
+                icon: '🏁',
+                title: 'Regresso',
+                desc: 'O viajante regressa a casa com boas recordações.',
+                location: '📍 Viagem concluída'
+            }];
+
+            let isJourneyActive = false;
+
+            function showStepCinematic(stepIndex) {
+                const data = stepData[stepIndex];
+                const overlay = document.getElementById('cinematicArrival');
+                document.getElementById('cinematicIcon').textContent = data.icon;
+                document.getElementById('cinematicTitle').textContent = data.title;
+                document.getElementById('cinematicDesc').textContent = data.desc;
+                overlay.classList.add('active');
+
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                    updateStep(stepIndex);
+                    addGuideMessage(`${data.icon} ${data.title}: ${data.desc}`, 'guide');
+
+                    // Mensagens específicas por etapa
+                    if (stepIndex === 0) {
+                        addGuideMessage('🚗 O táxi está a caminho do aeroporto. A viagem vai começar!', 'guide');
+                    } else if (stepIndex === 1) {
+                        addGuideMessage('✈️ O avião descolou! Durante o voo, pode apreciar a vista.', 'guide');
+                        addGuideMessage('🌍 A caminho de Angola, um país cheio de belezas naturais.', 'guide');
+                    } else if (stepIndex === 2) {
+                        addGuideMessage('🤝 Bem-vindo a Angola! Sou o seu guia. Vamos para Malanje.', 'guide');
+                        addGuideMessage('🚗 A viagem até Malanje dura cerca de 3 horas.', 'guide');
+                    } else if (stepIndex === 3) {
+                        addGuideMessage('🏨 Chegámos ao hotel! Vamos fazer o check-in.', 'guide');
+                        addGuideMessage('🛏️ Descanse um pouco. Amanhã começamos o tour.', 'guide');
+                    } else if (stepIndex === 4) {
+                        addGuideMessage('🗺️ Hoje vamos visitar as maravilhas de Malanje!', 'guide');
+                        addGuideMessage('🌊 Quedas Kalandula, ⛰️ Pedras Negras, 🦒 Cangandala, 🏞️ Carumbo.', 'guide');
+                        addGuideMessage('Clique nos cards para visitar cada destino.', 'guide');
+                        document.getElementById('touristStatus').textContent = 'A explorar Malanje';
+                    } else if (stepIndex === 5) {
+                        addGuideMessage('🏁 A sua viagem chegou ao fim. Obrigado por visitar Malanje!', 'guide');
+                        addGuideMessage('🌟 Esperamos que tenha gostado. Volte sempre!', 'guide');
+                        document.getElementById('guideStatusText').textContent = 'Viagem Concluída';
+                        document.getElementById('btnNextStep').disabled = true;
+                        document.getElementById('btnNextStep').innerHTML = '<i class="bi bi-check-circle"></i> Concluída';
+                    }
+
+                    document.getElementById('footerLocation').textContent = `Etapa: ${data.title}`;
+                    document.getElementById('touristLocation').textContent = data.location;
+
+                    // Incrementar estatísticas
+                    if (stepIndex >= 4) {
+                        const km = parseInt(document.getElementById('statKm').textContent) + Math.floor(Math.random() * 15 +
+                        10);
+                        document.getElementById('statKm').textContent = km;
+                    }
+
+                }, 3000);
+            }
+
+            function updateStep(stepIndex) {
+                currentStep = stepIndex;
+                const steps = document.querySelectorAll('.journey-step');
+                steps.forEach((el, i) => {
+                    el.classList.remove('active', 'completed');
+                    if (i < stepIndex) el.classList.add('completed');
+                    if (i === stepIndex) el.classList.add('active');
+                });
+            }
+
+            // Botão Próximo Passo
+            document.getElementById('btnNextStep').addEventListener('click', function() {
+                if (currentStep < totalSteps - 1) {
+                    showStepCinematic(currentStep + 1);
+                } else {
+                    addGuideMessage('🎉 A sua viagem já foi concluída!', 'guide');
+                }
+            });
+
+            // ============================================================
+            // 6. VISITAR DESTINOS (Durante o Tour)
+            // ============================================================
+            function visitDestination(destId) {
+                if (currentStep < 4) {
+                    addGuideMessage('🚫 Ainda não chegámos à fase do tour. Complete as etapas anteriores.', 'guide');
+                    return;
+                }
+
+                const dest = destinationsData.find(d => d.id === destId);
+                if (!dest) return;
+
+                currentDestination = dest;
+                document.getElementById('chatStatus').textContent = `● Visitando ${dest.name}`;
+
+                map.setView([dest.lat, dest.lng], 11);
+
+                const panel = document.getElementById('destinationPanel');
+                panel.classList.add('active');
+                document.getElementById('destTitle').textContent = `${dest.icon} ${dest.name}`;
+                document.getElementById('destDescription').textContent = dest.description;
+
+                const extra = document.getElementById('destExtraContent');
+                extra.innerHTML = `
+                        <div class="row g-2 mt-2">
+                            <div class="col-6">
+                                <div class="glass-card p-2" style="cursor:pointer;" onclick="showInfo('historia')">
+                                    <small class="text-muted">📜 História</small>
+                                    <p style="font-size:0.75rem;color:rgba(255,255,255,0.5);">${dest.history.substring(0, 60)}...</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="glass-card p-2" style="cursor:pointer;" onclick="showInfo('fauna')">
+                                    <small class="text-muted">🦒 Fauna</small>
+                                    <p style="font-size:0.75rem;color:rgba(255,255,255,0.5);">${dest.fauna.substring(0, 60)}...</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="glass-card p-2" style="cursor:pointer;" onclick="showInfo('flora')">
+                                    <small class="text-muted">🌿 Flora</small>
+                                    <p style="font-size:0.75rem;color:rgba(255,255,255,0.5);">${dest.flora.substring(0, 60)}...</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="glass-card p-2" style="cursor:pointer;" onclick="showInfo('lenda')">
+                                    <small class="text-muted">📖 Lenda</small>
+                                    <p style="font-size:0.75rem;color:rgba(255,255,255,0.5);">${dest.legend.substring(0, 60)}...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-glow" onclick="takePhoto()">
+                                <i class="bi bi-camera"></i> Tirar Foto
+                            </button>
+                            <button class="btn btn-sm btn-outline-glow" onclick="talkToNPC()">
+                                <i class="bi bi-people"></i> Falar com NPC
+                            </button>
+                        </div>
+                    `;
+
+                const places = parseInt(document.getElementById('statPlaces').textContent) + 1;
+                document.getElementById('statPlaces').textContent = places;
+                updateLevel();
+
+                addGuideMessage(`📍 Chegámos a ${dest.name}! ${dest.icon}`, 'guide');
+                addGuideMessage(dest.description, 'guide');
+            }
+
+            // ============================================================
+            // 7. AÇÕES
+            // ============================================================
+            window.takePhoto = function() {
+                const photos = parseInt(document.getElementById('statPhotos').textContent) + 1;
+                document.getElementById('statPhotos').textContent = photos;
+                updateLevel();
+                addGuideMessage('📸 Foto tirada com sucesso! Guardada no seu álbum.', 'guide');
+                if (currentDestination) {
+                    addGuideMessage(`📷 Foto de ${currentDestination.name} capturada!`, 'guide');
+                }
+            };
+
+            window.talkToNPC = function() {
+                const npcs = [
+                    { name: 'Artesão', msg: 'Bem-vindo! Veja o nosso artesanato tradicional.' },
+                    { name: 'Historiador', msg: 'Esta região tem uma história fascinante. Quer ouvir?' },
+                    { name: 'Guarda Florestal', msg: 'A fauna e flora daqui são únicas. Vamos explorar?' },
+                    { name: 'Chefe Tradicional', msg: 'As lendas dos nossos antepassados vivem nestas terras.' }
+                ];
+                const npc = npcs[Math.floor(Math.random() * npcs.length)];
+                addGuideMessage(`💬 ${npc.name}: "${npc.msg}"`, 'guide');
+                const level = parseInt(document.getElementById('statLevel').textContent) + 1;
+                document.getElementById('statLevel').textContent = level;
+                document.getElementById('levelDisplay').textContent = level;
+            };
+
+            window.showInfo = function(type) {
+                if (!currentDestination) {
+                    addGuideMessage('Escolha um destino primeiro.', 'guide');
+                    return;
+                }
+                const infoMap = {
+                    'historia': { icon: '📜', label: 'História', content: currentDestination.history },
+                    'fauna': { icon: '🦒', label: 'Fauna', content: currentDestination.fauna },
+                    'flora': { icon: '🌿', label: 'Flora', content: currentDestination.flora },
+                    'lenda': { icon: '📖', label: 'Lenda', content: currentDestination.legend }
+                };
+                const info = infoMap[type];
+                if (info) {
+                    addGuideMessage(`${info.icon} ${info.label}: ${info.content}`, 'guide');
+                }
+            };
+
+            // ============================================================
+            // 8. EVENTOS
+            // ============================================================
+            document.querySelectorAll('.destination-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    visitDestination(this.dataset.dest);
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('visit-dest-btn')) {
+                    visitDestination(e.target.dataset.id);
+                }
+            });
+
+            document.getElementById('closeDestPanel').addEventListener('click', function() {
+                document.getElementById('destinationPanel').classList.remove('active');
+            });
+
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    if (action === 'photo') takePhoto();
+                    else if (action === 'npc') talkToNPC();
+                    else if (action === 'info') {
+                        if (currentDestination) showInfo('historia');
+                        else addGuideMessage('Escolha um destino primeiro.', 'guide');
+                    }
+                });
+            });
+
+            document.querySelectorAll('.npc-badge').forEach(badge => {
+                badge.addEventListener('click', function() {
+                    const npc = this.textContent.trim();
+                    addGuideMessage(`💬 ${npc}: "Olá, viajante! Seja bem-vindo a Malanje."`, 'guide');
+                    const level = parseInt(document.getElementById('statLevel').textContent) + 1;
+                    document.getElementById('statLevel').textContent = level;
+                    document.getElementById('levelDisplay').textContent = level;
+                });
+            });
+
+            // ============================================================
+            // 9. MAPA CONTROLES
+            // ============================================================
+            document.getElementById('btnRecenter').addEventListener('click', function() {
+                if (currentDestination) {
+                    map.setView([currentDestination.lat, currentDestination.lng], 10);
+                } else {
+                    map.setView([-9.5, 16.5], 6);
+                }
+            });
+
+            document.getElementById('btnRoute').addEventListener('click', function() {
+                if (!currentDestination) {
+                    addGuideMessage('Escolha um destino para traçar a rota.', 'guide');
+                    return;
+                }
+                const start = [-9.5, 16.5];
+                const end = [currentDestination.lat, currentDestination.lng];
+                const routeLine = L.polyline([start, end], {
+                    color: '#f6d365',
+                    weight: 3,
+                    opacity: 0.6,
+                    dashArray: '8,6'
+                }).addTo(map);
+                map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+                addGuideMessage(`🗺️ Rota traçada para ${currentDestination.name}.`, 'guide');
+                setTimeout(() => map.removeLayer(routeLine), 3000);
+            });
+
+            // ============================================================
+            // 10. NIVEL
+            // ============================================================
+            function updateLevel() {
+                const photos = parseInt(document.getElementById('statPhotos').textContent);
+                const places = parseInt(document.getElementById('statPlaces').textContent);
+                const level = Math.floor((photos + places) / 2) + 1;
+                document.getElementById('statLevel').textContent = level;
+                document.getElementById('levelDisplay').textContent = level;
+            }
+
+            // ============================================================
+            // 11. INICIALIZAÇÃO
+            // ============================================================
+            avatarModal.show();
+
+            document.getElementById('btnAvatarConfig').addEventListener('click', function() {
+                avatarModal.show();
+            });
+
+            // Iniciar automaticamente a primeira etapa após criar o avatar
+            document.getElementById('btnSaveAvatar').addEventListener('click', function() {
+                setTimeout(() => {
+                    showStepCinematic(0);
+                }, 2500);
+            });
+
+            console.log('🌍 Malanje Virtual Tour - Fluxo Completo');
+            console.log('👤 Viajante:', userName);
+            console.log('📍 Etapas: Início → Viagem → Receção → Hotel → Tour → Regresso');
+
+        });
+    </script>
+</body>
+</html>

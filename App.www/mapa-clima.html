@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Clima - Malanje</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        /* === ESTILOS ORIGINAIS MANTIDOS === */
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1932');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.40);
+            z-index: 0;
+            transition: all 0.3s ease;
+        }
+        .container-fluid { position: relative; z-index: 1; }
+        
+        /* Tema Claro */
+        body.light-theme::before { background: rgba(255, 255, 255, 0.88); }
+        body.light-theme .page-title,
+        body.light-theme .page-title .badge,
+        body.light-theme .info-card .card-title,
+        body.light-theme .nav-tabs .nav-link,
+        body.light-theme .filter-section h6,
+        body.light-theme .modal-content,
+        body.light-theme .modal .form-label,
+        body.light-theme .tab-content,
+        body.light-theme .timeline-card .timeline-title,
+        body.light-theme .timeline-card .timeline-desc,
+        body.light-theme .resumo-item label,
+        body.light-theme .resumo-item span,
+        body.light-theme .weather-card .weather-temp,
+        body.light-theme .weather-card .weather-detail,
+        body.light-theme .forecast-table td,
+        body.light-theme .forecast-table th,
+        body.light-theme .legend-item span,
+        body.light-theme .alerta-item { color: #1a1a2e !important; }
+        body.light-theme .nav-tabs .nav-link { background: rgba(255,255,255,0.5); color: #1a1a2e !important; }
+        body.light-theme .nav-tabs .nav-link.active { background: rgba(255,255,255,0.8); color: #0d6efd !important; }
+        body.light-theme .tab-content,
+        body.light-theme .info-card,
+        body.light-theme .filter-section,
+        body.light-theme .weather-card,
+        body.light-theme .modal-content,
+        body.light-theme .resumo-card,
+        body.light-theme .legend-card,
+        body.light-theme .alerta-item { background: rgba(255,255,255,0.88); backdrop-filter: blur(15px); border-color: rgba(0,0,0,0.1); }
+        body.light-theme .filter-section .form-control,
+        body.light-theme .filter-section .form-select { background: rgba(255,255,255,0.9); color: #1a1a2e; border-color: rgba(0,0,0,0.15); }
+        body.light-theme #currentDateTime { background: rgba(255,255,255,0.8); color: #1a1a2e; border-color: rgba(0,0,0,0.1); }
+        body.light-theme .modal-content { background: rgba(255,255,255,0.95); color: #1a1a2e; }
+        body.light-theme .quick-actions .btn-outline-secondary { background: rgba(108,117,125,0.15); color: #1a1a2e; }
+        body.light-theme .theme-toggle-btn { background: rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.15); color: #1a1a2e; }
+        body.light-theme .timeline-card .badge { background: rgba(0,0,0,0.1) !important; color: #1a1a2e !important; }
+        body.light-theme .resumo-card .resumo-item { border-bottom-color: rgba(0,0,0,0.08); }
+        body.light-theme .language-dropdown .dropdown-toggle { background: rgba(0,0,0,0.05); color: #1a1a2e; border-color: rgba(0,0,0,0.10); }
+        body.light-theme .language-dropdown .dropdown-menu { background: rgba(255,255,255,0.95); border-color: rgba(0,0,0,0.08); }
+        body.light-theme .language-dropdown .dropdown-item { color: #1a1a2e; }
+        body.light-theme .forecast-table td { border-color: rgba(0,0,0,0.08); }
+        body.light-theme .legend-color { border-color: rgba(0,0,0,0.1); }
+
+        /* Componentes de Clima */
+        .weather-map-container {
+            height: 600px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.10);
+            position: relative;
+        }
+        #weatherMap {
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .weather-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 15px 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+        .weather-card .weather-icon {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+        .weather-card .weather-temp {
+            color: #fff;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        .weather-card .weather-desc {
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .weather-card .weather-detail {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .weather-card .weather-detail:last-child { border-bottom: none; }
+
+        .forecast-table {
+            width: 100%;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+        }
+        .forecast-table th {
+            color: rgba(255,255,255,0.5);
+            font-weight: normal;
+            padding: 6px 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .forecast-table td {
+            padding: 6px 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+        .forecast-table .temp-min {
+            color: rgba(255,255,255,0.5);
+        }
+        .forecast-table .temp-max {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        .legend-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 3px 0;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.7);
+        }
+        .legend-color {
+            width: 20px;
+            height: 12px;
+            border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .alerta-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.8);
+        }
+        .alerta-item.info { border-left: 3px solid #0dcaf0; }
+        .alerta-item.warning { border-left: 3px solid #ffc107; }
+        .alerta-item.danger { border-left: 3px solid #dc3545; }
+
+        .recomendacao-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            background: rgba(13, 110, 253, 0.10);
+            border-left: 3px solid #0d6efd;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.85rem;
+        }
+
+        .layer-toggle {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .layer-toggle .btn-layer {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.6);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .layer-toggle .btn-layer.active {
+            background: rgba(13,110,253,0.3);
+            color: #fff;
+            border-color: rgba(13,110,253,0.4);
+        }
+        .layer-toggle .btn-layer:hover {
+            background: rgba(255,255,255,0.12);
+        }
+
+        .custom-marker-climate {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 30px;
+            padding: 4px 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .custom-marker-climate .weather-icon-small {
+            font-size: 1rem;
+        }
+
+        .nav-tabs .nav-link {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 17px;
+            color: #fff;
+            border: none;
+            padding: 12px 22px;
+            margin-right: 5px;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .nav-tabs .nav-link:hover { background: rgba(255,255,255,0.22); transform: translateY(-2px); }
+        .nav-tabs .nav-link.active {
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(15px);
+            color: #fff;
+            border-bottom: 3px solid #0d6efd;
+            font-weight: bold;
+            box-shadow: 0 -2px 20px rgba(13,110,253,0.25);
+        }
+
+        .tab-content {
+            padding: 25px;
+            background: rgba(255,255,255,0.10);
+            backdrop-filter: blur(15px);
+            border-radius: 0 8px 8px 8px;
+            border: 1px solid rgba(255,255,255,0.10);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .page-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.20);
+        }
+        .page-title .bi { animation: bounce 2s infinite; }
+        .page-title .badge { background: rgba(13,110,253,0.35); backdrop-filter: blur(5px); }
+
+        @keyframes bounce {
+            0%,20%,50%,80%,100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+            60% { transform: translateY(-4px); }
+        }
+
+        .theme-toggle-btn {
+            background: rgba(255,255,255,0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.10);
+            color: #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .theme-toggle-btn:hover { background: rgba(255,255,255,0.18); transform: rotate(30deg); }
+
+        .dashboard-btn {
+            background: rgba(255,255,255,0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .dashboard-btn:hover { background: rgba(255,255,255,0.18); color: #fff; transform: translateY(-2px); }
+
+        #currentDateTime {
+            background: rgba(255,255,255,0.10);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.3s ease;
+        }
+
+        .language-dropdown .dropdown-toggle {
+            background: rgba(255,255,255,0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .language-dropdown .dropdown-toggle:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
+        .language-dropdown .dropdown-menu { background: rgba(30,30,50,0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 6px; min-width: 150px; }
+        .language-dropdown .dropdown-item { color: rgba(255,255,255,0.8); border-radius: 6px; padding: 8px 16px; display: flex; align-items: center; gap: 10px; transition: all 0.2s ease; }
+        .language-dropdown .dropdown-item:hover { background: rgba(255,255,255,0.10); color: #fff; }
+        .language-dropdown .dropdown-item.active { background: rgba(13,110,253,0.3); color: #fff; }
+
+        .flag-icon { font-size: 1.2rem; line-height: 1; }
+
+        .quick-actions .btn {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 3px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.10);
+        }
+        .quick-actions .btn:hover { transform: scale(1.05); }
+        .quick-actions .btn-primary { background: rgba(13,110,253,0.5); }
+        .quick-actions .btn-success { background: rgba(25,135,84,0.5); }
+        .quick-actions .btn-info { background: rgba(13,202,240,0.5); }
+        .quick-actions .btn-warning { background: rgba(255,193,7,0.5); }
+        .quick-actions .btn-outline-secondary { background: rgba(108,117,125,0.20); color: #fff; }
+
+        .info-card {
+            background: rgba(255,255,255,0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.10);
+            transition: all 0.3s ease;
+        }
+        .info-card .card-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            border-bottom: 2px solid rgba(255,255,255,0.08);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-section {
+            background: rgba(255,255,255,0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.10);
+            transition: all 0.3s ease;
+        }
+        .filter-section h6 { color: #fff; }
+        .filter-section .form-control,
+        .filter-section .form-select {
+            font-family: 'Times New Roman', Times, serif;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.10);
+            color: #fff;
+        }
+        .filter-section .form-control::placeholder { color: rgba(255,255,255,0.4); }
+        .filter-section .form-control:focus,
+        .filter-section .form-select:focus {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(13,110,253,0.4);
+            box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.10);
+            color: #fff;
+        }
+        .filter-section .form-select option { background: #2c3e50; color: #fff; }
+
+        .modal-content {
+            background: rgba(255,255,255,0.10);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        .modal-header { border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .modal-footer { border-top: 1px solid rgba(255,255,255,0.06); }
+        .modal .btn-close { filter: invert(1); }
+        .modal .form-label { color: rgba(255,255,255,0.75); }
+        .modal .form-control,
+        .modal .form-select { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); color: #fff; }
+        .modal .form-control:focus,
+        .modal .form-select:focus { background: rgba(255,255,255,0.10); border-color: rgba(13,110,253,0.4); }
+        .modal .form-select option { background: #2c3e50; color: #fff; }
+
+        @media (max-width: 768px) {
+            .tab-content { padding: 15px; }
+            .page-title { font-size: 1.3rem; }
+            .header-actions { flex-direction: column; gap: 10px; }
+            .nav-tabs .nav-link { font-size: 14px; padding: 10px 14px; }
+            .weather-map-container { height: 350px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+
+        <!-- Cabeçalho -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap header-actions">
+                    <h2 class="page-title">
+                        <i class="bi bi-cloud-sun text-warning"></i>
+                        Mapa de Clima - Malanje
+                        <span class="badge bg-info ms-2">WEATHER</span>
+                    </h2>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="input-group" style="max-width:250px;">
+                            <input type="text" class="form-control" id="pesquisaLocal" placeholder="🔍 Pesquisar município..." style="background:rgba(255,255,255,0.08);backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,0.10);color:#fff;">
+                            <button class="btn btn-outline-primary" id="btnPesquisarLocal"><i class="bi bi-search"></i></button>
+                        </div>
+                        <button class="btn btn-outline-info" id="btnAtualizarClima">
+                            <i class="bi bi-arrow-clockwise"></i> <span data-i18n="update">Atualizar</span>
+                        </button>
+                        <div class="dropdown language-dropdown">
+                            <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="languageDropdown">
+                                <span class="flag-icon" id="currentFlag">🇧🇷</span>
+                                <span id="currentLanguageLabel">PT</span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                                <li><a class="dropdown-item active" href="#" data-lang="pt" data-flag="🇧🇷"><span class="flag-icon">🇧🇷</span> Português</a></li>
+                                <li><a class="dropdown-item" href="#" data-lang="en" data-flag="🇺🇸"><span class="flag-icon">🇺🇸</span> English</a></li>
+                                <li><a class="dropdown-item" href="#" data-lang="fr" data-flag="🇫🇷"><span class="flag-icon">🇫🇷</span> Français</a></li>
+                                <li><a class="dropdown-item" href="#" data-lang="es" data-flag="🇪🇸"><span class="flag-icon">🇪🇸</span> Español</a></li>
+                            </ul>
+                        </div>
+                        <button class="theme-toggle-btn" id="themeToggle">
+                            <i class="bi bi-moon-stars" id="themeIcon"></i>
+                        </button>
+                        <span class="badge bg-info text-dark" id="currentDateTime">
+                            <i class="bi bi-clock"></i>
+                            <span id="dateTimeDisplay">Carregando...</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="mapa-tab" data-bs-toggle="tab" data-bs-target="#mapa" type="button" role="tab">
+                    <i class="bi bi-map"></i> <span data-i18n="map">Mapa</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="previsao-tab" data-bs-toggle="tab" data-bs-target="#previsao" type="button" role="tab">
+                    <i class="bi bi-calendar-week"></i> <span data-i18n="forecast">Previsão</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="alertas-tab" data-bs-toggle="tab" data-bs-target="#alertas" type="button" role="tab">
+                    <i class="bi bi-exclamation-triangle"></i> <span data-i18n="alerts">Alertas</span>
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+
+            <!-- Aba Mapa -->
+            <div class="tab-pane fade show active" id="mapa" role="tabpanel">
+                <div class="row">
+                    <!-- Mapa Principal -->
+                    <div class="col-lg-8">
+                        <div class="info-card" style="padding:0;overflow:hidden;">
+                            <div class="weather-map-container" id="weatherMapContainer">
+                                <div id="weatherMap"></div>
+                            </div>
+                        </div>
+                        <!-- Camadas e Legenda -->
+                        <div class="row mt-2">
+                            <div class="col-md-7">
+                                <div class="info-card" style="padding:12px 15px;">
+                                    <h6 style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin-bottom:8px;"><i class="bi bi-layers"></i> <span data-i18n="layers">Camadas</span></h6>
+                                    <div class="layer-toggle" id="layerToggle">
+                                        <button class="btn-layer active" data-layer="temperatura">🌡️ <span data-i18n="temperature">Temperatura</span></button>
+                                        <button class="btn-layer" data-layer="precipitacao">🌧️ <span data-i18n="precipitation">Precipitação</span></button>
+                                        <button class="btn-layer" data-layer="humidade">💧 <span data-i18n="humidity">Humidade</span></button>
+                                        <button class="btn-layer" data-layer="vento">💨 <span data-i18n="wind">Vento</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="legend-card">
+                                    <h6 style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin-bottom:8px;"><i class="bi bi-palette"></i> <span data-i18n="legend">Legenda</span></h6>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="legend-item"><span class="legend-color" style="background:#2196F3;"></span> <span data-i18n="cold">Frio (18-22°C)</span></div>
+                                            <div class="legend-item"><span class="legend-color" style="background:#8BC34A;"></span> <span data-i18n="mild">Ameno (23-27°C)</span></div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="legend-item"><span class="legend-color" style="background:#FF9800;"></span> <span data-i18n="warm">Quente (28-32°C)</span></div>
+                                            <div class="legend-item"><span class="legend-color" style="background:#F44336;"></span> <span data-i18n="hot">Muito Quente (&gt;32°C)</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-1">
+                                        <div class="col-6">
+                                            <div class="legend-item">☀️ <span data-i18n="clear">Céu limpo</span></div>
+                                            <div class="legend-item">⛅ <span data-i18n="partly_cloudy">Parcialmente nublado</span></div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="legend-item">🌧️ <span data-i18n="rain">Chuva</span></div>
+                                            <div class="legend-item">⛈️ <span data-i18n="storm">Tempestade</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Painel Lateral -->
+                    <div class="col-lg-4">
+                        <!-- Clima Atual -->
+                        <div class="weather-card" id="climaAtualCard">
+                            <div class="weather-icon" id="weatherIcon">☀️</div>
+                            <div class="weather-temp" id="weatherTemp">28°C</div>
+                            <div class="weather-desc" id="weatherDesc">Céu limpo</div>
+                            <hr style="border-color:rgba(255,255,255,0.05);">
+                            <div class="weather-detail"><span>🌡️ <span data-i18n="feels_like">Sensação térmica</span></span><span id="feelsLike">29°C</span></div>
+                            <div class="weather-detail"><span>💧 <span data-i18n="humidity">Humidade</span></span><span id="humidityValue">65%</span></div>
+                            <div class="weather-detail"><span>🌧️ <span data-i18n="rain_prob">Prob. de chuva</span></span><span id="rainProb">20%</span></div>
+                            <div class="weather-detail"><span>💨 <span data-i18n="wind">Vento</span></span><span id="windValue">12 km/h</span></div>
+                            <div class="weather-detail"><span>☀️ <span data-i18n="uv_index">Índice UV</span></span><span id="uvIndex">Moderado</span></div>
+                            <div class="weather-detail"><span>🌅 <span data-i18n="sunrise">Nascer do sol</span></span><span id="sunriseValue">06:15</span></div>
+                            <div class="weather-detail"><span>🌇 <span data-i18n="sunset">Pôr do sol</span></span><span id="sunsetValue">18:45</span></div>
+                        </div>
+
+                        <!-- Recomendações -->
+                        <div class="weather-card" id="recomendacoesCard">
+                            <h6 style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin-bottom:8px;"><i class="bi bi-lightbulb"></i> <span data-i18n="recommendations">Recomendações</span></h6>
+                            <div id="recomendacoesContainer">
+                                <div class="recomendacao-item">☀️ <span data-i18n="rec_sunny">Condições favoráveis para visitar as atrações ao ar livre.</span></div>
+                                <div class="recomendacao-item">🧴 <span data-i18n="rec_sunscreen">Use protetor solar e mantenha-se hidratado.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Previsão -->
+            <div class="tab-pane fade" id="previsao" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-calendar-week"></i> <span data-i18n="forecast_7days">Previsão para os Próximos 7 Dias</span></h6>
+                            <div class="table-responsive">
+                                <table class="forecast-table" id="forecastTable">
+                                    <thead>
+                                        <tr>
+                                            <th><span data-i18n="day">Dia</span></th>
+                                            <th><span data-i18n="weather">Clima</span></th>
+                                            <th><span data-i18n="min">Mín.</span></th>
+                                            <th><span data-i18n="max">Máx.</span></th>
+                                            <th><span data-i18n="rain">Chuva</span></th>
+                                            <th><span data-i18n="wind">Vento</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="forecastBody">
+                                        <!-- Preenchido via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Alertas -->
+            <div class="tab-pane fade" id="alertas" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-exclamation-triangle"></i> <span data-i18n="weather_alerts">Alertas Meteorológicos</span></h6>
+                            <div id="alertasContainer">
+                                <!-- Preenchido via JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-info-circle"></i> <span data-i18n="safety_tips">Dicas de Segurança</span></h6>
+                            <div id="dicasSeguranca">
+                                <div class="alerta-item info">🚗 <span data-i18n="tip_drive">Dirija com cuidado nas estradas de terra.</span></div>
+                                <div class="alerta-item info">🌊 <span data-i18n="tip_water">Evite nadar em áreas de correnteza.</span></div>
+                                <div class="alerta-item info">🧥 <span data-i18n="tip_clothes">Vista-se em camadas para se adaptar às mudanças de temperatura.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Botões de Ação Rápidos -->
+        <div class="quick-actions mt-4 d-flex flex-wrap gap-2">
+            <button class="btn btn-success" id="btnSalvarClima">
+                <i class="bi bi-save"></i> <span data-i18n="save_weather">Salvar Previsão</span>
+            </button>
+            <button class="btn btn-info" id="btnCompartilharClima">
+                <i class="bi bi-share"></i> <span data-i18n="share_weather">Compartilhar Clima</span>
+            </button>
+            <button class="btn btn-outline-secondary" id="btnVoltar">
+                <a href="company.html"><i class="bi bi-arrow-left">
+                  </i> <span id="actionBack">Voltar</span></a>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Modal Detalhes do Clima -->
+    <div class="modal fade" id="climaDetalhesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-cloud-sun"></i> <span id="modalLocalNome">Quedas de Kalandula</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalClimaDetalhes">
+                    <!-- Preenchido via JS -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                        <span data-i18n="close">Fechar</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+
+            // ============================================================
+            // SISTEMA DE IDIOMAS
+            // ============================================================
+
+            const translations = {
+                pt: {
+                    map: 'Mapa',
+                    forecast: 'Previsão',
+                    alerts: 'Alertas',
+                    update: 'Atualizar',
+                    layers: 'Camadas',
+                    temperature: 'Temperatura',
+                    precipitation: 'Precipitação',
+                    humidity: 'Humidade',
+                    wind: 'Vento',
+                    legend: 'Legenda',
+                    cold: 'Frio (18-22°C)',
+                    mild: 'Ameno (23-27°C)',
+                    warm: 'Quente (28-32°C)',
+                    hot: 'Muito Quente (>32°C)',
+                    clear: 'Céu limpo',
+                    partly_cloudy: 'Parcialmente nublado',
+                    rain: 'Chuva',
+                    storm: 'Tempestade',
+                    feels_like: 'Sensação térmica',
+                    rain_prob: 'Prob. de chuva',
+                    uv_index: 'Índice UV',
+                    sunrise: 'Nascer do sol',
+                    sunset: 'Pôr do sol',
+                    recommendations: 'Recomendações',
+                    rec_sunny: 'Condições favoráveis para visitar as atrações ao ar livre.',
+                    rec_sunscreen: 'Use protetor solar e mantenha-se hidratado.',
+                    forecast_7days: 'Previsão para os Próximos 7 Dias',
+                    day: 'Dia',
+                    weather: 'Clima',
+                    min: 'Mín.',
+                    max: 'Máx.',
+                    weather_alerts: 'Alertas Meteorológicos',
+                    safety_tips: 'Dicas de Segurança',
+                    tip_drive: 'Dirija com cuidado nas estradas de terra.',
+                    tip_water: 'Evite nadar em áreas de correnteza.',
+                    tip_clothes: 'Vista-se em camadas para se adaptar às mudanças de temperatura.',
+                    save_weather: 'Salvar Previsão',
+                    share_weather: 'Compartilhar Clima',
+                    back: 'Voltar',
+                    close: 'Fechar',
+                    monday: 'Segunda',
+                    tuesday: 'Terça',
+                    wednesday: 'Quarta',
+                    thursday: 'Quinta',
+                    friday: 'Sexta',
+                    saturday: 'Sábado',
+                    sunday: 'Domingo',
+                    alert_rain_intense: 'Aviso de chuva intensa nas próximas 24h.',
+                    alert_storm: 'Possibilidade de trovoadas na região.',
+                    alert_strong_wind: 'Ventos fortes previstos para hoje.',
+                    alert_fog: 'Neblina matinal pode reduzir visibilidade.',
+                    alert_high_temp: 'Temperaturas elevadas. Mantenha-se hidratado.'
+                },
+                en: {
+                    map: 'Map',
+                    forecast: 'Forecast',
+                    alerts: 'Alerts',
+                    update: 'Update',
+                    layers: 'Layers',
+                    temperature: 'Temperature',
+                    precipitation: 'Precipitation',
+                    humidity: 'Humidity',
+                    wind: 'Wind',
+                    legend: 'Legend',
+                    cold: 'Cold (18-22°C)',
+                    mild: 'Mild (23-27°C)',
+                    warm: 'Warm (28-32°C)',
+                    hot: 'Hot (>32°C)',
+                    clear: 'Clear sky',
+                    partly_cloudy: 'Partly cloudy',
+                    rain: 'Rain',
+                    storm: 'Storm',
+                    feels_like: 'Feels like',
+                    rain_prob: 'Rain prob.',
+                    uv_index: 'UV Index',
+                    sunrise: 'Sunrise',
+                    sunset: 'Sunset',
+                    recommendations: 'Recommendations',
+                    rec_sunny: 'Favorable conditions for visiting outdoor attractions.',
+                    rec_sunscreen: 'Use sunscreen and stay hydrated.',
+                    forecast_7days: '7-Day Forecast',
+                    day: 'Day',
+                    weather: 'Weather',
+                    min: 'Min',
+                    max: 'Max',
+                    weather_alerts: 'Weather Alerts',
+                    safety_tips: 'Safety Tips',
+                    tip_drive: 'Drive carefully on dirt roads.',
+                    tip_water: 'Avoid swimming in areas with strong currents.',
+                    tip_clothes: 'Dress in layers to adapt to temperature changes.',
+                    save_weather: 'Save Forecast',
+                    share_weather: 'Share Weather',
+                    back: 'Back',
+                    close: 'Close',
+                    monday: 'Monday',
+                    tuesday: 'Tuesday',
+                    wednesday: 'Wednesday',
+                    thursday: 'Thursday',
+                    friday: 'Friday',
+                    saturday: 'Saturday',
+                    sunday: 'Sunday',
+                    alert_rain_intense: 'Heavy rain warning for the next 24h.',
+                    alert_storm: 'Possible thunderstorms in the region.',
+                    alert_strong_wind: 'Strong winds forecast for today.',
+                    alert_fog: 'Morning fog may reduce visibility.',
+                    alert_high_temp: 'High temperatures. Stay hydrated.'
+                },
+                fr: {
+                    map: 'Carte',
+                    forecast: 'Prévisions',
+                    alerts: 'Alertes',
+                    update: 'Mettre à jour',
+                    layers: 'Couches',
+                    temperature: 'Température',
+                    precipitation: 'Précipitations',
+                    humidity: 'Humidité',
+                    wind: 'Vent',
+                    legend: 'Légende',
+                    cold: 'Froid (18-22°C)',
+                    mild: 'Doux (23-27°C)',
+                    warm: 'Chaud (28-32°C)',
+                    hot: 'Très chaud (>32°C)',
+                    clear: 'Ciel dégagé',
+                    partly_cloudy: 'Partiellement nuageux',
+                    rain: 'Pluie',
+                    storm: 'Tempête',
+                    feels_like: 'Ressenti',
+                    rain_prob: 'Prob. de pluie',
+                    uv_index: 'Indice UV',
+                    sunrise: 'Lever du soleil',
+                    sunset: 'Coucher du soleil',
+                    recommendations: 'Recommandations',
+                    rec_sunny: 'Conditions favorables pour visiter les attractions en plein air.',
+                    rec_sunscreen: 'Utilisez de la crème solaire et restez hydraté.',
+                    forecast_7days: 'Prévisions 7 jours',
+                    day: 'Jour',
+                    weather: 'Temps',
+                    min: 'Min',
+                    max: 'Max',
+                    weather_alerts: 'Alertes météo',
+                    safety_tips: 'Conseils de sécurité',
+                    tip_drive: 'Conduisez prudemment sur les routes de terre.',
+                    tip_water: 'Évitez de nager dans les zones de courant fort.',
+                    tip_clothes: 'Habillez-vous en couches pour vous adapter aux changements de température.',
+                    save_weather: 'Enregistrer les prévisions',
+                    share_weather: 'Partager la météo',
+                    back: 'Retour',
+                    close: 'Fermer',
+                    monday: 'Lundi',
+                    tuesday: 'Mardi',
+                    wednesday: 'Mercredi',
+                    thursday: 'Jeudi',
+                    friday: 'Vendredi',
+                    saturday: 'Samedi',
+                    sunday: 'Dimanche',
+                    alert_rain_intense: 'Avertissement de fortes pluies dans les 24h.',
+                    alert_storm: 'Possibilité d\'orages dans la région.',
+                    alert_strong_wind: 'Vents forts prévus aujourd\'hui.',
+                    alert_fog: 'Brouillard matinal pouvant réduire la visibilité.',
+                    alert_high_temp: 'Températures élevées. Restez hydraté.'
+                },
+                es: {
+                    map: 'Mapa',
+                    forecast: 'Pronóstico',
+                    alerts: 'Alertas',
+                    update: 'Actualizar',
+                    layers: 'Capas',
+                    temperature: 'Temperatura',
+                    precipitation: 'Precipitación',
+                    humidity: 'Humedad',
+                    wind: 'Viento',
+                    legend: 'Leyenda',
+                    cold: 'Frío (18-22°C)',
+                    mild: 'Templado (23-27°C)',
+                    warm: 'Cálido (28-32°C)',
+                    hot: 'Muy caliente (>32°C)',
+                    clear: 'Cielo despejado',
+                    partly_cloudy: 'Parcialmente nublado',
+                    rain: 'Lluvia',
+                    storm: 'Tormenta',
+                    feels_like: 'Sensación térmica',
+                    rain_prob: 'Prob. de lluvia',
+                    uv_index: 'Índice UV',
+                    sunrise: 'Amanecer',
+                    sunset: 'Atardecer',
+                    recommendations: 'Recomendaciones',
+                    rec_sunny: 'Condiciones favorables para visitar atracciones al aire libre.',
+                    rec_sunscreen: 'Use protector solar y manténgase hidratado.',
+                    forecast_7days: 'Pronóstico 7 días',
+                    day: 'Día',
+                    weather: 'Clima',
+                    min: 'Mín',
+                    max: 'Máx',
+                    weather_alerts: 'Alertas meteorológicas',
+                    safety_tips: 'Consejos de seguridad',
+                    tip_drive: 'Conduzca con cuidado en caminos de tierra.',
+                    tip_water: 'Evite nadar en áreas con corrientes fuertes.',
+                    tip_clothes: 'Vístase en capas para adaptarse a los cambios de temperatura.',
+                    save_weather: 'Guardar Pronóstico',
+                    share_weather: 'Compartir Clima',
+                    back: 'Volver',
+                    close: 'Cerrar',
+                    monday: 'Lunes',
+                    tuesday: 'Martes',
+                    wednesday: 'Miércoles',
+                    thursday: 'Jueves',
+                    friday: 'Viernes',
+                    saturday: 'Sábado',
+                    sunday: 'Domingo',
+                    alert_rain_intense: 'Aviso de lluvia intensa en las próximas 24h.',
+                    alert_storm: 'Posibilidad de tormentas en la región.',
+                    alert_strong_wind: 'Vientos fuertes previstos para hoy.',
+                    alert_fog: 'Niebla matinal puede reducir la visibilidad.',
+                    alert_high_temp: 'Temperaturas elevadas. Manténgase hidratado.'
+                }
+            };
+
+            let currentLang = 'pt';
+
+            function getTranslation(key) {
+                return translations[currentLang] && translations[currentLang][key] ? translations[currentLang][key] : key;
+            }
+
+            function updateLanguage(lang) {
+                currentLang = lang;
+                const flagMap = { pt: '🇧🇷', en: '🇺🇸', fr: '🇫🇷', es: '🇪🇸' };
+                const labelMap = { pt: 'PT', en: 'EN', fr: 'FR', es: 'ES' };
+                $('#currentFlag').text(flagMap[lang] || '🌐');
+                $('#currentLanguageLabel').text(labelMap[lang] || lang.toUpperCase());
+
+                $('.language-dropdown .dropdown-item').removeClass('active');
+                $(`.language-dropdown .dropdown-item[data-lang="${lang}"]`).addClass('active');
+
+                $('[data-i18n]').each(function() {
+                    const key = $(this).data('i18n');
+                    const translation = getTranslation(key);
+                    if (translation !== key) {
+                        $(this).text(translation);
+                    }
+                });
+
+                atualizarPrevisao();
+                atualizarAlertas();
+                atualizarRecomendacoes();
+            }
+
+            $(document).on('click', '.language-dropdown .dropdown-item', function(e) {
+                e.preventDefault();
+                const lang = $(this).data('lang');
+                if (lang && lang !== currentLang) {
+                    updateLanguage(lang);
+                    $('#languageDropdown').dropdown('toggle');
+                }
+            });
+
+            // ============================================================
+            // DADOS DE CLIMA - MUNICÍPIOS E ATRAÇÕES
+            // ============================================================
+
+            const locaisClima = [
+                { id: 1, nome: 'Malanje (Sede)', tipo: 'municipio', lat: -9.5333, lng: 16.3500,
+                    clima: { temp: 28, feelsLike: 29, humidity: 65, rainProb: 20, wind: 12, uv: 'Moderado', icon: '☀️',
+                        desc: 'Céu limpo', sunrise: '06:15', sunset: '18:45' } },
+                { id: 2, nome: 'Quedas de Kalandula', tipo: 'atracao', lat: -9.0833, lng: 16.1667,
+                    clima: { temp: 24, feelsLike: 25, humidity: 82, rainProb: 20, wind: 8, uv: 'Baixo', icon: '⛅',
+                        desc: 'Parcialmente nublado', sunrise: '06:10', sunset: '18:40' } },
+                { id: 3, nome: 'Pedras Negras de Pungo Andongo', tipo: 'atracao', lat: -9.3833, lng: 15.7667,
+                    clima: { temp: 26, feelsLike: 27, humidity: 70, rainProb: 15, wind: 10, uv: 'Moderado', icon: '☀️',
+                        desc: 'Céu limpo', sunrise: '06:12', sunset: '18:42' } },
+                { id: 4, nome: 'Parque Nacional da Cangandala', tipo: 'atracao', lat: -9.7667, lng: 16.7500,
+                    clima: { temp: 23, feelsLike: 24, humidity: 78, rainProb: 30, wind: 6, uv: 'Baixo', icon: '🌧️',
+                        desc: 'Chuva leve', sunrise: '06:18', sunset: '18:48' } },
+                { id: 5, nome: 'Rápidos do Kwanza', tipo: 'atracao', lat: -9.5333, lng: 16.0333,
+                    clima: { temp: 27, feelsLike: 28, humidity: 72, rainProb: 25, wind: 14, uv: 'Moderado', icon: '⛅',
+                        desc: 'Parcialmente nublado', sunrise: '06:14', sunset: '18:44' } },
+                { id: 6, nome: 'Barragem de Kapanda', tipo: 'atracao', lat: -9.4000, lng: 16.1333,
+                    clima: { temp: 25, feelsLike: 26, humidity: 75, rainProb: 10, wind: 9, uv: 'Moderado', icon: '☀️',
+                        desc: 'Céu limpo', sunrise: '06:13', sunset: '18:43' } },
+                { id: 7, nome: 'Foz do Amor', tipo: 'atracao', lat: -9.3167, lng: 16.0333,
+                    clima: { temp: 26, feelsLike: 27, humidity: 68, rainProb: 15, wind: 11, uv: 'Moderado', icon: '☀️',
+                        desc: 'Céu limpo', sunrise: '06:11', sunset: '18:41' } },
+                { id: 8, nome: 'Museu Regional de Malanje', tipo: 'atracao', lat: -9.5333, lng: 16.3500,
+                    clima: { temp: 28, feelsLike: 29, humidity: 65, rainProb: 20, wind: 12, uv: 'Moderado', icon: '☀️',
+                        desc: 'Céu limpo', sunrise: '06:15', sunset: '18:45' } },
+                { id: 9, nome: 'Cacuso', tipo: 'municipio', lat: -9.4167, lng: 15.7333,
+                    clima: { temp: 27, feelsLike: 28, humidity: 68, rainProb: 15, wind: 10, uv: 'Moderado', icon: '☀️',
+                        desc: 'Céu limpo', sunrise: '06:12', sunset: '18:42' } },
+                { id: 10, nome: 'Cambundala', tipo: 'municipio', lat: -9.6667, lng: 16.5000,
+                    clima: { temp: 24, feelsLike: 25, humidity: 80, rainProb: 35, wind: 7, uv: 'Baixo', icon: '🌧️',
+                        desc: 'Chuva leve', sunrise: '06:17', sunset: '18:47' } }
+            ];
+
+            // Previsão para 7 dias
+            const diasSemana = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const iconesClima = ['☀️', '🌤️', '⛅', '🌧️', '⛈️', '☀️', '🌤️'];
+            const tempsMin = [18, 19, 20, 18, 17, 19, 18];
+            const tempsMax = [28, 29, 26, 27, 29, 26, 28];
+
+            // ============================================================
+            // INICIALIZAÇÃO DO MAPA
+            // ============================================================
+
+            let weatherMap = null;
+            let mapInitialized = false;
+            let markers = [];
+            let activeLayer = 'temperatura';
+
+            function initWeatherMap() {
+                if (mapInitialized) return;
+                const container = document.getElementById('weatherMap');
+                if (!container) return;
+
+                weatherMap = L.map('weatherMap', {
+                    zoomControl: true,
+                    attributionControl: true
+                }).setView([-9.5333, 16.3500], 8);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap & CartoDB',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                }).addTo(weatherMap);
+
+                mapInitialized = true;
+                adicionarMarcadoresClima();
+            }
+
+            function adicionarMarcadoresClima() {
+                if (!mapInitialized) return;
+
+                // Limpar marcadores existentes
+                markers.forEach(m => weatherMap.removeLayer(m));
+                markers = [];
+
+                locaisClima.forEach(local => {
+                    const icon = local.clima.icon;
+                    const temp = local.clima.temp;
+                    const desc = local.clima.desc;
+
+                    const markerHtml = `
+                        <div class="custom-marker-climate">
+                            <span class="weather-icon-small">${icon}</span>
+                            <span>${temp}°C</span>
+                        </div>
+                    `;
+
+                    const marker = L.marker([local.lat, local.lng], {
+                        icon: L.divIcon({
+                            html: markerHtml,
+                            className: '',
+                            iconSize: [60, 30],
+                            iconAnchor: [30, 15]
+                        })
+                    }).addTo(weatherMap);
+
+                    marker.bindPopup(`
+                        <div style="font-family:'Times New Roman',serif;min-width:200px;">
+                            <h6 style="color:#0d6efd;font-weight:bold;">${local.nome}</h6>
+                            <div style="display:flex;align-items:center;gap:10px;margin:5px 0;">
+                                <span style="font-size:2rem;">${icon}</span>
+                                <span style="font-size:1.5rem;font-weight:bold;">${temp}°C</span>
+                            </div>
+                            <p style="margin:0;color:#666;">${desc}</p>
+                            <hr style="margin:5px 0;">
+                            <div style="font-size:0.85rem;">
+                                <div>💧 Humidade: ${local.clima.humidity}%</div>
+                                <div>🌧️ Chuva: ${local.clima.rainProb}%</div>
+                                <div>💨 Vento: ${local.clima.wind} km/h</div>
+                                <div>☀️ UV: ${local.clima.uv}</div>
+                                <div>🌅 Nascer: ${local.clima.sunrise}</div>
+                                <div>🌇 Pôr: ${local.clima.sunset}</div>
+                            </div>
+                            <button class="btn btn-sm btn-primary mt-2" onclick="verDetalhesClima(${local.id})">
+                                <i class="bi bi-eye"></i> Ver Detalhes
+                            </button>
+                        </div>
+                    `, { maxWidth: 280 });
+
+                    markers.push(marker);
+
+                    // Evento de clique para mostrar detalhes
+                    marker.on('click', function() {
+                        verDetalhesClima(local.id);
+                    });
+                });
+            }
+
+            // ============================================================
+            // FUNÇÕES DE CLIMA
+            // ============================================================
+
+            function atualizarClimaAtual() {
+                // Usar Malanje como padrão
+                const local = locaisClima.find(l => l.id === 1);
+                if (!local) return;
+
+                const c = local.clima;
+                $('#weatherIcon').text(c.icon);
+                $('#weatherTemp').text(`${c.temp}°C`);
+                $('#weatherDesc').text(c.desc);
+                $('#feelsLike').text(`${c.feelsLike}°C`);
+                $('#humidityValue').text(`${c.humidity}%`);
+                $('#rainProb').text(`${c.rainProb}%`);
+                $('#windValue').text(`${c.wind} km/h`);
+                $('#uvIndex').text(c.uv);
+                $('#sunriseValue').text(c.sunrise);
+                $('#sunsetValue').text(c.sunset);
+            }
+
+            function atualizarPrevisao() {
+                const tbody = $('#forecastBody');
+                tbody.empty();
+
+                const dias = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                const hoje = new Date();
+                const diaSemana = hoje.getDay();
+
+                for (let i = 0; i < 7; i++) {
+                    const idx = (diaSemana + i) % 7;
+                    const diaKey = dias[idx];
+                    const diaNome = getTranslation(diaKey);
+                    const icone = iconesClima[i % iconesClima.length];
+                    const min = tempsMin[i % tempsMin.length];
+                    const max = tempsMax[i % tempsMax.length];
+                    const chuva = ['10%', '20%', '30%', '15%', '25%', '40%', '10%'][i];
+                    const vento = [12, 10, 8, 14, 11, 9, 13][i];
+
+                    tbody.append(`
+                        <tr>
+                            <td>${diaNome}</td>
+                            <td>${icone}</td>
+                            <td class="temp-min">${min}°C</td>
+                            <td class="temp-max">${max}°C</td>
+                            <td>${chuva}</td>
+                            <td>${vento} km/h</td>
+                        </tr>
+                    `);
+                }
+            }
+
+            function atualizarAlertas() {
+                const container = $('#alertasContainer');
+                container.empty();
+
+                const alertas = [
+                    { tipo: 'warning', icone: '🌧️', texto: getTranslation('alert_rain_intense') },
+                    { tipo: 'info', icone: '⛈️', texto: getTranslation('alert_storm') },
+                    { tipo: 'warning', icone: '💨', texto: getTranslation('alert_strong_wind') },
+                    { tipo: 'info', icone: '🌫️', texto: getTranslation('alert_fog') },
+                    { tipo: 'danger', icone: '🌡️', texto: getTranslation('alert_high_temp') }
+                ];
+
+                alertas.forEach(a => {
+                    container.append(`
+                        <div class="alerta-item ${a.tipo}">
+                            <span>${a.icone}</span>
+                            <span>${a.texto}</span>
+                        </div>
+                    `);
+                });
+            }
+
+            function atualizarRecomendacoes() {
+                const container = $('#recomendacoesContainer');
+                container.empty();
+
+                const recomendacoes = [
+                    { icone: '☀️', texto: getTranslation('rec_sunny') },
+                    { icone: '🧴', texto: getTranslation('rec_sunscreen') },
+                    { icone: '🧥', texto: 'Leve um casaco leve para a noite.' },
+                    { icone: '📷', texto: 'Ótimas condições para fotografias nas quedas.' }
+                ];
+
+                recomendacoes.forEach(r => {
+                    container.append(`
+                        <div class="recomendacao-item">${r.icone} ${r.texto}</div>
+                    `);
+                });
+            }
+
+            // ============================================================
+            // DETALHES DO CLIMA (MODAL)
+            // ============================================================
+
+            window.verDetalhesClima = function(id) {
+                const local = locaisClima.find(l => l.id === id);
+                if (!local) return;
+
+                const c = local.clima;
+                $('#modalLocalNome').text(local.nome);
+
+                const html = `
+                    <div style="text-align:center;padding:10px 0;">
+                        <span style="font-size:3rem;">${c.icon}</span>
+                        <div style="font-size:2.5rem;font-weight:bold;">${c.temp}°C</div>
+                        <div style="font-size:1.1rem;color:rgba(255,255,255,0.6);">${c.desc}</div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="weather-detail"><span>🌡️ Sensação térmica</span><span>${c.feelsLike}°C</span></div>
+                            <div class="weather-detail"><span>💧 Humidade</span><span>${c.humidity}%</span></div>
+                            <div class="weather-detail"><span>🌧️ Prob. de chuva</span><span>${c.rainProb}%</span></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="weather-detail"><span>💨 Vento</span><span>${c.wind} km/h</span></div>
+                            <div class="weather-detail"><span>☀️ Índice UV</span><span>${c.uv}</span></div>
+                            <div class="weather-detail"><span>🌅 Nascer do sol</span><span>${c.sunrise}</span></div>
+                            <div class="weather-detail"><span>🌇 Pôr do sol</span><span>${c.sunset}</span></div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div style="font-size:0.9rem;color:rgba(255,255,255,0.6);">
+                        <i class="bi bi-info-circle"></i> Dados meteorológicos atualizados para ${local.nome}.
+                    </div>
+                `;
+
+                $('#modalClimaDetalhes').html(html);
+                $('#climaDetalhesModal').modal('show');
+            };
+
+            // ============================================================
+            // CAMADAS DO MAPA
+            // ============================================================
+
+            function alternarCamada(layer) {
+                activeLayer = layer;
+                $('.btn-layer').removeClass('active');
+                $(`.btn-layer[data-layer="${layer}"]`).addClass('active');
+
+                // Simular mudança de camada com cores diferentes nos marcadores
+                locaisClima.forEach((local, index) => {
+                    if (markers[index]) {
+                        const temp = local.clima.temp;
+                        let color = '#2196F3';
+                        if (temp > 32) color = '#F44336';
+                        else if (temp > 28) color = '#FF9800';
+                        else if (temp > 23) color = '#8BC34A';
+
+                        // Atualizar o marcador com a cor correspondente
+                        const icon = local.clima.icon;
+                        const markerHtml = `
+                            <div class="custom-marker-climate" style="border-color:${color};">
+                                <span class="weather-icon-small">${icon}</span>
+                                <span>${temp}°C</span>
+                            </div>
+                        `;
+                        markers[index].setIcon(L.divIcon({
+                            html: markerHtml,
+                            className: '',
+                            iconSize: [60, 30],
+                            iconAnchor: [30, 15]
+                        }));
+                    }
+                });
+            }
+
+            // ============================================================
+            // EVENTOS DOS BOTÕES
+            // ============================================================
+
+            // Pesquisar local
+            $('#btnPesquisarLocal').click(function() {
+                const termo = $('#pesquisaLocal').val().toLowerCase();
+                if (!termo) {
+                    weatherMap.setView([-9.5333, 16.3500], 8);
+                    return;
+                }
+
+                const local = locaisClima.find(l => l.nome.toLowerCase().includes(termo));
+                if (local) {
+                    weatherMap.setView([local.lat, local.lng], 10);
+                    // Abrir popup do marcador
+                    const idx = locaisClima.indexOf(local);
+                    if (markers[idx]) {
+                        markers[idx].openPopup();
+                    }
+                } else {
+                    alert(`⚠️ Local "${termo}" não encontrado em Malanje.`);
+                }
+            });
+
+            // Atualizar clima
+            $('#btnAtualizarClima').click(function() {
+                // Simular atualização com pequenas variações
+                locaisClima.forEach(local => {
+                    const variacao = (Math.random() - 0.5) * 2;
+                    local.clima.temp = Math.round((local.clima.temp || 25) + variacao);
+                    local.clima.humidity = Math.min(100, Math.max(30, (local.clima.humidity || 60) + (Math.random() -
+                        0.5) * 10));
+                    local.clima.rainProb = Math.min(100, Math.max(0, (local.clima.rainProb || 20) + (Math.random() -
+                        0.5) * 20));
+                });
+
+                atualizarClimaAtual();
+                adicionarMarcadoresClima();
+                atualizarPrevisao();
+                atualizarAlertas();
+                atualizarRecomendacoes();
+
+                alert('✅ ' + getTranslation('update') + ' - Dados meteorológicos atualizados com sucesso!');
+            });
+
+            // Camadas
+            $(document).on('click', '.btn-layer', function() {
+                const layer = $(this).data('layer');
+                alternarCamada(layer);
+            });
+
+            // Salvar previsão
+            $('#btnSalvarClima').click(function() {
+                alert('✅ Previsão do tempo salva com sucesso!\n\n' +
+                    '📅 Dados atualizados para Malanje.\n' +
+                    '💡 Você pode acessar esta previsão em "Meus Favoritos".');
+            });
+
+            // Compartilhar clima
+            $('#btnCompartilharClima').click(function() {
+                const link = 'https://malanje.travel/clima';
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Clima em Malanje',
+                        text: 'Confira as condições meteorológicas em Malanje!',
+                        url: link
+                    }).catch(() => {});
+                } else {
+                    alert('📤 Compartilhe o clima de Malanje!\n\n' +
+                        '🔗 Link: ' + link + '\n' +
+                        '📱 Copie o link e compartilhe com seus amigos.');
+                }
+            });
+
+            // Voltar
+            $('#btnVoltar').click(function() {
+                if (confirm('Deseja realmente sair do Mapa de Clima?')) {
+                    alert('🔙 Retornando ao menu principal...');
+                }
+            });
+
+            // ============================================================
+            // TEMA (mantido)
+            // ============================================================
+
+            let isDarkTheme = true;
+
+            function toggleTheme() {
+                isDarkTheme = !isDarkTheme;
+                if (isDarkTheme) {
+                    $('body').removeClass('light-theme');
+                    $('#themeIcon').removeClass('bi-sun-fill').addClass('bi-moon-stars');
+                } else {
+                    $('body').addClass('light-theme');
+                    $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+                }
+                localStorage.setItem('sicami-theme-clima', isDarkTheme ? 'dark' : 'light');
+            }
+
+            const savedTheme = localStorage.getItem('sicami-theme-clima');
+            if (savedTheme === 'light') {
+                isDarkTheme = false;
+                $('body').addClass('light-theme');
+                $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+            }
+            $('#themeToggle').click(toggleTheme);
+
+            // ============================================================
+            // DATA/HORA
+            // ============================================================
+
+            function updateDateTime() {
+                const now = new Date();
+                $('#dateTimeDisplay').text(
+                    now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR')
+                );
+            }
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+
+            // ============================================================
+            // INICIALIZAÇÃO
+            // ============================================================
+
+            setTimeout(initWeatherMap, 500);
+
+            // Atualizar dados iniciais
+            setTimeout(() => {
+                atualizarClimaAtual();
+                atualizarPrevisao();
+                atualizarAlertas();
+                atualizarRecomendacoes();
+            }, 600);
+
+            console.log('✅ Mapa de Clima - Malanje carregado!');
+            console.log(`📍 ${locaisClima.length} locais com dados meteorológicos`);
+            console.log(`🌐 Idioma atual: ${currentLang}`);
+            console.log('🗺️ Mapa interativo com Leaflet');
+            console.log('📊 Previsão para 7 dias disponível');
+
+        });
+    </script>
+</body>
+</html>

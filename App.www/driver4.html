@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Mobilidade Turística Malanje - Assistente Inteligente com IA Mágica</title>
+    <!-- Bootstrap 5 + Icons + Font Awesome + Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Times New Roman', Times, serif;
+        }
+        body {
+            background: url('images/tela-transporte.jpg') no-repeat center center fixed;
+    background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .btn-ver-taxis {
+            background: linear-gradient(135deg, #0b3b2f, #1b5e3f);
+            border: none;
+            padding: 18px 42px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            border-radius: 60px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+        .btn-ver-taxis:hover {
+            transform: scale(1.03);
+            box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #145c46, #228b5e);
+        }
+        .modal-mobilidade .modal-dialog {
+            max-width: 95vw;
+            width: 1400px;
+            margin: 1rem auto;
+        }
+        .modal-mobilidade .modal-content {
+            border-radius: 32px;
+            border: none;
+            overflow: hidden;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.3);
+        }
+        .modal-mobilidade .modal-header {
+            background: linear-gradient(135deg, #0b3b2f, #1b5e3f);
+            color: white;
+            border-bottom: none;
+            padding: 1.2rem 2rem;
+        }
+        .modal-mobilidade .btn-close-white {
+            filter: brightness(0) invert(1);
+        }
+        .card-transport {
+            border-radius: 20px;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            background: #ffffff;
+        }
+        .card-transport:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+        .btn-whatsapp {
+            background-color: #25d366;
+            border-color: #25d366;
+            color: white;
+        }
+        .btn-whatsapp:hover {
+            background-color: #1da851;
+        }
+        .btn-call {
+            background-color: #007bff;
+        }
+        .map-container {
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border: 2px solid #fff;
+        }
+        #mapModal {
+            height: 450px;
+            width: 100%;
+        }
+        .sidebar-info {
+            background: white;
+            border-radius: 24px;
+            padding: 1rem;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+        .btn-google-maps {
+            background-color: #34a853;
+            border: none;
+        }
+        .assistente-msg {
+            background: #e9f5ef;
+            border-left: 6px solid #1b5e3f;
+            border-radius: 16px;
+        }
+        .terminal-item {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 0;
+        }
+        .logo-empresa {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 5px;
+            margin-right: 12px;
+        }
+        .badge-ia-recomendado {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
+        }
+        .ia-suggestion-badge {
+            background: #f0e6ff;
+            border-left: 4px solid #6a11cb;
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+        }
+        
+        @keyframes magicAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+                filter: blur(5px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(106, 17, 203, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(106, 17, 203, 0.6); }
+        }
+        
+        .sugestao-magica {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            animation: magicAppear 0.6s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .sugestao-magica::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: glowPulse 3s infinite;
+            pointer-events: none;
+        }
+        
+        .magic-wand {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 2rem;
+            animation: sparkle 2s infinite;
+        }
+        
+        .magic-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .magic-title i {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #ffd89b, #c7e9fb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .magic-insight {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 12px;
+            margin: 12px 0;
+            border-left: 4px solid #ffd700;
+        }
+        
+        .magic-dica {
+            background: rgba(106, 17, 203, 0.3);
+            border-radius: 16px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+        
+        .fechar-sugestao {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        
+        .fechar-sugestao:hover {
+            background: rgba(255,255,255,0.4);
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .btn-ver-taxis { font-size: 1.3rem; padding: 12px 28px; }
+            #mapModal { height: 300px; }
+            .modal-mobilidade .modal-dialog { max-width: 98vw; }
+            .sugestao-magica { padding: 15px; }
+            .magic-title { font-size: 1rem; }
+        }
+        
+         /* Outher CSS */
+        .map-container iframe {
+            border-radius: 20px;
+            width: 100%;
+            height: 280px;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="text-center">
+    <button class="btn btn-ver-taxis text-white" data-bs-toggle="modal" data-bs-target="#assistenteMobilidadeModal">
+        <i class="fas fa-taxi me-3"></i> Ver Táxis & Mobilidade <i class="fas fa-map-marked-alt ms-3"></i>
+    </button>
+</div>
+
+<!-- MODAL COMPLETO -->
+<div class="modal fade modal-mobilidade" id="assistenteMobilidadeModal" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen-md-down modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h3 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i> Assistente de Mobilidade Turística | Malanje</h3>
+                    <p class="mb-0 small opacity-75">Navegação GPS • Táxis reais • IA Mágica • Sugestões Inspiradoras</p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body p-3 p-lg-4" style="background: #f4fbf8;">
+                <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+                    <div class="mb-2">
+                        <i class="fas fa-location-dot text-success"></i> 
+                        <span id="statusLocalizacaoModal"><i class="fas fa-spinner fa-pulse"></i> A localizar GPS...</span>
+                    </div>
+                    <div>
+                        <span class="badge bg-dark p-2"><i class="fas fa-phone-alt"></i> Emergência: 111 | Polícia: 113</span>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- COLUNA ESQUERDA -->
+                    <div class="col-lg-4">
+                        <div class="sidebar-info mb-4">
+                            <h4><i class="fas fa-umbrella-beach"></i> Destinos Turísticos</h4>
+                            <div class="d-flex flex-wrap gap-2 my-3" id="listaDestinosModal">
+                                <button class="btn btn-outline-success destino-btn-modal" data-nome="Quedas de Calandula" data-lat="-9.0747" data-lng="15.9301">🌊 Quedas de Calandula</button>
+                                <button class="btn btn-outline-success destino-btn-modal" data-nome="Pedras Negras de Pungo Andongo" data-lat="-9.6800" data-lng="15.5760">⛰️ Pedras Negras</button>
+                                <button class="btn btn-outline-success destino-btn-modal" data-nome="Parque Nacional da Cangandala" data-lat="-9.7925" data-lng="16.0492">🦒 Parque Cangandala</button>
+                                <button class="btn btn-outline-success destino-btn-modal" data-nome="Lagoa do Carumbo" data-lat="-9.3333" data-lng="17.3167">🏞️ Lagoa do Carumbo</button>
+                                <button class="btn btn-outline-success destino-btn-modal" data-nome="Palácio do Rei Ngola" data-lat="-9.5400" data-lng="16.3440">🏛️ Palácio do Rei Ngola</button>
+                            </div>
+                            <div id="destinoSelecionadoInfoModal" class="alert alert-light border mt-2">
+                                <i class="fas fa-info-circle"></i> Nenhum destino selecionado.
+                            </div>
+                            <button id="btnLevarAteLaModal" class="btn btn-success w-100 mt-2" disabled>
+                                <i class="fas fa-taxi"></i> Levar-me até lá (GPS + IA)
+                            </button>
+                        </div>
+
+                        <div class="sidebar-info mb-4">
+                            <h4><i class="fas fa-car-side"></i> Táxis de Malanje <span class="badge-ia-recomendado"><i class="fas fa-brain"></i> IA Recomenda</span></h4>
+                            <div id="iaSugestaoTop" class="ia-suggestion-badge mb-2">
+                                <i class="fas fa-robot"></i> <strong>Inteligência Artificial:</strong> A IA está a analisar disponibilidade e proximidade...
+                            </div>
+                            <div id="listaTaxiModal" class="row g-2"></div>
+                            <div class="mt-2 small text-muted">* Contacte diretamente: Ligar ou WhatsApp. A IA sugere a melhor opção baseada na sua localização e destino.</div>
+                        </div>
+
+                        <div class="sidebar-info">
+                            <h4><i class="fas fa-bus"></i> Terminais e Estações</h4>
+                            <div id="terminaisListaModal"></div>
+                            <div class="mt-2 text-center">
+                                <small><i class="fas fa-train"></i> Mobilidade intermunicipal e regional</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COLUNA DIREITA -->
+                    <div class="col-lg-8">
+                        <div id="sugestaoMagicaContainer" style="min-height: 180px;"></div>
+                        
+                        <!-- MAPA - API do Google Maps renderiza aqui -->
+                        <div class="map-container mb-3">
+                            <iframe id="mapModal"
+                                src="https://maps.google.com/maps?q=Bairro%20Ritondo%2C%20Malanje%2C%20Angola&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                                allowfullscreen="" 
+                                loading="lazy" 
+                                referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                        </div>
+                        
+                        <div class="row g-2 align-items-stretch mb-3">
+                            <div class="col-md-7">
+                                <div class="card p-3 h-100 shadow-sm">
+                                    <h5><i class="fas fa-route"></i> Rota & Navegação</h5>
+                                    <div id="infoRotaModal">
+                                        <p class="text-muted">📍 Selecione um destino para visualizar a rota no mapa</p>
+                                    </div>
+                                    <button id="abrirGoogleMapsModal" class="btn btn-google-maps text-white mt-2" disabled>
+                                        <i class="fab fa-google"></i> Abrir rota no Google Maps
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="card p-3 h-100 shadow-sm">
+                                    <h5><i class="fas fa-star-of-life"></i> Assistente IA</h5>
+                                    <div id="assistenteMensagemModal" class="assistente-msg p-2">
+                                        🤖 Bem-vindo! Escolha um destino e a IA recomendará o melhor táxi.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card p-3">
+                            <h5><i class="fas fa-concierge-bell"></i> Serviços Próximos ao Destino</h5>
+                            <div class="row" id="servicosProximosModal">
+                                <div class="col-12 text-muted">🔍 Selecione um destino para ver hotéis, restaurantes e serviços.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light justify-content-between">
+                <div><i class="fas fa-shield-alt text-success"></i> Experiência Premium - IA Mágica em tempo real</div>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Variáveis globais
+    let map;
+    let userMarker;
+    let directionsRenderer;
+    let userLat = null;
+    let userLng = null;
+    let userLocationFixed = false;
+    let selectedDest = null;
+    let watchId = null;
+    let destMarkers = [];
+
+    // Base de conhecimento para sugestões mágicas da IA
+    const magicSuggestionsDB = {
+        "Quedas de Calandula": {
+            fraseMagica: "✨ Onde as águas dançam em liberdade! ✨",
+            insight: "Sabia que as Quedas de Calandula são as segundas maiores quedas de água de África? Com mais de 105 metros de altura, o rugido das águas é a sinfonia da natureza.",
+            dicaEspecial: "🌅 Melhor horário para visitar: Entre 10h e 14h, quando o sol cria arco-íris perfeitos sobre a neblina!",
+            experiencia: "Leve câmera fotográfica e capa de chuva - a neblina é refrescante e cria fotos espetaculares!"
+        },
+        "Pedras Negras de Pungo Andongo": {
+            fraseMagica: "🏔️ Sentinelas de pedra que guardam segredos ancestrais! 🏔️",
+            insight: "As Pedras Negras são formações rochosas que a ciência estima ter mais de 500 milhões de anos! A lenda diz que são princesas petrificadas.",
+            dicaEspecial: "🥾 Use calçado confortável - a trilha até ao topo da pedra principal leva cerca de 30 minutos!",
+            experiencia: "Contrate um guia local no local - eles conhecem histórias fascinantes sobre cada formação rochosa."
+        },
+        "Parque Nacional da Cangandala": {
+            fraseMagica: "🦒 O último refúgio da Palanca Negra Gigante! 🦒",
+            insight: "Este é o único lugar no mundo onde pode ver a Palanca Negra Gigante em estado selvagem.",
+            dicaEspecial: "🔭 Traga binóculos! O melhor horário para observar os animais é ao amanhecer (5h-7h) ou ao entardecer (16h-18h).",
+            experiencia: "Os guardas florestais oferecem visitas guiadas - não perca a oportunidade!"
+        },
+        "Lagoa do Carumbo": {
+            fraseMagica: "💧 Um espelho d'água que reflete o céu de Malanje! 💧",
+            insight: "A Lagoa do Carumbo é uma das maiores lagoas de água doce de Angola, alimentada pelo rio Cuije.",
+            dicaEspecial: "🚣 Perfeito para passeios de canoa! Leve repelente e protetor solar.",
+            experiencia: "Experimente o peixe fresco assado na hora pelos pescadores locais!"
+        },
+        "Palácio do Rei Ngola": {
+            fraseMagica: "👑 Onde a história do Reino Ngola ganha vida! 👑",
+            insight: "Este palácio foi a residência do Rei Ngola Kiluanje, que governou a região antes da colonização.",
+            dicaEspecial: "📖 Visite o pequeno museu anexo - contém artefactos originais da realeza Ngola.",
+            experiencia: "Aos domingos, há apresentações de danças tradicionais no pátio do palácio."
+        }
+    };
+
+    // Empresas de táxi reais
+    const empresasTaxiReais = [
+        { id: 1, nome: "Macom Transporte", imgLogo: "https://cdn-icons-png.flaticon.com/512/3096/3096034.png", telefone: "+244936789173", whatsapp: "244936789173", tempoEspera: "8-12 min", veiculo: "Toyota Hiace / 12 lugares", avaliacao: 4.8, disponibilidade: 95 },
+        { id: 2, nome: "Macon Transport", imgLogo: "https://cdn-icons-png.flaticon.com/512/2331/2331966.png", telefone: "+244923456789", whatsapp: "244923456789", tempoEspera: "5-10 min", veiculo: "Sedan / 4 lugares", avaliacao: 4.6, disponibilidade: 88 },
+        { id: 3, nome: "Táxi Executivo Malanje", imgLogo: "https://cdn-icons-png.flaticon.com/512/2972/2972666.png", telefone: "+244944123456", whatsapp: "244944123456", tempoEspera: "10-15 min", veiculo: "Executivo / Ar Condicionado", avaliacao: 4.9, disponibilidade: 75 },
+        { id: 4, nome: "Táxi Central Malanje", imgLogo: "https://cdn-icons-png.flaticon.com/512/3096/3096034.png", telefone: "+244922345678", whatsapp: "244922345678", tempoEspera: "7-12 min", veiculo: "Standard / 4 lugares", avaliacao: 4.5, disponibilidade: 82 }
+    ];
+
+    const terminaisReais = [
+        { nome: "Estação Ferroviária de Malanje", localizacao: "Av. Comandante Che Guevara", horario: "06h - 18h", contacto: "+244 923 456 789", rotas: "Malanje → N'dalatando / Luanda" },
+        { nome: "Parque do Cacuso", localizacao: "Bairro Cacuso, Malanje", horario: "05h - 20h", contacto: "+244 912 345 678", rotas: "Cacuso → Calandula, Cacuso → Kambo" },
+        { nome: "Macon (Terminal Interprovincial)", localizacao: "Rua 1º Congresso", horario: "06h-19h", contacto: "+244 922 554 433", rotas: "Malanje → Luanda, Malanje → Uíge" },
+        { nome: "Terminal do Cemiterio", localizacao: "Av. 4 de Fevereiro", horario: "06h-20h", contacto: "+244 923 111 222", rotas: "Malanje → Saurimo, Luanda, Calandula" }
+    ];
+
+    const servicosBaseReais = {
+        "Quedas de Calandula": { hoteis: "Pousada Calandula, Residencial Cascata", restaurantes: "Restaurante Mirante, Barragem Grill", farmacia: "Farmácia Calandula Centro", hospital: "Centro de Saúde Calandula" },
+        "Pedras Negras de Pungo Andongo": { hoteis: "Eco Lodge Pedras Negras, Pousada Pungo", restaurantes: "Cantinho da Montanha, Churrasqueira Pedras", farmacia: "Farmácia Pungo", hospital: "Hospital Municipal do Andongo" },
+        "Parque Nacional da Cangandala": { hoteis: "Cangandala Camp, Residencial Mussende", restaurantes: "Restaurante do Parque, Lanchonete Savana", farmacia: "Farmácia Cangandala", hospital: "Centro de Saúde Cangandala" },
+        "Lagoa do Carumbo": { hoteis: "Pousada Carumbo, Lodge Lagoa Azul", restaurantes: "Restaurante Flutuante, Bar da Lagoa", farmacia: "Farmácia Carumbo", hospital: "Hospital de Caculama" },
+        "Palácio do Rei Ngola": { hoteis: "Hotel Malanje, Residencial Ngola", restaurantes: "Restaurante Sabores do Rei, Churrascaria Ngola", farmacia: "Farmácia Popular", hospital: "Hospital Provincial de Malanje" }
+    };
+
+    function recomendarMelhorTaxiIA(distanciaKm = 50) {
+        return empresasTaxiReais.map(taxi => {
+            let tempoEsperaNum = parseInt(taxi.tempoEspera.split('-')[0]) || 10;
+            let bonus = (distanciaKm > 80 && taxi.veiculo.includes("Hiace")) ? 15 : 0;
+            let score = ((taxi.avaliacao / 5) * 40 + (taxi.disponibilidade / 100) * 35 + (Math.max(0, 20 - tempoEsperaNum) / 20) * 25) + bonus;
+            return { ...taxi, scoreIA: Math.min(100, Math.round(score)) };
+        }).sort((a, b) => b.scoreIA - a.scoreIA);
+    }
+
+    function carregarEmpresasTaxiReais(distanciaKm = 50) {
+        const container = document.getElementById("listaTaxiModal");
+        if (!container) return;
+        
+        const taxisOrdenados = recomendarMelhorTaxiIA(distanciaKm);
+        container.innerHTML = "";
+        
+        taxisOrdenados.forEach((emp, index) => {
+            const col = document.createElement("div");
+            col.className = "col-12";
+            col.innerHTML = `
+                <div class="card card-transport mb-2 p-2" style="${index === 0 ? 'border: 2px solid #6a11cb; background: #f8f0ff;' : ''}">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                        <div class="d-flex align-items-center">
+                            <img src="${emp.imgLogo}" class="logo-empresa" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3096/3096034.png';">
+                            <div>
+                                <strong>${emp.nome}</strong>
+                                ${index === 0 ? '<span class="badge-ia-recomendado"><i class="fas fa-trophy"></i> Melhor Opção IA</span>' : ''}
+                                <br><small>🚙 ${emp.veiculo}</small>
+                                <br><small><i class="fas fa-star text-warning"></i> ${emp.avaliacao}/5 | Score IA: ${emp.scoreIA}/100</small>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="tel:${emp.telefone}" class="btn btn-sm btn-call text-white"><i class="fas fa-phone-alt"></i> Ligar</a>
+                            <a href="https://wa.me/${emp.whatsapp}" target="_blank" class="btn btn-sm btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(col);
+        });
+        
+        if (taxisOrdenados[0]) {
+            document.getElementById("iaSugestaoTop").innerHTML = `
+                <i class="fas fa-brain"></i> <strong>🤖 IA Recomendação:</strong> 
+                <strong>${taxisOrdenados[0].nome}</strong> é a melhor opção! 
+                <i class="fas fa-star text-warning"></i> Score: ${taxisOrdenados[0].scoreIA}/100
+            `;
+        }
+    }
+
+    function carregarTerminaisReais() {
+        const container = document.getElementById("terminaisListaModal");
+        if (!container) return;
+        container.innerHTML = terminaisReais.map(t => `
+            <div class="terminal-item">
+                <strong><i class="fas fa-map-pin"></i> ${t.nome}</strong><br>
+                <small>📍 ${t.localizacao} | 🕒 ${t.horario}</small><br>
+                <small>🚌 Rotas: ${t.rotas}</small>
+            </div>
+        `).join('');
+    }
+
+    function mostrarSugestaoMagica(destinoNome) {
+        const dados = magicSuggestionsDB[destinoNome];
+        if (!dados) return;
+        
+        document.getElementById("sugestaoMagicaContainer").innerHTML = `
+            <div class="sugestao-magica">
+                <div class="magic-wand"><i class="fas fa-magic"></i></div>
+                <div class="magic-title"><i class="fas fa-gem"></i><span>✨ IA Mágica acaba de pensar em si... ✨</span></div>
+                <h4 style="color: #ffd700;"><i class="fas fa-quote-left"></i> ${dados.fraseMagica}</h4>
+                <div class="magic-insight"><strong>🔮 Insight da IA:</strong> ${dados.insight}</div>
+                <div class="magic-dica"><strong>⏰ Dica inteligente:</strong> ${dados.dicaEspecial}</div>
+                <div class="magic-dica" style="background: rgba(255,215,0,0.2);"><strong>⭐ Experiência imperdível:</strong> ${dados.experiencia}</div>
+                <div class="text-end mt-2">
+                    <button class="fechar-sugestao" onclick="this.closest('.sugestao-magica').remove();"><i class="fas fa-times"></i> Dispensar</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function calcularRota() {
+        if (!selectedDest || !userLocationFixed || !userLat || !userLng) {
+            if (!userLocationFixed) {
+                document.getElementById("infoRotaModal").innerHTML = `<p class="text-warning">⚠️ Aguardando ativação do GPS...</p>`;
+            }
+            return;
+        }
+        
+        const directionsService = new google.maps.DirectionsService();
+        const origin = new google.maps.LatLng(userLat, userLng);
+        const destination = new google.maps.LatLng(selectedDest.lat, selectedDest.lng);
+        
+        directionsService.route({
+            origin: origin,
+            destination: destination,
+            travelMode: google.maps.TravelMode.DRIVING
+        }, (result, status) => {
+            if (status === "OK") {
+                directionsRenderer.setDirections(result);
+                const route = result.routes[0].legs[0];
+                const distanciaKm = (route.distance.value / 1000).toFixed(1);
+                const duracao = route.duration.text;
+                
+                document.getElementById("infoRotaModal").innerHTML = `
+                    <p><i class="fas fa-road"></i> <strong>Distância:</strong> ${distanciaKm} km<br>
+                    <i class="fas fa-clock"></i> <strong>Tempo estimado:</strong> ${duracao}<br>
+                    <i class="fas fa-flag-checkered"></i> <strong>Destino:</strong> ${selectedDest.nome}</p>
+                `;
+                document.getElementById("abrirGoogleMapsModal").disabled = false;
+                
+                carregarEmpresasTaxiReais(parseFloat(distanciaKm));
+                
+                const melhorTaxi = recomendarMelhorTaxiIA(parseFloat(distanciaKm))[0];
+                document.getElementById("assistenteMensagemModal").innerHTML = `
+                    <i class="fas fa-robot"></i> 🤖 IA: Rota calculada! ${distanciaKm} km até ${selectedDest.nome}. 
+                    Tempo estimado: ${duracao}. Recomendo ${melhorTaxi ? melhorTaxi.nome : "qualquer táxi disponível"}.
+                `;
+                
+                const serv = servicosBaseReais[selectedDest.nome] || {};
+                document.getElementById("servicosProximosModal").innerHTML = `
+                    <div class="col-md-6"><i class="fas fa-hotel"></i> <strong>Hotéis:</strong> ${serv.hoteis || "Informação local"}</div>
+                    <div class="col-md-6"><i class="fas fa-utensils"></i> <strong>Restaurantes:</strong> ${serv.restaurantes || "Variedade local"}</div>
+                    <div class="col-md-6"><i class="fas fa-prescription-bottle"></i> <strong>Farmácias:</strong> ${serv.farmacia || "Próximas ao destino"}</div>
+                    <div class="col-md-6"><i class="fas fa-hospital"></i> <strong>Hospitais:</strong> ${serv.hospital || "Unidade de saúde próxima"}</div>
+                `;
+            } else {
+                document.getElementById("infoRotaModal").innerHTML = `<p class="text-danger">Erro ao calcular rota. Tente novamente.</p>`;
+            }
+        });
+    }
+
+    // FUNÇÃO PRINCIPAL DE INICIALIZAÇÃO DO MAPA E GPS
+    window.initMap = function() {
+        const malanjeCenter = { lat: -9.5383, lng: 16.3435 };
+        
+        map = new google.maps.Map(document.getElementById("mapModal"), {
+            center: malanjeCenter,
+            zoom: 12,
+            zoomControl: true,
+            mapTypeControl: true,
+            streetViewControl: true,
+            fullscreenControl: true
+        });
+        
+        directionsRenderer = new google.maps.DirectionsRenderer({
+            map: map,
+            suppressMarkers: false,
+            polylineOptions: {
+                strokeColor: '#1b5e3f',
+                strokeWeight: 5,
+                strokeOpacity: 0.8
+            }
+        });
+        
+        userMarker = new google.maps.Marker({
+            position: malanjeCenter,
+            map: map,
+            title: "Sua localização",
+            icon: {
+                url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+                scaledSize: new google.maps.Size(40, 40)
+            },
+            animation: google.maps.Animation.DROP
+        });
+        
+        // INICIAR GPS
+        if (navigator.geolocation) {
+            const statusDiv = document.getElementById("statusLocalizacaoModal");
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLat = position.coords.latitude;
+                    userLng = position.coords.longitude;
+                    const userPos = { lat: userLat, lng: userLng };
+                    
+                    map.setCenter(userPos);
+                    map.setZoom(13);
+                    userMarker.setPosition(userPos);
+                    
+                    statusDiv.innerHTML = `<i class="fas fa-check-circle text-success"></i> GPS ativo: ${userLat.toFixed(6)}, ${userLng.toFixed(6)} (precisão: ${position.coords.accuracy.toFixed(0)}m)`;
+                    userLocationFixed = true;
+                    
+                    carregarEmpresasTaxiReais(50);
+                    
+                    if (selectedDest) calcularRota();
+                    
+                    if (watchId) navigator.geolocation.clearWatch(watchId);
+                    watchId = navigator.geolocation.watchPosition(
+                        (newPos) => {
+                            userLat = newPos.coords.latitude;
+                            userLng = newPos.coords.longitude;
+                            userMarker.setPosition({ lat: userLat, lng: userLng });
+                            statusDiv.innerHTML = `<i class="fas fa-satellite-dish text-success"></i> GPS atualizado: ${userLat.toFixed(6)}, ${userLng.toFixed(6)}`;
+                            if (selectedDest) calcularRota();
+                        },
+                        (err) => console.warn("Watch error:", err),
+                        { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+                    );
+                },
+                (error) => {
+                    console.error("GPS Error:", error);
+                    let msg = "";
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED: msg = "Permissão negada. Ative o GPS nas configurações."; break;
+                        case error.POSITION_UNAVAILABLE: msg = "Localização indisponível. Usando centro de Malanje."; break;
+                        case error.TIMEOUT: msg = "Tempo esgotado. Usando centro de Malanje."; break;
+                        default: msg = "Erro ao obter localização.";
+                    }
+                    statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle text-warning"></i> ${msg}`;
+                    userLocationFixed = false;
+                    carregarEmpresasTaxiReais(50);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            document.getElementById("statusLocalizacaoModal").innerHTML = `<i class="fas fa-ban text-danger"></i> Navegador sem suporte a GPS.`;
+            carregarEmpresasTaxiReais(50);
+        }
+        
+        // Marcadores dos destinos turísticos
+        const destinos = [
+            { nome: "Quedas de Calandula", lat: -9.0747, lng: 15.9301 },
+            { nome: "Pedras Negras de Pungo Andongo", lat: -9.6800, lng: 15.5760 },
+            { nome: "Parque Nacional da Cangandala", lat: -9.7925, lng: 16.0492 },
+            { nome: "Lagoa do Carumbo", lat: -9.3333, lng: 17.3167 },
+            { nome: "Palácio do Rei Ngola", lat: -9.5400, lng: 16.3440 }
+        ];
+        
+        destinos.forEach(dest => {
+            const marker = new google.maps.Marker({
+                position: { lat: dest.lat, lng: dest.lng },
+                map: map,
+                title: dest.nome,
+                icon: {
+                    url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+                    scaledSize: new google.maps.Size(35, 35)
+                },
+                animation: google.maps.Animation.DROP
+            });
+            
+            marker.addListener("click", () => {
+                selecionarDestinoModal(dest.nome, dest.lat, dest.lng);
+            });
+        });
+    };
+    
+    function selecionarDestinoModal(nome, lat, lng) {
+        selectedDest = { nome: nome, lat: parseFloat(lat), lng: parseFloat(lng) };
+        document.getElementById("destinoSelecionadoInfoModal").innerHTML = `<i class="fas fa-check-circle text-success"></i> Destino selecionado: <strong>${nome}</strong>`;
+        document.getElementById("btnLevarAteLaModal").disabled = false;
+        
+        mostrarSugestaoMagica(nome);
+        
+        if (userLocationFixed && userLat && userLng) {
+            calcularRota();
+            const bounds = new google.maps.LatLngBounds();
+            bounds.extend({ lat: userLat, lng: userLng });
+            bounds.extend({ lat: parseFloat(lat), lng: parseFloat(lng) });
+            map.fitBounds(bounds);
+        } else {
+            map.setCenter({ lat: parseFloat(lat), lng: parseFloat(lng) });
+            map.setZoom(10);
+            document.getElementById("infoRotaModal").innerHTML = `<p class="text-warning">⚠️ Ative o GPS para ver a rota até ${nome}.</p>`;
+        }
+    }
+    
+    function abrirGoogleMapsRoute() {
+        if (selectedDest && userLocationFixed && userLat && userLng) {
+            window.open(`https://www.google.com/maps/dir/${userLat},${userLng}/${selectedDest.lat},${selectedDest.lng}`, '_blank');
+        } else if (!userLocationFixed) {
+            alert("⚠️ Por favor, ative a localização GPS.");
+        } else {
+            alert("⚠️ Selecione um destino primeiro.");
+        }
+    }
+    
+    function botaoLevarAteLa() {
+        if (!selectedDest) {
+            alert("Selecione um destino turístico primeiro.");
+            return;
+        }
+        if (!userLocationFixed) {
+            alert("⚠️ Permita o acesso à localização GPS nas configurações do navegador.");
+            return;
+        }
+        calcularRota();
+    }
+    
+    // Evento do modal - redimensionar o mapa quando aberto
+    document.getElementById("assistenteMobilidadeModal").addEventListener("shown.bs.modal", function() {
+        if (map) {
+            google.maps.event.trigger(map, 'resize');
+            if (userLocationFixed && userLat && userLng) {
+                map.setCenter({ lat: userLat, lng: userLng });
+                map.setZoom(13);
+            } else {
+                map.setCenter({ lat: -9.5383, lng: 16.3435 });
+                map.setZoom(11);
+            }
+        }
+    });
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        carregarTerminaisReais();
+        carregarEmpresasTaxiReais(50);
+        
+        document.querySelectorAll(".destino-btn-modal").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                selecionarDestinoModal(
+                    btn.getAttribute("data-nome"),
+                    btn.getAttribute("data-lat"),
+                    btn.getAttribute("data-lng")
+                );
+            });
+        });
+        
+        document.getElementById("abrirGoogleMapsModal").addEventListener("click", abrirGoogleMapsRoute);
+        document.getElementById("btnLevarAteLaModal").addEventListener("click", botaoLevarAteLa);
+    });
+</script>
+<!-- API do Google Maps com chave válida -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7KQyPq07cB0Eh8nM5q6T3WqY5oJQpKpE&libraries=places,geometry&callback=initMap" async defer></script>
+</body>
+</html>

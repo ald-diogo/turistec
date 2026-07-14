@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enciclopédia Turística - Malanje</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        /* ===== ESTILO GERAL - GLASSMORPHISM ===== */
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-image: url('images/book-master.png');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 0;
+            transition: all 0.3s ease;
+        }
+        /* TEMA CLARO */
+        body.light-theme::before {
+            background: rgba(255, 255, 255, 0.92);
+        }
+        body.light-theme .page-title,
+        body.light-theme .info-card .card-title,
+        body.light-theme .info-card .info-label,
+        body.light-theme .info-card .info-value,
+        body.light-theme .glass-card h5,
+        body.light-theme .glass-card p,
+        body.light-theme .glass-card .text-muted,
+        body.light-theme .faq-item .faq-question,
+        body.light-theme .faq-item .faq-answer,
+        body.light-theme .team-card h6,
+        body.light-theme .team-card p,
+        body.light-theme .team-card .bio,
+        body.light-theme .banner-message,
+        body.light-theme .nav-tabs .nav-link,
+        body.light-theme .modal-content,
+        body.light-theme .modal .form-label,
+        body.light-theme .legend-text,
+        body.light-theme .info-block p,
+        body.light-theme .info-block li,
+        body.light-theme .info-block h6,
+        body.light-theme .info-block strong {
+            color: #1a1a2e !important;
+        }
+        body.light-theme .nav-tabs .nav-link {
+            color: #1a1a2e !important;
+            background: rgba(255, 255, 255, 0.5);
+        }
+        body.light-theme .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.8);
+            color: #0d6efd !important;
+        }
+        body.light-theme .tab-content,
+        body.light-theme .glass-card,
+        body.light-theme .info-card,
+        body.light-theme .faq-item,
+        body.light-theme .team-card,
+        body.light-theme .banner-content,
+        body.light-theme .filter-section,
+        body.light-theme .chart-container,
+        body.light-theme .assistant-card,
+        body.light-theme .info-block {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        body.light-theme .filter-section .form-control,
+        body.light-theme .filter-section .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+        body.light-theme .filter-section .form-control::placeholder {
+            color: rgba(0, 0, 0, 0.4);
+        }
+        body.light-theme #currentDateTime {
+            background: rgba(255, 255, 255, 0.8);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        body.light-theme .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1a2e;
+        }
+        body.light-theme .modal .form-control {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+        body.light-theme .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+        body.light-theme .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.15);
+        }
+        body.light-theme .quick-actions .btn-outline-secondary {
+            background: rgba(108, 117, 125, 0.2);
+            color: #1a1a2e;
+        }
+        body.light-theme .quick-actions .btn-primary {
+            background: rgba(13, 110, 253, 0.8);
+        }
+        body.light-theme .quick-actions .btn-success {
+            background: rgba(25, 135, 84, 0.8);
+        }
+        body.light-theme .quick-actions .btn-info {
+            background: rgba(13, 202, 240, 0.8);
+            color: #000;
+        }
+        body.light-theme .quick-actions .btn-warning {
+            background: rgba(255, 193, 7, 0.8);
+            color: #000;
+        }
+        body.light-theme .quick-actions .btn-danger {
+            background: rgba(220, 53, 69, 0.8);
+        }
+        body.light-theme .quick-actions .btn-outline-dark {
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+        body.light-theme .quick-actions .btn-outline-dark:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        body.light-theme .team-card .social-links a {
+            color: #1a1a2e;
+        }
+        body.light-theme .team-card .social-links a:hover {
+            color: #0d6efd;
+        }
+        body.light-theme .assistant-card {
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.85) 0%, rgba(245, 87, 108, 0.85) 100%);
+        }
+        body.light-theme .team-card .avatar {
+            border-color: rgba(13, 110, 253, 0.3);
+        }
+        body.light-theme .attraction-card .attraction-info h6 {
+            color: #1a1a2e;
+        }
+        body.light-theme .attraction-card .attraction-info p {
+            color: rgba(0, 0, 0, 0.6);
+        }
+        body.light-theme .attraction-card {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        body.light-theme .dish-card {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        body.light-theme .dish-card .dish-info h6 {
+            color: #1a1a2e;
+        }
+        body.light-theme .dish-card .dish-info p {
+            color: rgba(0, 0, 0, 0.6);
+        }
+        body.light-theme .dish-card .dish-info .dish-price {
+            color: #e67e22;
+        }
+        body.light-theme .info-image-card {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        body.light-theme .info-image-card .info-content h6 {
+            color: #1a1a2e;
+        }
+        body.light-theme .info-image-card .info-content p {
+            color: rgba(0, 0, 0, 0.6);
+        }
+        body.light-theme .map-placeholder {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: rgba(0, 0, 0, 0.5);
+        }
+        body.light-theme .team-photo-container .photo-caption {
+            color: rgba(0, 0, 0, 0.6);
+        }
+        body.light-theme .team-photo-container img {
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        body.light-theme .footer-link {
+            color: rgba(0, 0, 0, 0.5) !important;
+        }
+        body.light-theme .footer-text {
+            color: rgba(0, 0, 0, 0.6) !important;
+        }
+        body.light-theme .legend-text {
+            color: #1a1a2e !important;
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== CARDS GLASS ===== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .glass-card h5 {
+            color: #fff;
+            font-family: 'Times New Roman', Times, serif;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .glass-card .info-label {
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .glass-card .info-value {
+            color: #fff;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .glass-card .icon-big {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .glass-card p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .glass-card .text-muted {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+
+        /* ===== BANNER ===== */
+        .banner-content {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        .banner-content h1 {
+            color: #fff;
+            font-family: 'Times New Roman', Times, serif;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+        .banner-content .banner-message {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+        }
+        .banner-content .btn-group .btn {
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        .banner-content .btn-group .btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* ===== TABS ===== */
+        .nav-tabs .nav-link {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 16px;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin-right: 5px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .nav-tabs .nav-link:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: #fff;
+            border-bottom: 3px solid #0d6efd;
+            font-weight: bold;
+            box-shadow: 0 -2px 20px rgba(13, 110, 253, 0.3);
+        }
+        .tab-content {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 0 8px 8px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        /* ===== INFO BLOCK ===== */
+        .info-block {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .info-block:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .info-block h6 {
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .info-block p,
+        .info-block li {
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.7;
+        }
+        .info-block ul {
+            padding-left: 20px;
+        }
+        .info-block .legend-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+
+        /* ===== ATTRACTIONS ===== */
+        .attraction-card {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.4s ease;
+            height: 100%;
+        }
+        .attraction-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .attraction-card .attraction-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+        }
+        .attraction-card:hover .attraction-image {
+            transform: scale(1.05);
+        }
+        .attraction-card .attraction-info {
+            padding: 15px;
+        }
+        .attraction-card .attraction-info h6 {
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .attraction-card .attraction-info p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+        .attraction-card .attraction-info .attraction-location {
+            color: #ffc107;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        /* ===== DISH CARDS ===== */
+        .dish-card {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.4s ease;
+            height: 100%;
+        }
+        .dish-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .dish-card .dish-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+        }
+        .dish-card:hover .dish-image {
+            transform: scale(1.05);
+        }
+        .dish-card .dish-info {
+            padding: 15px;
+        }
+        .dish-card .dish-info h6 {
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .dish-card .dish-info p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+        .dish-card .dish-info .dish-price {
+            color: #ffc107;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        /* ===== TEAM ===== */
+        .team-card {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .team-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .team-card .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(13, 110, 253, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #fff;
+            margin: 0 auto 15px auto;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .team-card .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .team-card:hover .avatar {
+            transform: scale(1.05);
+            border-color: rgba(13, 110, 253, 0.6);
+        }
+        .team-card h6 {
+            color: #fff;
+            font-weight: bold;
+        }
+        .team-card .role {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        .team-card .bio {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            margin: 10px 0;
+        }
+        .team-card .social-links a {
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0 8px;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        .team-card .social-links a:hover {
+            color: #0d6efd;
+            transform: translateY(-2px);
+        }
+        .team-card .stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .team-card .stats .stat-item {
+            text-align: center;
+        }
+        .team-card .stats .stat-number {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .team-card .stats .stat-label {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.7rem;
+        }
+
+        /* ===== ASSISTANT ===== */
+        .assistant-card {
+            background: rgba(240, 147, 251, 0.25);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .assistant-card .bi-robot {
+            font-size: 2.5rem;
+            margin-right: 15px;
+        }
+        .assistant-card h5 {
+            color: #fff;
+        }
+        .assistant-card p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .assistant-card .chat-input {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 15px;
+            color: #fff;
+            width: 90%;
+        }
+        .assistant-card .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .assistant-card .chat-input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+
+        /* ===== FAQ ===== */
+        .faq-item {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .faq-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .faq-item .faq-question {
+            padding: 15px 20px;
+            color: #fff;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .faq-item .faq-answer {
+            padding: 0 20px 15px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            display: none;
+        }
+        .faq-item .faq-answer.show {
+            display: block;
+        }
+
+        /* ===== MAP ===== */
+        .map-placeholder {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.5);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .map-placeholder .bi-map {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* ===== THEME TOGGLE ===== */
+        .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: rotate(30deg);
+        }
+
+        /* ===== PAGE TITLE ===== */
+        .page-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+        .page-title .badge {
+            background: rgba(13, 110, 253, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        /* ===== DATE TIME ===== */
+        #currentDateTime {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        /* ===== TEAM PHOTO ===== */
+        .team-photo-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .team-photo-container img {
+            max-width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+        .team-photo-container img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+        }
+        .team-photo-container .photo-caption {
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+        }
+
+        /* ===== INFO IMAGE CARD ===== */
+        .info-image-card {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.4s ease;
+            height: 100%;
+        }
+        .info-image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+        .info-image-card .info-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .info-image-card .info-content {
+            padding: 15px;
+        }
+        .info-image-card .info-content h6 {
+            color: #fff;
+            font-weight: bold;
+        }
+        .info-image-card .info-content p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* ===== BOTÕES ===== */
+        .btn-primary {
+            background: rgba(13, 110, 253, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .btn-primary:hover {
+            background: rgba(13, 110, 253, 0.8);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== RESPONSIVO ===== */
+        @media (max-width: 768px) {
+            .banner-content {
+                padding: 20px;
+            }
+            .banner-content h1 {
+                font-size: 1.5rem;
+            }
+            .tab-content {
+                padding: 15px;
+            }
+            .header-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .page-title {
+                font-size: 1.3rem;
+            }
+            .team-card .avatar {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+            }
+            .quick-actions .btn {
+                font-size: 0.85rem;
+                padding: 5px 10px;
+            }
+            .dish-card .dish-image,
+            .attraction-card .attraction-image {
+                height: 150px;
+            }
+        }
+
+        /* ===== FOOTER ===== */
+        .footer-link {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .footer-link:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .footer-text {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* ===== DIVIDER ===== */
+        .divider-custom {
+            border: 0;
+            height: 2px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+            margin: 25px 0;
+        }
+        body.light-theme .divider-custom {
+            background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.15), transparent);
+        }
+
+        /* ===== QUOTE ===== */
+        .quote-block {
+            font-size: 1.2rem;
+            font-style: italic;
+            padding: 15px 25px;
+            border-left: 4px solid #ffc107;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+        .quote-block .quote-author {
+            display: block;
+            text-align: right;
+            font-style: normal;
+            opacity: 0.7;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+
+        <!-- ===== CABEÇALHO ===== -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap header-actions">
+                    <h2 class="page-title">
+                        <i class="bi bi-book-fill text-primary"></i>
+                        Enciclopédia Turística
+                        <span class="badge bg-primary ms-2">MALANJE</span>
+                    </h2>
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Tema -->
+                        <button class="theme-toggle-btn" id="themeToggle" title="Alternar Tema">
+                            <i class="bi bi-moon-stars" id="themeIcon"></i>
+                        </button>
+
+                        <!-- Idioma -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" style="color: #fff; border-color: rgba(255,255,255,0.2);">
+                                <i class="bi bi-globe"></i> Idioma
+                            </button>
+                            <ul class="dropdown-menu" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);">
+                                <li><a class="dropdown-item" href="#" style="color: #fff;"><span class="flag">🇦🇴</span> Português</a></li>
+                                <li><a class="dropdown-item" href="#" style="color: #fff;"><span class="flag">🇬🇧</span> English</a></li>
+                                <li><a class="dropdown-item" href="#" style="color: #fff;"><span class="flag">🇫🇷</span> Français</a></li>
+                                <li><a class="dropdown-item" href="#" style="color: #fff;"><span class="flag">🇪🇸</span> Español</a></li>
+                            </ul>
+                        </div>
+
+                        <span class="badge bg-info text-dark" id="currentDateTime">
+                            <i class="bi bi-clock"></i>
+                            <span id="dateTimeDisplay">Carregando...</span>
+                        </span>
+
+                        <div class="input-group" style="width: 250px;">
+                            <input type="text" id="quickSearch" class="form-control" placeholder="🔍 Pesquisar...">
+                            <button class="btn btn-outline-primary" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== BANNER ===== -->
+        <div class="banner-content fade-in">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <h1><i class="bi bi-pin-map"></i> Malanje – O Coração Histórico e Natural de Angola</h1>
+                    <p class="banner-message">
+                        Terra dos mistérios, das cascatas e dos reis. Descubra uma província onde a natureza e a história caminham lado a lado.
+                    </p>
+                    <div class="btn-group flex-wrap justify-content-center mt-3">
+                        <button class="btn btn-primary" onclick="scrollToTab('historia')"><i class="bi bi-clock-history"></i> História</button>
+                        <button class="btn btn-success" onclick="scrollToTab('natureza')"><i class="bi bi-tree"></i> Natureza</button>
+                        <button class="btn btn-warning" onclick="scrollToTab('cultura')"><i class="bi bi-music-note"></i> Cultura</button>
+                        <button class="btn btn-info" onclick="scrollToTab('gastronomia')"><i class="bi bi-egg-fried"></i> Gastronomia</button>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <img src="images/rock-3.png"
+                         alt="Paisagem de Malanje" class="img-fluid rounded-3" style="max-height: 250px; width: 100%; object-fit: cover; border: 2px solid rgba(255,255,255,0.2);">
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TABS ===== -->
+        <ul class="nav nav-tabs" id="infoTabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active" id="historia-tab" data-bs-toggle="tab" data-bs-target="#historia" type="button"><i class="bi bi-clock-history"></i> História</button></li>
+            <li class="nav-item"><button class="nav-link" id="natureza-tab" data-bs-toggle="tab" data-bs-target="#natureza" type="button"><i class="bi bi-tree"></i> Natureza</button></li>
+            <li class="nav-item"><button class="nav-link" id="cultura-tab" data-bs-toggle="tab" data-bs-target="#cultura" type="button"><i class="bi bi-music-note"></i> Cultura</button></li>
+            <li class="nav-item"><button class="nav-link" id="gastronomia-tab" data-bs-toggle="tab" data-bs-target="#gastronomia" type="button"><i class="bi bi-egg-fried"></i> Gastronomia</button></li>
+            <li class="nav-item"><button class="nav-link" id="monumentos-tab" data-bs-toggle="tab" data-bs-target="#monumentos" type="button"><i class="bi bi-mountain"></i> Monumentos</button></li>
+            <li class="nav-item"><button class="nav-link" id="lendas-tab" data-bs-toggle="tab" data-bs-target="#lendas" type="button"><i class="bi bi-stars"></i> Lendas</button></li>
+            <li class="nav-item"><button class="nav-link" id="municipios-tab" data-bs-toggle="tab" data-bs-target="#municipios" type="button"><i class="bi bi-geo-alt"></i> Municípios</button></li>
+            <li class="nav-item"><button class="nav-link" id="faq-tab" data-bs-toggle="tab" data-bs-target="#faq" type="button"><i class="bi bi-question-circle"></i> FAQ</button></li>
+            <li class="nav-item"><button class="nav-link" id="equipa-tab" data-bs-toggle="tab" data-bs-target="#equipa" type="button"><i class="bi bi-people-fill"></i> Equipa</button></li>
+        </ul>
+
+        <div class="tab-content" id="infoTabContent">
+
+            <!-- ============================================================ -->
+            <!-- ===== ABA: HISTÓRIA ===== -->
+            <!-- ============================================================ -->
+            <div class="tab-pane fade show active" id="historia" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="glass-card">
+                            <h5><i class="bi bi-clock-history text-primary"></i> A História de Malanje</h5>
+                            <p style="color: rgba(255,255,255,0.8); font-size: 1.1rem;">
+                                <strong>Malanje</strong> é uma das províncias mais históricas, misteriosas e culturalmente ricas de Angola.
+                                Localizada na região centro-norte do país, é conhecida pelas suas paisagens naturais impressionantes,
+                                rios majestosos, quedas de água, formações rochosas únicas, tradições ancestrais e pelo legado do
+                                antigo <strong>Reino de Ndongo</strong>.
+                            </p>
+                            <div class="quote-block">
+                                "Conhecida como o <strong>Coração Verde de Angola</strong>, Malanje possui uma combinação rara de natureza,
+                                história e cultura que a transforma num dos destinos turísticos mais fascinantes do país."
+                                <span class="quote-author">— Guia Turístico de Angola</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-translate text-info"></i> Origem do Nome</h6>
+                            <p>Existem várias narrativas populares sobre a origem do nome <strong>Malanje</strong>.</p>
+                            <p>Uma das versões mais conhecidas relata que comerciantes e exploradores portugueses encontraram
+                            um <strong>soba</strong> local chamado <strong>Malanji</strong>, e o território acabou por receber
+                            essa designação. Outra versão associa o nome às antigas comunidades <strong>Ambundu</strong>
+                            que habitavam a região.</p>
+                            <img src="images/ambundi.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:2000px; object-fit:cover;" alt="Cultura Ambundu">
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-crown text-warning"></i> O Reino de Ndongo</h6>
+                            <p>Durante séculos, estas terras integraram o poderoso <strong>Reino de Ndongo</strong>.</p>
+                            <ul>
+                                <li>Estrutura política organizada</li>
+                                <li>Exército próprio</li>
+                                <li>Sistema de impostos</li>
+                                <li>Comércio regional</li>
+                                <li>Autoridades tradicionais (sobas)</li>
+                            </ul>
+                            <p>Os soberanos eram respeitados não apenas como governantes, mas também como líderes espirituais.</p>
+                            <img src="images/Ndongo.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:500px; object-fit:cover;" alt="Reino de Ndongo">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="info-block">
+                            <h6><i class="bi bi-person-arms-up text-danger"></i> A Lendária Rainha Njinga</h6>
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <p>Entre todas as figuras históricas associadas à região, nenhuma é tão admirada quanto
+                                    <strong>Nzinga Mbandi</strong>.</p>
+                                    <p>Conta-se que possuía inteligência extraordinária, coragem incomum e uma capacidade
+                                    estratégica admirável. Quando negociava com representantes portugueses, recusava demonstrar
+                                    submissão.</p>
+                                    <p>É o maior símbolo de resistência africana à colonização portuguesa em Angola.</p>
+                                    <p>Rainha do Ndongo, actual Angola, Nzinga Mbandi(1582-1663) entrou para a história como combatente destemida,
+                                        exímia estrategista militar e diplomata astuciosa. Ela chefiou pessoalmente o exército até os 73 anos de idade e era tão
+                                        respeitada pelos portugueses que Angola só foi dominada depois de sua morte, aos 81 anos.</p>
+                                    <div class="quote-block">
+                                        "Uma das histórias mais conhecidas relata que, durante uma reunião diplomática, sem que lhe fosse
+                                        oferecida uma cadeira, ordenou a uma serva que se ajoelhasse para servir-lhe de assento,
+                                        demonstrando que jamais aceitaria ser tratada como inferior."
+                                        <span class="quote-author">— Tradição oral do Reino de Ndongo</span>
+                                    </div>
+                                    <p>Até hoje, a sua memória vive nas canções, nos relatos tradicionais e nas formações rochosas
+                                    de <strong>Pungo Andongo</strong>.</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <img src="images/rainha.png"
+                                         class="img-fluid rounded-3" alt="Rainha Njinga" style="width:100%; max-height:500px; object-fit:cover;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-people text-success"></i> Os Sobas e a Sabedoria Ancestral</h6>
+                            <p>Os <strong>sobas</strong> são muito mais do que autoridades tradicionais. São guardiões da
+                            memória coletiva.</p>
+                            <ul>
+                                <li>Conhecem histórias que nunca foram escritas</li>
+                                <li>Sabem onde ocorreram batalhas antigas</li>
+                                <li>Conhecem as origens das famílias</li>
+                                <li>Recordam secas, cheias, migrações e acontecimentos transmitidos de geração em geração</li>
+                            </ul>
+                            <p>Muitas comunidades ainda recorrem aos sobas para resolver conflitos e preservar tradições.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-calendar2-week text-info"></i> Linha do Tempo Histórica</h6>
+                            <ul>
+                                <li><strong>Séculos XV-XVI:</strong> Povos Ambundu habitam a região</li>
+                                <li><strong>Século XVII:</strong> Resistência da Rainha Njinga contra a colonização</li>
+                                <li><strong>Século XIX:</strong> Chegada dos exploradores portugueses</li>
+                                <li><strong>1975:</strong> Independência de Angola</li>
+                                <li><strong>2000+:</strong> Desenvolvimento do turismo na província</li>
+                            </ul>
+                            <img src="images/linha-historica.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:350px; object-fit:cover;" alt="Linha do tempo">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- ===== ABA: NATUREZA ===== -->
+            <!-- ============================================================ -->
+            <div class="tab-pane fade" id="natureza" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="glass-card">
+                            <h5><i class="bi bi-tree text-success"></i> A Natureza Exuberante de Malanje</h5>
+                            <p style="color: rgba(255,255,255,0.8); font-size: 1.1rem;">
+                                Malanje é abençoada com uma diversidade natural impressionante. Desde as majestosas quedas
+                                de água até às florestas tropicais, passando por formações rochosas únicas e uma fauna
+                                rara, a província é um verdadeiro paraíso para os amantes da natureza.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/kalandula.png"
+                                 class="attraction-image" alt="Quedas de Kalandula">
+                            <div class="attraction-info">
+                                <h6>💧 Quedas de Kalandula</h6>
+                                <p>Uma das maiores quedas de água de África, com <strong>105 metros</strong> de altura.
+                                O som do rugido da água pode ser ouvido a quilómetros de distância.</p>
+                                <p>As Quedas de Kalandula , anteriormente chamadas de <strong>Duque de Bragança</strong>. Estão localizadas no Município
+                                    de Kalandula, a <strong>85Km</strong> da cidade de Malanje.
+                                </p>
+                                
+                                <p>Caracterizam-se or serem grandes quedas de água, proveniente do <strong>rio Lucala</strong>, e são
+                                    consideradas as segundas maiores de África, com una altura de <strong>105m</strong> e uma largura de <strong>410m</strong>. 
+                                </p>
+                                
+                                <p>Possui um miradouro de onde se tem uma vista espetacular das quedas com o seu arco-íris sempre presente, e uma
+                                    pousada com uma vista frontal. Para os mais ousados, podem descer até a margem das quedas e aprecia-las de perto, 
+                                    além de se puder tomar banho nas águas frias. 
+                                </p>
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Kalandula, Malanje</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/pungo-an-dongo.png"
+                                 class="attraction-image" alt="Pedras Negras">
+                            <div class="attraction-info">
+                                <h6>⛰️ Pedras Negras de Pungo Andongo</h6>
+                                <p> Gigantescos blocos rochosos que se erguem do solo como fortalezas naturais.
+                                Uma das <strong>Sete Maravilhas Naturais de Angola</strong>.</p>
+                                
+                                <p>As Pedras Negras de Pungo Andongo, também conhecidas por <strong>Fortaleza de ungo Andongo</strong>, 
+                                    são grandes formações rochosas com milhões de anos, localizadas no <strong>Município de Cacuso</strong>
+                                    à <strong>116 Km</strong> da Cidade de Malanje.</p>
+                                
+                                <p>De uma beleza estonteante que encanta todo o visitante, que pode observa-las numa maravilhosa
+                                    vista desde o topo das mesmas, deslumbrando o lindo <strong>rio Kwanza</strong> e toda a extensão das rochas. 
+                                 </p>
+                                
+                                <p>Estes importantes maciços, além do grande valor natural que têm, também carregam muita história, sendo utilizadas
+                                    como fortificação para os <strong>Reis Ngola</strong> e nesta altura era a Capital do  <strong>Reino da Matamba.</strong>
+                                     . Também serviu com refúgio da <strong>Rainha Nzinga Mbandi</strong>.</p>
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Pungo Andongo, Malanje</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/musseje.png"
+                                 class="attraction-image" alt="Quedas de Kalandula">
+                            <div class="attraction-info">
+                                <h6>💧 Quedas de Musseleje</h6>
+                                <p>Situadas no Município de <strong> Kalandula</strong> à <strong>39 km</strong>
+                                da sede do Município e a <strong> 95 Km</strong> da Cidade de Malanje, as quedas se caracterizam
+                                or serem umas cascatas escondidas no meio de densa vegetação, que termina numa pequena bacia de água,
+                                propicia para o banho</p>
+                                <p> O acesso é de terra batida, com excelentes condições para a realização de diversas actividades como escalar,
+                                    nadar, acampar e observação da natureza.
+                                </p>
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Kalandula, Malanje</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/rapidos.png"
+                                 class="attraction-image" alt="Pedras Negras">
+                            <div class="attraction-info">
+                                <h6>💧 Rápidos do Kwanza</h6>
+                                <p> Os rápidos do Kwanza são um importante recurso natural situado no
+                                    Município de  <strong>Cangandala</strong>, a <strong>35Km</strong> da Cidade de Malanje
+                                    e a <strong>20Km</strong> da Sede Municipal.
+                                </p>
+                                
+                                <p>Caracterizam-se por serem quedas de água caídas sobre pedregulhos.</p>
+                                
+                                <p>Boas para banho, pesca desportiva e passeio de barco, além de que no seu enorme se
+                                    podem realizar diversas actividades turística como campismo, actividades recreativas entre 
+                                    outras.
+                                </p>
+                              
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Kangandala, Malanje</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/casados.png"
+                                 class="attraction-image" alt="Quedas de Kalandula">
+                            <div class="attraction-info">
+                                <h6>💧 Quedas dos bem casados</h6>
+                                <p>Situadas no Município de <strong>Cabundi Catembo </strong>  
+                                     as Quedas dos Bem casados se encontra á 
+                                    ….km da Cidade de Malanje, numa estrada completamente asfaltada. 
+                                </p>
+                                
+                                <p> Caracterizam-se por duas quedas de água, uma proveniente do
+                                    <strong>Rio kubanje</strong> e outra do 
+                                    <strong>Rio Muheba</strong>, que se encontram formando uma perfeita união.
+                                </p>
+                                
+                                <p> Estão no meio de uma mata densa, a descida até a base das quedas é bastante ingreme, 
+                                    no entanto uma vez postos na base, é um encanto natural sem igual. Propicia para o 
+                                    banho e a realização de outras actividades de aventura e lazer.
+                                </p>
+                                
+                                <p> No entanto existe uma lenda amorosa sobre as Quedas, dizem que 2 amantes de 
+                                    aldeias rivais queriam oficializar o seu amor, mas devido a rivalidade entre os povos 
+                                    foram mortos, no lugar que cada um morreu formou-se uma nascente de água que se 
+                                    transformou em Quedas, uma procurou a outra e encontraram-se, abraçando-se num 
+                                    amor lindo e eterno.
+                                </p>
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Cabundi Catembo, Malanje</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/kinjila.png"
+                                 class="attraction-image" alt="Pedras Negras">
+                            <div class="attraction-info">
+                                <h6>💧 Aldeia da Kinjila</h6>
+                                <p> Pequena Aldeia criada pelo <strong>Soba Lumbo</strong>, situada no Município de 
+                                    <strong>Kalandula </strong> á … km da Cidade de Malanje,actualmente liderada pelo
+                                    <strong>Soba Nhanga. </strong>
+                                </p>
+                                
+                                <p>Esta constituída com casas retangulares feitas de adobe com telhado de 
+                                    capim, rodeada de uma mata meio serrada.</p>
+                                
+                                <p>Nela encontramos o <strong>Cossifa de Cabeça Branca</strong> , pássaro endêmico de Angola. 
+                                    Além deste, podemos encontrar outras variedades de pássaros raros, tendo 
+                                    como actividade principal o aviturismo.
+                                </p>
+                              
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Kalandula, Malanje</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-water text-primary"></i> Rios de Malanje</h6>
+                            <p><strong>Rio Kwanza</strong> – O mais famoso, alimenta comunidades, facilita o comércio,
+                            sustenta a agricultura e inspira lendas e tradições.</p>
+                            <p><strong>Outros rios:</strong> Rio Lucala, Rio Cuije, Rio Lui, Rio Cangandala.</p>
+                            <p>As margens dos rios foram palco de encontros entre povos, celebrações tradicionais e
+                            momentos marcantes da história angolana.</p>
+                            <img src="images/kwanza-2.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:80px; object-fit:cover;" alt="Rio Kwanza">
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-paw text-warning"></i> A Terra da Palanca Negra Gigante</h6>
+                            <p>Poucos animais despertam tanto orgulho nacional quanto a <strong>Palanca Negra Gigante</strong>.</p>
+                            <ul>
+                                <li>Elegante</li>
+                                <li>Rara</li>
+                                <li>Majestosa</li>
+                            </ul>
+                            <p>Durante muitos anos acreditou-se que poderia desaparecer. Mas a sua sobrevivência transformou-se
+                            numa das maiores histórias de conservação da natureza em Angola.
+                            </p>
+                            
+                            <p>Caracterizado por ser uma floresta aberta, o Parque Nacional de Cangandala situa-se
+                                no Município de mesmo nome, a <strong>50Km</strong> da Cidade de Malanje e tem uma superfície de 
+                                <strong>600Km2</strong>
+                            </p>
+                            
+                            <p>Este importante Parque foi inicialmente criado em <strong>1963</strong> como uma Reserva 
+                                Integral, e a <strong>25 de Junho de 1970</strong> passou a Parque Nacional.
+                            </p>
+                            
+                            <p>A principal atração é a <strong>“Palanca Negra Gigante”</strong> 
+                                ungulado raro, endêmico de 
+                                Angola, considerado como Símbolo Nacional, mas no seu interior também se 
+                                podem observar outras espécies como bâmbis, gulungos, nunces, palancas 
+                                castanhas, pacaças e seixas.
+                            </p>
+                            
+                            <div class="attraction-location"><i class="bi bi-geo-alt"></i> Parque Nacional da Cangandala</div>
+                            <img src="images/parque-cangandala.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:500px; object-fit:cover;" alt="Palanca Negra">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-tree-fill text-success"></i> Flora</h6>
+                            <p>Espécies comuns na região:</p>
+                            <ul>
+                                <li>Imbondeiro (baobá)</li>
+                                <li>Mulemba</li>
+                                <li>Eucalipto</li>
+                                <li>Acácia</li>
+                                <li>Mandioca</li>
+                                <li>Milho</li>
+                            </ul>
+                            <img src="images/flora.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:500px; object-fit:cover;" alt="Flora de Malanje">
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-bug text-danger"></i> Fauna</h6>
+                            <p>Animais encontrados na região:</p>
+                            <ul>
+                                <li>🐾 Palanca Negra Gigante</li>
+                                <li>🐾 Antílopes</li>
+                                <li>🐾 Macacos</li>
+                                <li>🐾 Javali</li>
+                                <li>🐾 Leopardo</li>
+                                <li>🐦 Aves tropicais</li>
+                            </ul>
+                            
+                             <img src="images/fauna.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:1000px; object-fit:cover;" alt="Flora de Malanje">
+                            <div class="attraction-location"><i class="bi bi-geo-alt"></i> Parque Nacional da Cangandala</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- ===== ABA: CULTURA ===== -->
+            <!-- ============================================================ -->
+            <div class="tab-pane fade" id="cultura" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="glass-card">
+                            <h5><i class="bi bi-music-note text-warning"></i> Cultura e Tradições de Malanje</h5>
+                            <p style="color: rgba(255,255,255,0.8); font-size: 1.1rem;">
+                                A cultura de Malanje é um tesouro vivo, onde as tradições ancestrais se mantêm
+                                preservadas através das gerações. A música, a dança, o artesanato e as festividades
+                                são expressões vibrantes da identidade do povo malanjino.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-4 mb-4">
+                        <div class="info-block text-center">
+                            <i class="bi bi-music-note-beamed" style="font-size:2.5rem; color:#ffc107;"></i>
+                            <h6 class="mt-2">Danças Tradicionais</h6>
+                            <ul style="list-style:none; padding-left:0;">
+                                <li>Semba</li>
+                                <li>Rebita</li>
+                                <li>Kabetula</li>
+                                <li>Kilapanga</li>
+                            </ul>
+                            <p style="font-size:0.9rem;">As apresentações ocorrem em festas tradicionais, casamentos
+                            e celebrações comunitárias.</p>
+                            <img src="images/dancas.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:900px; object-fit:cover;" alt="Dança tradicional">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="info-block text-center">
+                            <i class="bi bi-drum" style="font-size:2.5rem; color:#0dcaf0;"></i>
+                            <h6 class="mt-2">Instrumentos Musicais</h6>
+                            <ul style="list-style:none; padding-left:0;">
+                                <li>Ngoma (tambor)</li>
+                                <li>Marimba</li>
+                                <li>Kissange</li>
+                                <li>Tambores tradicionais</li>
+                            </ul>
+                            <img src="images/instrumentos.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:1500px; object-fit:cover;" alt="Instrumentos musicais">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="info-block text-center">
+                            <i class="bi bi-basket" style="font-size:2.5rem; color:#20c997;"></i>
+                            <h6 class="mt-2">Artesanato</h6>
+                            <p>Produção de:</p>
+                            <ul style="list-style:none; padding-left:0;">
+                                <li>Cestos</li>
+                                <li>Esculturas</li>
+                                <li>Máscaras</li>
+                                <li>Objetos decorativos</li>
+                                <li>Instrumentos musicais</li>
+                            </ul>
+                            <img src="images/artesanato.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:280px; object-fit:cover;" alt="Artesanato">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-calendar-event text-primary"></i> Festividades</h6>
+                            <ul>
+                                <li><strong>Carnaval</strong> – Celebração cultural com grupos tradicionais</li>
+                                <li><strong>Festas Religiosas</strong> – Realizadas em diversos municípios</li>
+                                <li><strong>Festivais Culturais</strong> – Valorização da música, dança e gastronomia</li>
+                            </ul>
+                            <img src="images/festas.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:500px; object-fit:cover;" alt="Festividades">
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-people-fill text-success"></i> Comunidades e Tradições</h6>
+                            <p>As comunidades de Malanje preservam tradições que incluem:</p>
+                            <ul>
+                                <li>Rituais de passagem</li>
+                                <li>Cerimónias de colheita</li>
+                                <li>Contação de histórias pelos mais velhos</li>
+                                <li>Artesanato transmitido de geração em geração</li>
+                            </ul>
+                            <div class="quote-block" style="font-size:0.95rem;">
+                                "Os anciãos transmitiam sabedoria. As crianças aprendiam observando a natureza.
+                                A vida seguia o ritmo das estações, das colheitas e das tradições."
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- ===== ABA: GASTRONOMIA ===== -->
+            <!-- ============================================================ -->
+            <div class="tab-pane fade" id="gastronomia" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="glass-card">
+                            <h5><i class="bi bi-egg-fried text-warning"></i> Gastronomia Típica de Malanje</h5>
+                            <p style="color: rgba(255,255,255,0.8); font-size:1.1rem;">
+                                Cada prato tradicional guarda séculos de história. A culinária de Malanje é um
+                                reflexo da sua identidade cultural e da generosidade da sua terra.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-3 mb-4">
+                        <div class="dish-card">
+                            <img src="images/calulu.png" alt="Calulu" class="dish-image">
+                            <div class="dish-info">
+                                <h6>🍲 Calulu</h6>
+                                <p>Guisado de carne ou peixe com quiabo, alface e legumes. Prato tradicional muito apreciado.</p>
+                                <div class="dish-price">💰 3.500 AOA</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="dish-card">
+                            <img src="images/funge.png" alt="Funje" class="dish-image">
+                            <div class="dish-info">
+                                <h6>🍚 Funge</h6>
+                                <p>Massa de farinha de milho ou mandioca. Principal acompanhamento e símbolo de união familiar.</p>
+                                <div class="dish-price">💰 1.200 AOA</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="dish-card">
+                            <img src="images/muamba.png" alt="Muamba de Galinha" class="dish-image">
+                            <div class="dish-info">
+                                <h6>🍗 Muamba de Galinha</h6>
+                                <p>Frango estufado com óleo de palma, quiabo e gindungo. Preparada em festas e celebrações.</p>
+                                <div class="dish-price">💰 4.200 AOA</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="dish-card">
+                            <img src="images/kizaca.png" alt="Kizaca" class="dish-image">
+                            <div class="dish-info">
+                                <h6>🌿 Kizaca</h6>
+                                <p>Folhas de mandioca preparadas de forma tradicional. Um verdadeiro símbolo da culinária angolana.</p>
+                                <div class="dish-price">💰 1.500 AOA</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-fruit text-success"></i> Frutas Tradicionais</h6>
+                            <ul>
+                                <li>Manga</li>
+                                <li>Goiaba</li>
+                                <li>Papaia</li>
+                                <li>Abacate</li>
+                                <li>Banana</li>
+                                <li>Jaca</li>
+                                <li>Ananás</li>
+                            </ul>
+                            <img src="images/frutas.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:500px; object-fit:cover;" alt="Frutas">
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-info-circle text-info"></i> Restaurantes Recomendados</h6>
+                            <p><span class="badge bg-warning text-dark">Kalandula</span>
+                            <span class="badge bg-warning text-dark">Sabores de Malanje</span>
+                            <span class="badge bg-warning text-dark">Pungo Andongo</span></p>
+                            <p style="font-size:0.9rem;">Estes restaurantes oferecem uma experiência autêntica da culinária
+                            malanjina, com pratos preparados segundo receitas tradicionais.</p>
+                            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=80&fit=crop&crop=center"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:70px; object-fit:cover;" alt="Restaurantes">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- ===== ABA: MONUMENTOS ===== -->
+            <!-- ============================================================ -->
+            <div class="tab-pane fade" id="monumentos" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="glass-card">
+                            <h5><i class="bi bi-mountain text-primary"></i> Monumentos Naturais e Históricos</h5>
+                            <p style="color: rgba(255,255,255,0.8); font-size:1.1rem;">
+                                Malanje é um museu a céu aberto, onde a natureza esculpiu verdadeiras obras de arte
+                                e a história deixou marcas indeléveis.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-4 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/pungo-an-dongo.png" class="attraction-image" alt="Pedras Negras">
+                            <div class="attraction-info">
+                                <h6>⛰️ Pedras Negras</h6>
+                                <p>Uma das Sete Maravilhas Naturais de Angola. Formações rochosas imponentes com valor histórico e espiritual.</p>
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Pungo Andongo</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/kalandula.png" class="attraction-image" alt="Quedas de Kalandula">
+                            <div class="attraction-info">
+                                <h6>💧 Quedas de Kalandula</h6>
+                                <p>Uma das maiores quedas de água de África, com 105 metros de altura. Arco-íris frequentes e vegetação exuberante.</p>
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Kalandula</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/forte.jpg" class="attraction-image" alt="Forte de Pungo Andongo">
+                            <div class="attraction-info">
+                                <h6>🏰 Forte de Pungo Andongo</h6>
+                                <p>Construção histórica do período colonial português, testemunha de séculos de história.</p>
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Pungo Andongo</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-4 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/tumulo.png" class="attraction-image" alt="Pedras Negras">
+                            <div class="attraction-info">
+                                <h6>🏰 Túmulo do zé Telhado</h6>
+                                <p>Situada no Município de Mucari á … km da Cidade de Malanje, caracteriza
+                                    se por ser uma campa branca construída numa área reservada ao ar livre.
+                                </p>
+                                
+                                <p>Zé do Telhado foi um comandante aspirante português conhecido por 
+                                    roubar aos ricos e dar aos pobres, por isso foi também conhecido como o 
+                                    Robin Hood de Angola.
+                                </p>
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Mucari</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/arcanjo.png" class="attraction-image" alt="Quedas de Kalandula">
+                            <div class="attraction-info">
+                                <h6>🏰 Missão Católica De São Miguel Arcanjo</h6>
+                                <p>
+                                    A Missão Católica “Miguel Arcanjo”, é uma igreja da congregação espirita, construída 
+                                    em 1959 no Município de Kalandula a ….km da Cidade de Malanje.
+                                </p>
+                                
+                                <p>
+                                    É uma autêntica réplica da Igreja de Camabatela (Cuanza-Norte), sendo que a única 
+                                    diferença é o revestimento exterior. Foi  fundada pelo Padre Belga Luís de Vilarge. 
+                                </p>
+                                
+                                <p>
+                                    A história sobre a semelhança entre estas duas igrejas deveu-se a que o Padre Vilarge 
+                                    tendo a intenção de construir uma igreja em Calandula, foi ter com o Bispo, que o 
+                                    orientou a ir a Camabatela onde estavam a construir uma igreja, e lá foi ele solicitar o 
+                                    projecto, como não estava ainda acabada não viu o resultado final da igreja de 
+                                    Camabatela, por isso a diferença exterior.
+                                </p>
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Kalandula</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="attraction-card">
+                            <img src="images/Quessua.png" class="attraction-image" alt="Forte de Pungo Andongo">
+                            <div class="attraction-info">
+                                <h6>🏰 Missão Evangélica Do Quéssua</h6>
+                                <p>
+                                    É uma igreja da Missão Metodista situada no Município de Malanje á 12 km do 
+                                    centro da Cidade.
+                                </p>
+                                
+                                <p>
+                                    A primeira igreja foi construída em 1924 e era completamente de adobe, com o 
+                                    tempo desabou e no lugar foi construída a actual já de alvenaria inaugurada em 
+                                    1951.
+                                </p>
+                                
+                                <p>
+                                    Ao redor desta Missão tem importantes instituições como Universidades e 
+                                    hospitais, tendo formado um grande número de figuras que hoje se encontram 
+                                    na governação do País.
+                                </p>
+                                <div class="attraction-location"><i class="bi bi-geo-alt"></i> Malanje</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-tree text-success"></i> Parque Nacional da Cangandala</h6>
+                            <p>O menor parque nacional de Angola, famoso por proteger a <strong>Palanca Negra Gigante</strong>,
+                            animal considerado símbolo nacional.</p>
+                            <ul>
+                                <li>Santuario da Palanca Negra Gigante</li>
+                                <li>Espécie endémica de Angola</li>
+                                <li>Área de conservação de biodiversidade</li>
+                            </ul>
+                            <img src="images/palancas.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:200px; object-fit:cover;" alt="Parque Nacional">
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-building text-primary"></i> Museu Regional de Malanje</h6>
+                            <p>Acervo histórico e cultural da província de Malanje, com exposições que contam a história
+                            do Reino de Ndongo, da Rainha Njinga e das tradições locais.</p>
+                            <div class="attraction-location"><i class="bi bi-geo-alt"></i> Centro de Malanje</div>
+                            <img src="images/museu-malanje.jpg"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:275px; object-fit:cover;" alt="Museu Regional">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <img src="images/muceque.jpg" class="attraction-image" style="max-height:275px; max-width:100%;" alt="Pedras Negras">
+                            <h6><i class="bi bi-water text-primary"></i> Lagoa do Muceque</h6>
+                            <p>Lagoa com águas cristalinas e paisagem deslumbrante, um local de beleza tranquila
+                            e perfeito para contemplação.</p>
+                            <div class="attraction-location"><i class="bi bi-geo-alt"></i> Muceque, Malanje</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-geo-alt text-danger"></i> Miradouros Naturais</h6>
+                            <p>Vários pontos de observação oferecem vistas panorâmicas impressionantes:</p>
+                            <ul>
+                                <li>Miradouro das Pedras Negras</li>
+                                <li>Miradouro das Quedas de Kalandula</li>
+                                <li>Vista do Rio Kwanza</li>
+                            </ul>
+                            <p style="font-size:0.9rem;">Perfeitos para fotografias e momentos de contemplação.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- ===== ABA: LENDAS ===== -->
+            <!-- ============================================================ -->
+            <div class="tab-pane fade" id="lendas" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="glass-card">
+                            <h5><i class="bi bi-stars text-warning"></i> Lendas que Sobrevivem ao Tempo</h5>
+                            <p style="color: rgba(255,255,255,0.8); font-size:1.1rem;">
+                                As lendas de Malanje são o eco de um passado onde o sagrado e o quotidiano se entrelaçavam.
+                                Transmitidas oralmente de geração em geração, elas mantêm viva a memória dos antepassados.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-footprints text-danger"></i> A Pegada da Rainha Njinga</h6>
+                            <p>Segundo a tradição oral, a Rainha Njinga deixou impressa numa das <strong>Pedras Negras</strong>
+                            a marca do seu pé durante uma fuga estratégica dos seus inimigos.
+                            </p>
+                            
+                             <p>A Lenda da Pegada da Rainha Njinga é uma das tradições mais conhecidas da província de Malanje
+                                 e está associada à célebre Rainha Njinga.
+                            </p>
+                            
+                            <p>Para muitas comunidades locais, essa pegada simboliza a presença histórica da rainha na região e representa a 
+                                resistência do povo angolano contra a dominação estrangeira. 
+                            </p>
+                            
+                            <p>Embora não existam provas históricas que confirmem que a 
+                                marca foi realmente deixada por ela, a lenda faz parte do património cultural e é transmitida de geração em geração.
+                            </p>
+                            
+                             <p>Actualmente, a chamada <strong>Pegada da Rainha Njinga</strong> é um ponto de interesse turístico e cultural em Malanje, 
+                                 atraindo visitantes interessados na história, nas tradições e nas lendas de Angola .
+                            </p>
+                            
+                            
+                            
+                            <p> Ela reforça a importância da Rainha
+                                 Njinga como uma das figuras mais marcantes da História angolana, reconhecida pela sua inteligência dos reinos de Ndongo e Matamba.
+                            </p>
+                            
+                            <div class="quote-block">
+                                "Conta-se que a rainha, durante uma perseguição, saltou de uma das pedras e a sua pegada
+                                ficou gravada na rocha como um sinal da sua força e determinação."
+                                <span class="quote-author">— Lenda local</span>
+                            </div>
+                            <p>Verdade ou lenda, a história continua viva na imaginação popular.</p>
+                            <img src="images/pegada.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:2000px; object-fit:cover;" alt="Pegada da Rainha Njinga">
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-water text-primary"></i> A Mulher das Águas</h6>
+                            <p>Em algumas aldeias existem histórias sobre uma misteriosa entidade protetora dos rios.</p>
+                            <p>Dizem que protege os pescadores respeitadores da natureza e pune aqueles que poluem as águas.</p>
+                            <div class="quote-block">
+                                "Os mais velhos recomendavam respeito absoluto à natureza. As águas têm espírito e memória."
+                                <span class="quote-author">— Sabedoria popular</span>
+                            </div>
+                            <img src="images/mulher-agua.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:900px; object-fit:cover;" alt="Mulher das Águas">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-moon-stars text-secondary"></i> Os Espíritos das Pedras</h6>
+                            <p>Há quem afirme ouvir sons estranhos junto às <strong>Pedras Negras</strong> durante determinadas
+                            noites.</p>
+                            <p>Os mais velhos explicam que são os espíritos dos antepassados recordando acontecimentos antigos.</p>
+                            <img src="images/espirito.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:1500px; object-fit:cover;" alt="Espíritos das Pedras">
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="info-block">
+                            <h6><i class="bi bi-drum text-warning"></i> O Tambor Invisível</h6>
+                            <p>Algumas narrativas tradicionais contam que, em noites específicas, sons de tambores podem ser
+                            ouvidos ao longe sem que ninguém encontre os músicos.</p>
+                            <div class="quote-block">
+                                "O tambor invisível anuncia a presença dos antepassados que vigiam a comunidade."
+                                <span class="quote-author">— Tradição oral</span>
+                            </div>
+                            <img src="images/tambor.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:1900px; object-fit:cover;" alt="Tambor Invisível">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="info-block">
+                            <h6><i class="bi bi-book text-info"></i> Porque Visitar Malanje?</h6>
+                            <p>Porque em Malanje:</p>
+                            <ul>
+                                <li>A história pode ser tocada</li>
+                                <li>As lendas continuam vivas</li>
+                                <li>A natureza impressiona</li>
+                                <li>A cultura emociona</li>
+                                <li>As tradições permanecem preservadas</li>
+                                <li>Os habitantes recebem os visitantes com hospitalidade</li>
+                            </ul>
+                            <div class="quote-block" style="font-size:1.1rem;">
+                                "Malanje não é apenas um destino turístico. É um lugar onde cada rio tem uma história,
+                                cada pedra guarda um segredo, cada aldeia preserva uma memória e cada visitante regressa
+                                para casa levando consigo uma parte da alma desta extraordinária província angolana."
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- ===== ABA: MUNICÍPIOS ===== -->
+            <!-- ============================================================ -->
+            <div class="tab-pane fade" id="municipios" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="glass-card">
+                            <h5><i class="bi bi-geo-alt text-primary"></i> Municípios de Malanje</h5>
+                            <p style="color: rgba(255,255,255,0.8); font-size:1.1rem;">
+                                Malanje é composta por diversos municípios, cada um com as suas particularidades,
+                                tradições e belezas naturais.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-4 mb-4">
+                        <div class="info-block text-center">
+                            <h6>🏙️ Malanje</h6>
+                            <p>A capital da província, centro administrativo, comercial e cultural.</p>
+                            <div class="attraction-location"><i class="bi bi-geo-alt"></i> Sede do governo provincial</div>
+                            <img src="https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400&h=100&fit=crop&crop=center"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:200px; object-fit:cover;" alt="Malanje">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="info-block text-center">
+                            <h6>💧 Calandula</h6>
+                            <p>Famoso pelas majestosas Quedas de Kalandula, um dos maiores atrativos turísticos de Angola.</p>
+                            <div class="attraction-location"><i class="bi bi-geo-alt"></i> Quedas de Kalandula</div>
+                            <img src="images/kalandula.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:200px; object-fit:cover;" alt="Calandula">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="info-block text-center">
+                            <h6>⛰️ Pungo Andongo</h6>
+                            <p>Lar das icónicas Pedras Negras e do Forte histórico, com grande valor cultural e espiritual.</p>
+                            <div class="attraction-location"><i class="bi bi-geo-alt"></i> Pedras Negras</div>
+                            <img src="images/pungo-an-dongo.png"
+                                 class="img-fluid rounded-3 mt-2" style="width:100%; max-height:200px; object-fit:cover;" alt="Pungo Andongo">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 mb-4">
+                        <div class="info-block text-center">
+                            <h6>🌾 Cacuso</h6>
+                            <p>Município agrícola com forte produção de alimentos.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="info-block text-center">
+                            <h6>🌳 Marimba</h6>
+                            <p>Conhecido pela sua vegetação exuberante e clima ameno.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="info-block text-center">
+                            <h6>🌄 Quela</h6>
+                            <p>Paisagens montanhosas e tradições culturais preservadas.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="info-block text-center">
+                            <h6>🏞️ Kiwaba Nzoji</h6>
+                            <p>Região com belas paisagens e comunidades acolhedoras.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- ===== ABA: FAQ ===== -->
+            <!-- ============================================================ -->
+            <div class="tab-pane fade" id="faq" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="glass-card">
+                            <h5><i class="bi bi-question-circle text-primary"></i> Perguntas Frequentes</h5>
+                            <p style="color: rgba(255,255,255,0.7);">Tudo o que precisa saber antes de visitar Malanje</p>
+
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <span><i class="bi bi-shield-check text-success"></i> É seguro visitar Malanje?</span>
+                                    <i class="bi bi-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer show">Sim, Malanje é uma cidade acolhedora e segura. Como em qualquer destino, recomenda-se tomar precauções básicas, como evitar andar sozinho em áreas desconhecidas durante a noite.</div>
+                            </div>
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <span><i class="bi bi-calendar-check text-warning"></i> Qual a melhor época para visitar?</span>
+                                    <i class="bi bi-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">A melhor época é durante a estação seca, de <strong>Maio a Setembro</strong>, com temperaturas amenas e menos chuva, facilitando a visita aos monumentos naturais.</div>
+                            </div>
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <span><i class="bi bi-water text-primary"></i> Como chegar às Quedas de Kalandula?</span>
+                                    <i class="bi bi-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">As Quedas de Kalandula ficam a cerca de <strong>85 km</strong> de Malanje. É possível chegar de carro, táxi ou excursão organizada. Recomenda-se contratar um guia local para uma experiência mais rica.</div>
+                            </div>
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <span><i class="bi bi-currency-exchange text-success"></i> Onde posso trocar dinheiro?</span>
+                                    <i class="bi bi-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">Pode trocar dinheiro em bancos, casas de câmbio ou hotéis principais. Recomenda-se trocar em instituições oficiais para evitar fraudes.</div>
+                            </div>
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <span><i class="bi bi-tree text-success"></i> O que não posso deixar de visitar?</span>
+                                    <i class="bi bi-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">Não deixe de visitar as <strong>Pedras Negras de Pungo Andongo</strong>, as <strong>Quedas de Kalandula</strong>, o <strong>Parque Nacional da Cangandala</strong> e o <strong>Museu Regional de Malanje</strong>.</div>
+                            </div>
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <span><i class="bi bi-people text-info"></i> Quais são as principais tradições culturais?</span>
+                                    <i class="bi bi-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">As principais tradições incluem as danças como a <strong>Semba e a Rebita</strong>, o artesanato em madeira e fibras vegetais, a culinária tradicional (Calulu, Muamba, Funge) e as celebrações comunitárias que preservam a cultura local.</div>
+                            </div>
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <span><i class="bi bi-hospital text-danger"></i> Existem hospitais em Malanje?</span>
+                                    <i class="bi bi-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">Sim, Malanje conta com o <strong>Hospital Regional de Malanje</strong>, o Hospital Pediátrico e diversas clínicas e farmácias 24h.</div>
+                            </div>
+
+                            <div class="mt-3">
+                                <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&h=100&fit=crop&crop=center"
+                                     class="img-fluid rounded-3" style="width:100%; max-height:80px; object-fit:cover;" alt="FAQ Turismo">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- ===== ABA: EQUIPA ===== -->
+            <!-- ============================================================ -->
+            <div class="tab-pane fade" id="equipa" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="glass-card">
+                            <h5><i class="bi bi-people-fill text-primary"></i> Conheça os Criadores</h5>
+                            <p style="color: rgba(255,255,255,0.7);">A equipa por trás da Enciclopédia Turística de Malanje</p>
+
+                            <div class="team-photo-container">
+                                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=400&fit=crop&crop=center"
+                                     alt="Equipa de Criadores do Sistema de Turismo de Malanje" class="img-fluid">
+                                <p class="photo-caption">Equipa de desenvolvimento da Enciclopédia Turística de Malanje</p>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-md-3 mb-4">
+                                    <div class="team-card">
+                                        <div class="avatar">
+                                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face" alt="António Diogo">
+                                        </div>
+                                        <h6>António Diogo</h6>
+                                        <div class="role">Desenvolvedor Full Stack</div>
+                                        <div class="bio">Especialista em desenvolvimento web com 5 anos de experiência.</div>
+                                        <div class="social-links">
+                                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
+                                            <a href="#"><i class="bi bi-linkedin"></i></a>
+                                            <a href="#"><i class="bi bi-github"></i></a>
+                                        </div>
+                                        <div class="stats">
+                                            <div class="stat-item"><div class="stat-number">12</div><div class="stat-label">Projetos</div></div>
+                                            <div class="stat-item"><div class="stat-number">5</div><div class="stat-label">Anos Exp.</div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-4">
+                                    <div class="team-card">
+                                        <div class="avatar">
+                                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face" alt="Maria Santos">
+                                        </div>
+                                        <h6>Maria Santos</h6>
+                                        <div class="role">Designer UI/UX</div>
+                                        <div class="bio">Cria experiências digitais intuitivas e visualmente impactantes.</div>
+                                        <div class="social-links">
+                                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
+                                            <a href="#"><i class="bi bi-linkedin"></i></a>
+                                            <a href="#"><i class="bi bi-github"></i></a>
+                                        </div>
+                                        <div class="stats">
+                                            <div class="stat-item"><div class="stat-number">8</div><div class="stat-label">Projetos</div></div>
+                                            <div class="stat-item"><div class="stat-number">3</div><div class="stat-label">Anos Exp.</div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-4">
+                                    <div class="team-card">
+                                        <div class="avatar">
+                                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face" alt="Carlos Mendes">
+                                        </div>
+                                        <h6>Carlos Mendes</h6>
+                                        <div class="role">Analista de Sistemas</div>
+                                        <div class="bio">Especialista em análise de requisitos e arquitetura de software.</div>
+                                        <div class="social-links">
+                                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
+                                            <a href="#"><i class="bi bi-linkedin"></i></a>
+                                            <a href="#"><i class="bi bi-github"></i></a>
+                                        </div>
+                                        <div class="stats">
+                                            <div class="stat-item"><div class="stat-number">10</div><div class="stat-label">Projetos</div></div>
+                                            <div class="stat-item"><div class="stat-number">6</div><div class="stat-label">Anos Exp.</div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-4">
+                                    <div class="team-card">
+                                        <div class="avatar">
+                                            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop&crop=face" alt="Ana Ferreira">
+                                        </div>
+                                        <h6>Ana Ferreira</h6>
+                                        <div class="role">Gestora de Projeto</div>
+                                        <div class="bio">Coordena equipas e garante a entrega de projetos com qualidade.</div>
+                                        <div class="social-links">
+                                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
+                                            <a href="#"><i class="bi bi-linkedin"></i></a>
+                                            <a href="#"><i class="bi bi-github"></i></a>
+                                        </div>
+                                        <div class="stats">
+                                            <div class="stat-item"><div class="stat-number">7</div><div class="stat-label">Projetos</div></div>
+                                            <div class="stat-item"><div class="stat-number">4</div><div class="stat-label">Anos Exp.</div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end tab-content -->
+
+        <!-- ===== ASSISTENTE ===== -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="assistant-card">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-robot"></i>
+                                <div>
+                                    <h5><i class="bi bi-stars"></i> Assistente Turístico</h5>
+                                    <p id="assistantMessage">Olá! Como posso ajudar na sua viagem a Malanje?</p>
+                                    <div class="d-flex flex-wrap gap-2 mt-2">
+                                        <button class="btn btn-sm btn-outline-light" onclick="askAssistant('Como chegar às Pedras Negras?')">📍 Pedras Negras</button>
+                                        <button class="btn btn-sm btn-outline-light" onclick="askAssistant('Quais hotéis estão disponíveis?')">🏨 Hotéis</button>
+                                        <button class="btn btn-sm btn-outline-light" onclick="askAssistant('Qual o clima hoje?')">🌤️ Clima</button>
+                                        <button class="btn btn-sm btn-outline-light" onclick="askAssistant('Onde comer?')">🍽️ Gastronomia</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="text" id="chatInput" class="chat-input" placeholder="Faça uma pergunta...">
+                                <button class="btn btn-primary" onclick="sendChat()"><i class="bi bi-send"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== RODAPÉ ===== -->
+        <footer class="mt-5 text-center" style="padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.1);">
+            <p class="mb-2 footer-text">© 2026 Enciclopédia Turística de Malanje | Sistema Web de Apoio ao Turismo</p>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="#" class="footer-link"><i class="bi bi-envelope"></i> antoniodiogo958@gmail.com</a>
+                <a href="#" class="footer-link"><i class="bi bi-instagram"></i> Instagram</a>
+                <a href="#" class="footer-link"><i class="bi bi-facebook"></i> Facebook</a>
+                <a href="#" class="footer-link">Política de Privacidade</a>
+                <a href="#" class="footer-link">Termos de Utilização</a>
+            </div>
+        </footer>
+
+    </div><!-- end container-fluid -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+
+            // ===== TEMA =====
+            let isDarkTheme = true;
+
+            function toggleTheme() {
+                isDarkTheme = !isDarkTheme;
+                if (isDarkTheme) {
+                    $('body').removeClass('light-theme');
+                    $('#themeIcon').removeClass('bi-sun-fill').addClass('bi-moon-stars');
+                } else {
+                    $('body').addClass('light-theme');
+                    $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+                }
+                localStorage.setItem('sicami-theme-info', isDarkTheme ? 'dark' : 'light');
+            }
+
+            const savedTheme = localStorage.getItem('sicami-theme-info');
+            if (savedTheme === 'light') {
+                isDarkTheme = false;
+                $('body').addClass('light-theme');
+                $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+            }
+            $('#themeToggle').click(toggleTheme);
+
+            // ===== DATA E HORA =====
+            function updateDateTime() {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('pt-BR');
+                const timeStr = now.toLocaleTimeString('pt-BR');
+                $('#dateTimeDisplay').text(`${dateStr} ${timeStr}`);
+            }
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+
+            // ===== FAQ TOGGLE =====
+            window.toggleFaq = function(element) {
+                const answer = $(element).find('.faq-answer');
+                const icon = $(element).find('.bi-chevron-down');
+                answer.toggleClass('show');
+                icon.toggleClass('bi-chevron-down bi-chevron-up');
+            };
+
+            // ===== ASSISTENTE =====
+            window.askAssistant = function(question) {
+                $('#chatInput').val(question);
+                sendChat();
+            };
+
+            window.sendChat = function() {
+                const input = $('#chatInput');
+                const question = input.val().trim();
+                if (!question) return;
+
+                const message = $('#assistantMessage');
+                message.html(`🧐 <strong>Você:</strong> "${question}"<br><br><i class="bi bi-robot"></i> Processando...`);
+
+                setTimeout(() => {
+                    const responses = {
+                        'Pedras Negras': 'Para chegar às Pedras Negras de Pungo Andongo, pegue a estrada nacional em direção ao município de Pungo Andongo, a cerca de 120 km de Malanje. Recomenda-se contratar um guia local para conhecer as lendas e a história do local.',
+                        'Hotéis': 'Temos vários hotéis em Malanje: Hotel Kalandula, Hotel Palmeiras, Hotel Malanje e diversas pensões com ótimo custo-benefício. Recomendo o Hotel Kalandula pela vista para as quedas.',
+                        'Clima': 'O clima hoje está ensolarado com 28°C. A previsão para os próximos dias permanece estável, com pequenas possibilidades de chuva. A melhor época para visitar é de Maio a Setembro.',
+                        'Gastronomia': 'Não deixe de provar o Calulu, Funje, Muamba de Galinha e Kizaca. Recomendo o Restaurante Kalandula para uma experiência autêntica da culinária malanjina.',
+                        'Cultura': 'Malanje tem uma cultura rica com danças como a Semba e Rebita, artesanato em madeira e fibras, e festividades como o Carnaval e festas religiosas.',
+                        'História': 'Malanje tem uma história fascinante ligada ao Reino de Ndongo e à Rainha Njinga. As Pedras Negras de Pungo Andongo guardam lendas e pegadas históricas.',
+                        'Natureza': 'Malanje é abençoada com as Quedas de Kalandula, as Pedras Negras, o Parque Nacional da Cangandala e o Rio Kwanza. A fauna inclui a Palanca Negra Gigante.'
+                    };
+
+                    let response = 'Desculpe, não entendi sua pergunta. Pode reformular? Posso ajudar com informações sobre história, cultura, natureza, gastronomia, hotéis e monumentos.';
+                    for (const [key, value] of Object.entries(responses)) {
+                        if (question.toLowerCase().includes(key.toLowerCase())) {
+                            response = value;
+                            break;
+                        }
+                    }
+                    message.html(`🧐 <strong>Você:</strong> "${question}"<br><br><i class="bi bi-robot"></i> ${response}`);
+                }, 1000);
+
+                input.val('');
+            };
+
+            $('#chatInput').keypress(function(e) {
+                if (e.which === 13) sendChat();
+            });
+
+            // ===== SCROLL PARA TABS =====
+            window.scrollToTab = function(tabId) {
+                const tab = $(`#${tabId}-tab`);
+                if (tab.length) {
+                    tab.tab('show');
+                    $('html, body').animate({
+                        scrollTop: $('#infoTabs').offset().top - 100
+                    }, 500);
+                }
+            };
+
+            // ===== PESQUISA RÁPIDA =====
+            $('#quickSearch').on('input', function() {
+                const term = $(this).val().toLowerCase();
+                if (term.length > 2) {
+                    $('.glass-card, .dish-card, .attraction-card, .info-block').each(function() {
+                        const text = $(this).text().toLowerCase();
+                        if (text.includes(term)) {
+                            $(this).closest('.tab-pane').addClass('show active');
+                            $(this).closest('.tab-pane').siblings('.tab-pane').removeClass('show active');
+                            $(this).closest('.tab-pane').find('.glass-card, .dish-card, .attraction-card, .info-block').show();
+                            $(this).show();
+                        }
+                    });
+                } else {
+                    $('.tab-pane').removeClass('show active');
+                    $('#historia-tab').tab('show');
+                    $('.glass-card, .dish-card, .attraction-card, .info-block').show();
+                }
+            });
+
+            console.log('✅ Enciclopédia Turística de Malanje carregada com sucesso!');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Malanje Virtual Experience 3D</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* ===== RESET E BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background: #0a0e17;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* ===== VÍDEO DE FUNDO ===== */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.35;
+        }
+        .video-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 23, 0.75);
+            z-index: 1;
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ===== GLASSMORPHISM ===== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.4s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ===== CABEÇALHO ===== */
+        .cinematic-header {
+            padding: 20px 0 25px;
+            background: linear-gradient(180deg, rgba(10, 14, 23, 0.95) 0%, transparent 100%);
+        }
+        .cinematic-header .logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Georgia', serif;
+        }
+        .cinematic-header .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+            letter-spacing: 1.5px;
+        }
+
+        /* ===== AVATAR DO GUIA (3D Estilizado) ===== */
+        .guide-avatar-3d {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #f6d365, #fda085);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            color: #0a0e17;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 40px rgba(253, 160, 133, 0.25);
+            animation: pulseGlow 2.5s infinite;
+            position: relative;
+        }
+        .guide-avatar-3d::after {
+            content: '🎙️';
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            font-size: 1.2rem;
+            background: #0a0e17;
+            border-radius: 50%;
+            padding: 2px;
+        }
+        .guide-avatar-3d:hover {
+            transform: scale(1.08) rotate(-5deg);
+            box-shadow: 0 0 60px rgba(253, 160, 133, 0.5);
+        }
+        @keyframes pulseGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 30px rgba(253, 160, 133, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(253, 160, 133, 0.5);
+            }
+        }
+
+        /* ===== AVATAR DO TURISTA (Mini no mapa) ===== */
+        .tourist-avatar-marker {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #60a5fa, #2563eb);
+            border: 3px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 30px rgba(96, 165, 250, 0.5);
+            animation: floatMarker 2s ease-in-out infinite;
+            color: #fff;
+        }
+        @keyframes floatMarker {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+
+        /* ===== JORNADA ===== */
+        .journey-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 50px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            flex-wrap: wrap;
+        }
+        .journey-step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            transition: all 0.5s ease;
+            border: 2px solid transparent;
+            color: rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+        .journey-step.active {
+            background: #f6d365;
+            color: #0a0e17;
+            border-color: #fff;
+            transform: scale(1.15);
+            box-shadow: 0 0 30px rgba(246, 211, 101, 0.4);
+        }
+        .journey-step.completed {
+            background: #4ade80;
+            color: #0a0e17;
+            border-color: rgba(74, 222, 128, 0.5);
+        }
+        .journey-step .step-label {
+            position: absolute;
+            bottom: -22px;
+            font-size: 0.55rem;
+            white-space: nowrap;
+            color: rgba(255, 255, 255, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .journey-step:hover .step-label {
+            opacity: 1;
+        }
+
+        /* ===== CHAT DO GUIA ===== */
+        .guide-chat {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            min-height: 180px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .guide-chat::-webkit-scrollbar {
+            width: 4px;
+        }
+        .guide-chat::-webkit-scrollbar-thumb {
+            background: rgba(246, 211, 101, 0.3);
+            border-radius: 10px;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            animation: slideIn 0.4s ease;
+        }
+        .message .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        .message.guide .avatar {
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            color: #0a0e17;
+        }
+        .message.user .avatar {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .message .bubble {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 14px;
+            border-radius: 12px;
+            max-width: 82%;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .message.guide .bubble {
+            border-top-left-radius: 4px;
+            background: rgba(246, 211, 101, 0.08);
+            border-color: rgba(246, 211, 101, 0.1);
+        }
+        .message.user .bubble {
+            border-top-right-radius: 4px;
+            background: rgba(255, 255, 255, 0.06);
+            margin-left: auto;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            padding: 4px 8px;
+        }
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            animation: typingAnim 1.4s infinite;
+        }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes typingAnim {
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.3;
+            }
+            30% {
+                transform: translateY(-8px);
+                opacity: 1;
+            }
+        }
+
+        /* ===== MAPA ===== */
+        #map {
+            height: 380px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .leaflet-control-zoom a {
+            background: rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: blur(8px) !important;
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        }
+        .leaflet-popup-content-wrapper {
+            background: rgba(10, 14, 23, 0.92) !important;
+            backdrop-filter: blur(20px) !important;
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 14px !important;
+        }
+        .leaflet-popup-tip {
+            background: rgba(10, 14, 23, 0.92) !important;
+        }
+
+        /* ===== DESTINOS ===== */
+        .destination-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border-radius: 14px;
+            transition: all 0.5s ease;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .destination-card .card-img-overlay {
+            background: linear-gradient(0deg, rgba(10, 14, 23, 0.85) 0%, transparent 70%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 14px;
+        }
+        .destination-card img {
+            transition: transform 0.6s ease;
+            height: 110px;
+            object-fit: cover;
+        }
+        .destination-card:hover img {
+            transform: scale(1.06);
+        }
+        .destination-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(246, 211, 101, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ===== BOTÕES ===== */
+        .btn-glow {
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            color: #0a0e17;
+            border: none;
+            font-weight: 600;
+            padding: 10px 28px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(253, 160, 133, 0.25);
+        }
+        .btn-glow:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 40px rgba(253, 160, 133, 0.45);
+            color: #0a0e17;
+        }
+        .btn-outline-glow {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            padding: 8px 20px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .btn-outline-glow:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: #f6d365;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .chat-input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-radius: 50px;
+            padding: 10px 18px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .chat-input:focus {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: #f6d365;
+            box-shadow: 0 0 25px rgba(246, 211, 101, 0.06);
+            color: #fff;
+            outline: none;
+        }
+        .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .guide-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 50px;
+            background: rgba(74, 222, 128, 0.12);
+            border: 1px solid rgba(74, 222, 128, 0.15);
+            font-size: 0.8rem;
+            color: #4ade80;
+        }
+        .guide-status .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: blinkDot 1.5s infinite;
+        }
+        @keyframes blinkDot {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.2;
+            }
+        }
+
+        .user-location-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.8rem;
+        }
+        .user-location-badge .bi {
+            color: #f6d365;
+        }
+
+        /* ===== MODAL DE CRIAÇÃO DE AVATAR ===== */
+        .avatar-modal .modal-content {
+            background: rgba(10, 14, 23, 0.96);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 24px;
+        }
+        .avatar-modal .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .avatar-modal .btn-close {
+            filter: invert(1);
+        }
+        .avatar-option {
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.03);
+            text-align: center;
+        }
+        .avatar-option:hover {
+            border-color: rgba(246, 211, 101, 0.3);
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .avatar-option.selected {
+            border-color: #f6d365;
+            background: rgba(246, 211, 101, 0.08);
+        }
+        .avatar-option .preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ===== CINEMÁTICA ===== */
+        .cinematic-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            animation: fadeInCinematic 0.8s ease;
+        }
+        .cinematic-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeInCinematic {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .cinematic-content {
+            max-width: 700px;
+            text-align: center;
+            padding: 40px;
+        }
+        .cinematic-content .big-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: floatIcon 2s ease-in-out infinite;
+        }
+        @keyframes floatIcon {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+        .cinematic-content h2 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .cinematic-content p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 768px) {
+            .cinematic-header .logo {
+                font-size: 1.6rem;
+            }
+            #map {
+                height: 260px;
+            }
+            .guide-avatar-3d {
+                width: 55px;
+                height: 55px;
+                font-size: 2rem;
+            }
+            .journey-step {
+                width: 32px;
+                height: 32px;
+                font-size: 0.6rem;
+            }
+            .destination-card img {
+                height: 80px;
+            }
+        }
+
+        /* ===== SCROLL ===== */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(246, 211, 101, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== VÍDEO DE FUNDO ===== -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-african-savanna-at-sunset-32878-large.mp4" type="video/mp4" />
+        </video>
+    </div>
+
+    <!-- ===== CINEMÁTICA DE CHEGADA ===== -->
+    <div class="cinematic-overlay" id="cinematicArrival">
+        <div class="cinematic-content">
+            <div class="big-icon">✈️</div>
+            <h2>Bem-vindo a Malanje!</h2>
+            <p>O avião aterrou com sucesso. A sua aventura virtual está prestes a começar.</p>
+            <p style="font-size: 0.9rem; color: rgba(255,255,255,0.4);">
+                <i class="bi bi-clock"></i> A carregar o ambiente...
+            </p>
+            <div class="mt-3">
+                <div class="spinner-border text-warning" role="status" style="width: 40px; height: 40px;">
+                    <span class="visually-hidden">A carregar...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONTEÚDO PRINCIPAL ===== -->
+    <div class="container-fluid py-3">
+
+        <!-- ===== CABEÇALHO ===== -->
+        <div class="cinematic-header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="guide-avatar-3d" id="guideAvatar" title="Guia Virtual">
+                            🧭
+                        </div>
+                        <div>
+                            <div class="logo">🌍 Malanje Virtual Experience</div>
+                            <div class="subtitle">Guia 3D · Província de Malanje</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                        <div class="guide-status">
+                            <span class="dot"></span> Guia Online
+                        </div>
+                        <div class="user-location-badge" id="userLocation">
+                            <i class="bi bi-geo-alt"></i>
+                            <span id="locationText">A localizar...</span>
+                        </div>
+                        <button class="btn btn-glow btn-sm" id="btnStartJourney">
+                            <i class="bi bi-play-fill"></i> Iniciar
+                        </button>
+                        <button class="btn btn-outline-glow btn-sm" id="btnAvatarConfig">
+                            <i class="bi bi-person-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== JORNADA ===== -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="journey-indicator" id="journeyIndicator">
+                    <div class="journey-step active" data-step="0">
+                        🏠
+                        <span class="step-label">Início</span>
+                    </div>
+                    <div class="journey-step" data-step="1">
+                        📋
+                        <span class="step-label">Planeamento</span>
+                    </div>
+                    <div class="journey-step" data-step="2">
+                        ✈️
+                        <span class="step-label">Viagem</span>
+                    </div>
+                    <div class="journey-step" data-step="3">
+                        🚗
+                        <span class="step-label">Chegada</span>
+                    </div>
+                    <div class="journey-step" data-step="4">
+                        🗺️
+                        <span class="step-label">Exploração</span>
+                    </div>
+                    <div class="journey-step" data-step="5">
+                        🏁
+                        <span class="step-label">Regresso</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CONTEÚDO ===== -->
+        <div class="row g-4">
+
+            <!-- COLUNA ESQUERDA: CHAT + AVATAR INFO -->
+            <div class="col-lg-5">
+                <div class="glass-card p-4 h-100">
+
+                    <!-- Avatar do Turista (mini) -->
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div id="touristAvatarDisplay" style="width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #60a5fa, #2563eb);display:flex;align-items:center;justify-content:center;font-size:1.8rem;border:2px solid rgba(255,255,255,0.2);">
+                            🧑
+                        </div>
+                        <div>
+                            <h6 class="mb-0" id="touristNameDisplay">Viajante</h6>
+                            <small class="text-muted" id="touristStatus">● A explorar Malanje</small>
+                        </div>
+                        <div class="ms-auto">
+                            <span class="badge" style="background:rgba(246,211,101,0.15);color:#f6d365;">
+                                <i class="bi bi-star-fill"></i> Nível 1
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="mb-0"><i class="bi bi-chat-dots text-warning"></i> Guia Virtual</h6>
+                        <small class="text-muted" id="chatStatus">● Conectado</small>
+                    </div>
+
+                    <div class="guide-chat" id="guideChat">
+                        <div class="message guide">
+                            <div class="avatar">🧭</div>
+                            <div class="bubble">
+                                Olá, viajante! Sou o seu Guia 3D de Malanje.
+                                <br /><small class="text-muted">Estou aqui para o acompanhar em cada passo.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <div class="d-flex gap-2">
+                            <input type="text" class="chat-input" id="chatInput" placeholder="Fale com o guia..." />
+                            <button class="btn btn-glow" id="btnSendMessage">
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2 d-flex gap-2 flex-wrap">
+                            <button class="btn btn-sm btn-outline-glow suggestion-btn" data-msg="O que visitar em Malanje?">
+                                <i class="bi bi-compass"></i> O que visitar?
+                            </button>
+                            <button class="btn btn-sm btn-outline-glow suggestion-btn" data-msg="Conte-me sobre as Quedas de Kalandula">
+                                <i class="bi bi-water"></i> Kalandula
+                            </button>
+                            <button class="btn btn-sm btn-outline-glow suggestion-btn" data-msg="Onde fica a Palanca Negra?">
+                                <i class="bi bi-tree"></i> Palanca
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- COLUNA DIREITA: MAPA + DESTINOS -->
+            <div class="col-lg-7">
+
+                <!-- MAPA -->
+                <div class="glass-card p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0"><i class="bi bi-map text-warning"></i> Mapa Interativo 3D</h6>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-glow" id="btnRecenter">
+                                <i class="bi bi-crosshair"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-glow" id="btnRoute">
+                                <i class="bi bi-arrow-right-circle"></i> Rota
+                            </button>
+                            <button class="btn btn-sm btn-outline-glow" id="btnFollowMe">
+                                <i class="bi bi-person-walking"></i> Seguir
+                            </button>
+                        </div>
+                    </div>
+                    <div id="map"></div>
+                    <div class="mt-2 small text-muted">
+                        <i class="bi bi-info-circle"></i> Clique nos marcadores para visitar os destinos
+                    </div>
+                </div>
+
+                <!-- DESTINOS EM DESTAQUE -->
+                <div class="row g-2">
+                    <div class="col-3">
+                        <div class="destination-card glass-card p-0" data-dest="kalandula">
+                            <img src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=400&h=200&fit=crop" alt="Kalandula" />
+                            <div class="card-img-overlay">
+                                <small class="fw-bold">🌊 Kalandula</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="destination-card glass-card p-0" data-dest="pungo">
+                            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=200&fit=crop" alt="Pungo" />
+                            <div class="card-img-overlay">
+                                <small class="fw-bold">⛰️ Pungo</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="destination-card glass-card p-0" data-dest="cangandala">
+                            <img src="https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400&h=200&fit=crop" alt="Cangandala" />
+                            <div class="card-img-overlay">
+                                <small class="fw-bold">🦒 Cangandala</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="destination-card glass-card p-0" data-dest="carumbo">
+                            <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&h=200&fit=crop" alt="Carumbo" />
+                            <div class="card-img-overlay">
+                                <small class="fw-bold">🏞️ Carumbo</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ===== RODAPÉ ===== -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <hr style="border-color: rgba(255,255,255,0.04);" />
+                <small class="text-muted">
+                    <i class="bi bi-pin-map"></i> Malanje Virtual Experience 3D ·
+                    <span id="footerLocation">GPS: -9.5, 16.5</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: CRIAÇÃO DE AVATAR ===== -->
+    <div class="modal fade avatar-modal" id="avatarModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">🧑‍🎨 Criar o seu Avatar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Personalize o seu personagem para a viagem virtual.</p>
+
+                    <label class="fw-bold small text-muted">Género</label>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="avatar-option gender-option selected" data-gender="male">
+                                <div class="preview" style="background:rgba(96,165,250,0.2);">👨</div>
+                                <small>Homem</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="avatar-option gender-option" data-gender="female">
+                                <div class="preview" style="background:rgba(244,114,182,0.2);">👩</div>
+                                <small>Mulher</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="fw-bold small text-muted">Estilo</label>
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <div class="avatar-option style-option selected" data-style="explorer">
+                                <div class="preview">🎒</div>
+                                <small>Explorador</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="avatar-option style-option" data-style="adventurer">
+                                <div class="preview">🧗</div>
+                                <small>Aventureiro</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="avatar-option style-option" data-style="photographer">
+                                <div class="preview">📸</div>
+                                <small>Fotógrafo</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold small text-muted">Nome do Viajante</label>
+                        <input type="text" class="form-control" id="touristNameInput" value="Viajante" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.08);color:#fff;" />
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="btn btn-glow w-100" id="btnSaveAvatar">
+                            <i class="bi bi-check-lg"></i> Iniciar Viagem
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ============================================================
+            // 1. AVATAR DO UTILIZADOR (Configuração)
+            // ============================================================
+            const avatarModal = new bootstrap.Modal(document.getElementById('avatarModal'), { backdrop: 'static' });
+
+            let userGender = 'male';
+            let userStyle = 'explorer';
+            let userName = 'Viajante';
+
+            // Seleção de género
+            document.querySelectorAll('.gender-option').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('.gender-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    userGender = this.dataset.gender;
+                });
+            });
+
+            // Seleção de estilo
+            document.querySelectorAll('.style-option').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('.style-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    userStyle = this.dataset.style;
+                });
+            });
+
+            // Salvar avatar
+            document.getElementById('btnSaveAvatar').addEventListener('click', function() {
+                userName = document.getElementById('touristNameInput').value || 'Viajante';
+                updateTouristAvatar();
+                avatarModal.hide();
+
+                // Disparar mensagem de boas-vindas personalizada
+                setTimeout(() => {
+                    addGuideMessage(`Olá, ${userName}! Que bom ter você aqui. 🎒`, 'guide');
+                    addGuideMessage(
+                        'Estou pronto para o acompanhar nesta viagem virtual por Malanje. Vamos começar?',
+                        'guide');
+                }, 600);
+
+                // Mostrar cinemática de chegada
+                setTimeout(() => {
+                    showCinematic();
+                }, 2000);
+            });
+
+            function updateTouristAvatar() {
+                const genderEmoji = userGender === 'male' ? '👨' : '👩';
+                const styleEmojis = { explorer: '🎒', adventurer: '🧗', photographer: '📸' };
+                const display = document.getElementById('touristAvatarDisplay');
+                display.textContent = genderEmoji + ' ' + styleEmojis[userStyle];
+                document.getElementById('touristNameDisplay').textContent = userName;
+
+                // Atualizar marcador no mapa
+                if (touristMarker) {
+                    const iconHtml = `
+                            <div class="tourist-avatar-marker">
+                                ${genderEmoji}
+                            </div>
+                        `;
+                    const newIcon = L.divIcon({
+                        className: 'tourist-marker-icon',
+                        html: iconHtml,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
+                    });
+                    touristMarker.setIcon(newIcon);
+                }
+            }
+
+            // ============================================================
+            // 2. MAPA INTERATIVO
+            // ============================================================
+            const map = L.map('map').setView([-9.5, 16.5], 8);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 18
+            }).addTo(map);
+
+            const destinations = [
+                { name: 'Quedas de Kalandula', lat: -9.075, lng: 16.007, icon: '🌊',
+                info: 'Queda de 105m, uma das maiores de África.' },
+                { name: 'Pedras Negras de Pungo Andongo', lat: -9.691, lng: 15.578, icon: '⛰️',
+                    info: 'Formações rochosas com significado histórico.' },
+                { name: 'Parque Nacional da Cangandala', lat: -9.787, lng: 16.475, icon: '🦒',
+                    info: 'Habitat da Palanca Negra Gigante.' },
+                { name: 'Lagoa do Carumbo', lat: -8.398, lng: 17.383, icon: '🏞️',
+                    info: 'Lagoa com rica biodiversidade.' }
+            ];
+
+            const destIcon = L.divIcon({
+                className: 'dest-icon',
+                html: '<div style="background:rgba(246,211,101,0.9);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;border:2px solid #fff;box-shadow:0 4px 15px rgba(0,0,0,0.3);">📍</div>',
+                iconSize: [34, 34],
+                iconAnchor: [17, 17]
+            });
+
+            destinations.forEach(d => {
+                L.marker([d.lat, d.lng], { icon: destIcon })
+                    .addTo(map)
+                    .bindPopup(`
+                            <div>
+                                <h6>${d.icon} ${d.name}</h6>
+                                <p style="font-size:0.85rem;">${d.info}</p>
+                                <button class="btn btn-sm btn-warning visit-dest" data-lat="${d.lat}" data-lng="${d.lng}" data-name="${d.name}">
+                                    <i class="bi bi-play-fill"></i> Visitar
+                                </button>
+                            </div>
+                        `);
+            });
+
+            // ============================================================
+            // 3. GPS E MARCADOR DO TURISTA
+            // ============================================================
+            let touristLat = -9.5;
+            let touristLng = 16.5;
+            let touristMarker = null;
+            let routeLine = null;
+
+            function initTouristMarker() {
+                const genderEmoji = userGender === 'male' ? '👨' : '👩';
+                const iconHtml = `
+                        <div class="tourist-avatar-marker">
+                            ${genderEmoji}
+                        </div>
+                    `;
+                const icon = L.divIcon({
+                    className: 'tourist-marker-icon',
+                    html: iconHtml,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+                touristMarker = L.marker([touristLat, touristLng], { icon }).addTo(map);
+
+                // Círculo de precisão
+                L.circle([touristLat, touristLng], {
+                    radius: 800,
+                    color: '#60a5fa',
+                    fillColor: '#60a5fa',
+                    fillOpacity: 0.06,
+                    weight: 1,
+                    dashArray: '5,5'
+                }).addTo(map);
+
+                updateLocationDisplay();
+            }
+
+            function updateLocationDisplay() {
+                document.getElementById('locationText').textContent =
+                    `${touristLat.toFixed(4)}, ${touristLng.toFixed(4)} • ${userName}`;
+                document.getElementById('footerLocation').textContent =
+                    `📍 ${touristLat.toFixed(4)}, ${touristLng.toFixed(4)} • Rota activa`;
+            }
+
+            function moveTouristTo(lat, lng, callback) {
+                const steps = 20;
+                const latStep = (lat - touristLat) / steps;
+                const lngStep = (lng - touristLng) / steps;
+                let step = 0;
+
+                const interval = setInterval(() => {
+                    step++;
+                    touristLat += latStep;
+                    touristLng += lngStep;
+                    if (touristMarker) {
+                        touristMarker.setLatLng([touristLat, touristLng]);
+                    }
+                    updateLocationDisplay();
+
+                    if (step >= steps) {
+                        clearInterval(interval);
+                        touristLat = lat;
+                        touristLng = lng;
+                        if (touristMarker) {
+                            touristMarker.setLatLng([touristLat, touristLng]);
+                        }
+                        updateLocationDisplay();
+                        if (callback) callback();
+                    }
+                }, 100);
+            }
+
+            // ============================================================
+            // 4. GPS REAL (Geolocation API)
+            // ============================================================
+            let useRealGPS = false;
+
+            function startRealGPS() {
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(pos) {
+                            useRealGPS = true;
+                            const { latitude, longitude } = pos.coords;
+                            touristLat = latitude;
+                            touristLng = longitude;
+                            if (touristMarker) {
+                                touristMarker.setLatLng([touristLat, touristLng]);
+                            }
+                            map.setView([touristLat, touristLng], 13);
+                            updateLocationDisplay();
+                            addGuideMessage('📍 GPS ativado! Estou a ver a sua localização real.', 'guide');
+
+                            // Continuar a monitorizar
+                            navigator.geolocation.watchPosition(function(p) {
+                                touristLat = p.coords.latitude;
+                                touristLng = p.coords.longitude;
+                                if (touristMarker) {
+                                    touristMarker.setLatLng([touristLat, touristLng]);
+                                }
+                                updateLocationDisplay();
+                            });
+                        },
+                        function(err) {
+                            console.warn('GPS não disponível, usando simulação.');
+                            addGuideMessage('🌐 A usar localização simulada. Ative o GPS para mais realismo.',
+                            'guide');
+                        }, { enableHighAccuracy: true }
+                    );
+                } else {
+                    addGuideMessage('🌐 O seu navegador não suporta GPS. A usar simulação.', 'guide');
+                }
+            }
+
+            // ============================================================
+            // 5. CHAT INTELIGENTE
+            // ============================================================
+            const chatContainer = document.getElementById('guideChat');
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('btnSendMessage');
+
+            function addGuideMessage(text, type = 'guide') {
+                const div = document.createElement('div');
+                div.className = `message ${type}`;
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar';
+                avatar.textContent = type === 'guide' ? '🧭' : '👤';
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.innerHTML = text;
+                div.appendChild(avatar);
+                div.appendChild(bubble);
+                chatContainer.appendChild(div);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            function addTyping() {
+                const div = document.createElement('div');
+                div.className = 'message guide';
+                div.id = 'typingIndicator';
+                div.innerHTML = `
+                        <div class="avatar">🧭</div>
+                        <div class="bubble">
+                            <div class="typing-indicator"><span></span><span></span><span></span></div>
+                        </div>
+                    `;
+                chatContainer.appendChild(div);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            function removeTyping() {
+                const el = document.getElementById('typingIndicator');
+                if (el) el.remove();
+            }
+
+            function getGuideResponse(msg) {
+                const m = msg.toLowerCase();
+                if (m.includes('olá') || m.includes('oi')) return `Olá, ${userName}! Como posso ajudar? 🌟`;
+                if (m.includes('kalandula') || m.includes('queda')) return 'As Quedas de Kalandula são um espetáculo! 105m de altura, uma das maiores de África. 💧';
+                if (m.includes('pungo') || m.includes('pedras')) return 'As Pedras Negras guardam segredos do Reino de Ndongo. ⛰️';
+                if (m.includes('palanca') || m.includes('cangandala')) return 'A Palanca Negra Gigante é o símbolo de Angola. Apenas 100 exemplares! 🦒';
+                if (m.includes('carumbo') || m.includes('lagoa')) return 'A Lagoa do Carumbo é um paraíso escondido na floresta. 🏞️';
+                if (m.includes('época') || m.includes('melhor')) return 'A melhor época é de Maio a Outubro, estação seca. ☀️';
+                if (m.includes('comida') || m.includes('gastronomia')) return 'Prove o Muamba de Galinha e o funge com calulu! 🍲';
+                if (m.includes('história')) return 'Malanje tem uma história rica, desde o Reino de Ndongo até à independência. 📜';
+                if (m.includes('obrigado') || m.includes('valeu')) return 'Foi um prazer! Continue explorando. 😊';
+                if (m.includes('adeus') || m.includes('tchau')) return 'Até breve, ${userName}! Malanje espera por si! 👋';
+                return `Que interessante! Malanje é cheia de surpresas. Quer saber mais sobre Kalandula, Pungo, Cangandala ou Carumbo? 🌟`;
+            }
+
+            function handleUserMessage() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                addGuideMessage(text, 'user');
+                chatInput.value = '';
+
+                addTyping();
+                setTimeout(() => {
+                    removeTyping();
+                    const response = getGuideResponse(text);
+                    addGuideMessage(response, 'guide');
+                    updateJourneyStep(text);
+                }, 800 + Math.random() * 800);
+            }
+
+            sendBtn.addEventListener('click', handleUserMessage);
+            chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleUserMessage(); });
+
+            document.querySelectorAll('.suggestion-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    chatInput.value = this.dataset.msg;
+                    handleUserMessage();
+                });
+            });
+
+            // ============================================================
+            // 6. JORNADA (Gamificação)
+            // ============================================================
+            let currentStep = 0;
+
+            function updateJourneyStep(msg) {
+                const m = msg.toLowerCase();
+                const steps = document.querySelectorAll('.journey-step');
+                if (m.includes('plane') || m.includes('hotel') || m.includes('voar')) currentStep = Math.max(currentStep, 1);
+                if (m.includes('kalandula') || m.includes('queda')) currentStep = Math.max(currentStep, 2);
+                if (m.includes('cheg') || m.includes('aqui')) currentStep = Math.max(currentStep, 3);
+                if (m.includes('explor') || m.includes('visitar')) currentStep = Math.max(currentStep, 4);
+                if (m.includes('adeus') || m.includes('fim')) currentStep = Math.max(currentStep, 5);
+
+                steps.forEach((el, i) => {
+                    el.classList.remove('active', 'completed');
+                    if (i < currentStep) el.classList.add('completed');
+                    if (i === currentStep) el.classList.add('active');
+                });
+            }
+
+            // ============================================================
+            // 7. CINEMÁTICA DE CHEGADA
+            // ============================================================
+            function showCinematic() {
+                const overlay = document.getElementById('cinematicArrival');
+                overlay.classList.add('active');
+
+                // Simular carregamento
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            overlay.classList.remove('active');
+                            addGuideMessage(
+                                '✈️ Chegámos a Malanje! Estamos prontos para explorar. Onde gostaria de ir primeiro?',
+                                'guide');
+                            // Mover para o centro de Malanje
+                            moveTouristTo(-9.5, 16.5, () => {
+                                addGuideMessage('📍 Estamos no coração de Malanje. Olhe à volta!', 'guide');
+                            });
+                        }, 1000);
+                    }
+                }, 200);
+            }
+
+            // ============================================================
+            // 8. INTERAÇÃO COM DESTINOS
+            // ============================================================
+            document.querySelectorAll('.destination-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const dest = this.dataset.dest;
+                    const destData = destinations.find(d => d.name.toLowerCase().includes(dest));
+                    if (destData) {
+                        addGuideMessage(`🚀 A caminho de ${destData.name}...`, 'guide');
+                        map.setView([destData.lat, destData.lng], 12);
+                        moveTouristTo(destData.lat, destData.lng, () => {
+                            addGuideMessage(`📍 Chegámos a ${destData.name}! ${destData.icon}`, 'guide');
+                            addGuideMessage(destData.info, 'guide');
+                        });
+                    }
+                });
+            });
+
+            // ============================================================
+            // 9. CONTROLES DO MAPA
+            // ============================================================
+            document.getElementById('btnRecenter').addEventListener('click', function() {
+                map.setView([touristLat, touristLng], 11);
+                addGuideMessage('📍 A centralizar na sua posição.', 'guide');
+            });
+
+            document.getElementById('btnRoute').addEventListener('click', function() {
+                if (routeLine) { map.removeLayer(routeLine);
+                    routeLine = null; }
+                const points = [
+                    [touristLat, touristLng],
+                    [-9.075, 16.007]
+                ];
+                routeLine = L.polyline(points, {
+                    color: '#f6d365',
+                    weight: 4,
+                    opacity: 0.8,
+                    dashArray: '12,8'
+                }).addTo(map);
+                map.fitBounds(routeLine.getBounds(), { padding: [60, 60] });
+                addGuideMessage('🗺️ Rota traçada para as Quedas de Kalandula. Sigamos!', 'guide');
+            });
+
+            document.getElementById('btnFollowMe').addEventListener('click', function() {
+                map.setView([touristLat, touristLng], 14);
+                addGuideMessage('👣 A seguir os seus passos.', 'guide');
+            });
+
+            // ============================================================
+            // 10. CLICK NOS POPUPS DO MAPA
+            // ============================================================
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('visit-dest')) {
+                    const lat = parseFloat(e.target.dataset.lat);
+                    const lng = parseFloat(e.target.dataset.lng);
+                    const name = e.target.dataset.name;
+                    addGuideMessage(`🎯 A visitar ${name}...`, 'guide');
+                    moveTouristTo(lat, lng, () => {
+                        addGuideMessage(`📍 Chegámos a ${name}!`, 'guide');
+                    });
+                    map.setView([lat, lng], 13);
+                }
+            });
+
+            // ============================================================
+            // 11. INICIALIZAÇÃO
+            // ============================================================
+            // Mostrar modal de avatar
+            avatarModal.show();
+
+            // Iniciar marcador
+            initTouristMarker();
+
+            // Tentar GPS real
+            startRealGPS();
+
+            // Botão Iniciar Viagem
+            document.getElementById('btnStartJourney').addEventListener('click', function() {
+                addGuideMessage('🚀 A iniciar a nossa aventura por Malanje!', 'guide');
+                addGuideMessage('Vamos visitar lugares incríveis. Acompanhe-me!', 'guide');
+                showCinematic();
+            });
+
+            // Botão Avatar Config
+            document.getElementById('btnAvatarConfig').addEventListener('click', function() {
+                avatarModal.show();
+            });
+
+            console.log('🌍 Malanje Virtual Experience 3D carregada!');
+            console.log(`👤 Viajante: ${userName} | Género: ${userGender} | Estilo: ${userStyle}`);
+        });
+    </script>
+</body>
+</html>

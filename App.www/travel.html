@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Descubra Malanje - O Coração Turístico de Angola</title>
+
+    <!-- Bootstrap + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Leaflet.js para Mapas Interativos -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        /* ===== ESTILOS GLOBAIS ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1a7a3a;
+            --secondary-color: #f5a623;
+            --accent-color: #8b5a2b;
+            --body-bg: #f8f4ef;
+            --body-color: #1e2a3a;
+            --card-bg: #ffffff;
+            --card-color: #1e2a3a;
+            --border-color: #dee2e6;
+            --chat-user-bg: #e9ecef;
+            --chat-bot-bg: #d4e6f1;
+            --shadow: 0 8px 30px rgba(0,0,0,0.08);
+        }
+
+        [data-bs-theme="dark"] {
+            --primary-color: #2ecc71;
+            --secondary-color: #f39c12;
+            --body-bg: #121212;
+            --body-color: #f8f9fa;
+            --card-bg: #1e1e1e;
+            --card-color: #f8f9fa;
+            --border-color: #444;
+            --chat-user-bg: #2c2c2c;
+            --chat-bot-bg: #1a3e50;
+            --shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: var(--body-bg);
+            color: var(--body-color);
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+            
+            /* IMAGEM DE FUNDO ADICIONADA */
+            background-image: url('images/travel.jpg'); /* Substitua pelo URL da sua imagem */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar-custom {
+            background: var(--card-bg);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            backdrop-filter: blur(8px);
+        }
+        .navbar-brand-custom {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        .logo-img {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+        .brand-text {
+            line-height: 1.2;
+            display: flex;
+            flex-direction: column;
+        }
+        .brand-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--body-color);
+            margin-bottom: 0;
+            line-height: 1.1;
+        }
+        .brand-sub {
+            font-size: 0.6rem;
+            opacity: 0.8;
+            color: var(--body-color);
+        }
+
+        /* ===== BOTÕES DE IDIOMA E TEMA ===== */
+        .lang-btn {
+            background: rgba(128, 128, 128, 0.08);
+            border: 1px solid var(--border-color);
+            border-radius: 40px;
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: var(--body-color);
+        }
+        .lang-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .lang-dropdown {
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            min-width: 170px;
+            z-index: 1050;
+            display: none;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .lang-dropdown.show { display: block; }
+        .lang-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            text-decoration: none;
+            color: var(--body-color);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .lang-option:hover { background: rgba(26, 122, 58, 0.1); }
+        .theme-toggle {
+            position: relative;
+            display: inline-block;
+            width: 55px;
+            height: 28px;
+        }
+        .theme-toggle input { opacity: 0; width: 0; height: 0; }
+        .theme-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .theme-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .theme-slider { background-color: var(--primary-color); }
+        input:checked + .theme-slider:before { transform: translateX(27px); }
+
+        /* ===== HERO SECTION ===== */
+        .hero-section {
+            position: relative;
+            color: white;
+            padding: 100px 0;
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+        .slideshow-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .mySlides {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+        .mySlides.active { display: block; opacity: 1; }
+        .slide-background {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .slide-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+        }
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease;
+        }
+        .hero-subtitle {
+            font-size: 1.4rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            animation: fadeInUp 1.2s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hero-btn-group .btn {
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        .hero-btn-group .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color), #0d5e2a);
+            border: none;
+            color: white;
+            box-shadow: 0 6px 20px rgba(26, 122, 58, 0.4);
+        }
+        .hero-btn-group .btn-primary-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(26, 122, 58, 0.5);
+        }
+        .hero-btn-group .btn-outline-light {
+            border: 2px solid white;
+            backdrop-filter: blur(4px);
+        }
+        .hero-btn-group .btn-outline-light:hover {
+            background: white;
+            color: #1a7a3a;
+        }
+
+        /* ===== SEÇÕES GERAIS ===== */
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--body-color);
+        }
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--body-color);
+            opacity: 0.7;
+            margin-bottom: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            background-color: var(--card-bg);
+            color: var(--card-color);
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+        }
+        .card-img-top {
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+        }
+        .badge-custom {
+            background: var(--secondary-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+        }
+        .btn-outline-custom {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-outline-custom:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color), #0d5e2a);
+            border: none;
+            color: white;
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(26, 122, 58, 0.4);
+            color: white;
+        }
+
+        /* ===== CARTÕES DE "POR QUE VISITAR" ===== */
+        .feature-card {
+            text-align: center;
+            padding: 25px 15px;
+            border-radius: 20px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .feature-card .icon-wrapper {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(26, 122, 58, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+        .feature-card h5 { font-weight: 700; margin-bottom: 8px; }
+        .feature-card p { font-size: 0.9rem; opacity: 0.8; }
+
+        /* ===== GALERIA DE DESTINOS ===== */
+        .destino-card .card-img-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+        .destino-card .card-img-wrapper img {
+            transition: transform 0.5s;
+        }
+        .destino-card:hover .card-img-wrapper img {
+            transform: scale(1.05);
+        }
+        .destino-card .overlay-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            color: white;
+        }
+        .destino-card .overlay-info .rating {
+            color: var(--secondary-color);
+        }
+
+        /* ===== PLANEADOR INTELIGENTE ===== */
+        .planner-box {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        .planner-box .form-control, .planner-box .form-select {
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            background: var(--body-bg);
+            color: var(--body-color);
+        }
+        .planner-box .form-control:focus, .planner-box .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 122, 58, 0.2);
+        }
+
+        /* ===== MAPA ===== */
+        #map {
+            height: 450px;
+            border-radius: 20px;
+            z-index: 1;
+        }
+
+        /* ===== CALENDÁRIO DE EVENTOS ===== */
+        .event-card {
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+        .event-card .event-date {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .countdown {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+
+        /* ===== CHATBOT INVITED ===== */
+        .fab {
+            position: fixed;
+            bottom: 120px;
+            right: 26px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), #0d5e2a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 8px 25px rgba(26, 122, 58, 0.4);
+            z-index: 100;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-decoration: none;
+        }
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(26, 122, 58, 0.5);
+        }
+        .chat-messages {
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 15px;
+            background: var(--body-bg);
+            border-radius: 16px;
+            margin-bottom: 15px;
+        }
+        .message { margin-bottom: 12px; display: flex; align-items: flex-start; gap: 10px; }
+        .message.user { justify-content: flex-end; }
+        .message.bot .avatar, .message.user .avatar {
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; color: white; flex-shrink: 0;
+        }
+        .message.bot .avatar { background: var(--primary-color); }
+        .message.user .avatar { background: var(--secondary-color); }
+        .bubble {
+            max-width: 75%; padding: 10px 14px; border-radius: 18px; word-wrap: break-word;
+        }
+        .bot .bubble { background: var(--chat-bot-bg); color: var(--body-color); }
+        .user .bubble { background: var(--primary-color); color: white; }
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .quick-reply-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            color: var(--body-color);
+        }
+        .quick-reply-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* ===== PARCEIROS ===== */
+        .partner-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 16px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            height: 100%;
+        }
+        .partner-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        .partner-card .partner-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(26, 122, 58, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 2.5rem;
+            color: var(--primary-color);
+        }
+
+        /* ===== INFORMAÇÕES ÚTEIS ===== */
+        .info-grid .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 10px;
+        }
+        .info-grid .info-item i {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            width: 30px;
+            text-align: center;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #1a2a3a;
+            color: #e0e0e0;
+            padding: 40px 0 20px;
+        }
+        .footer a { color: #a0b0c0; text-decoration: none; transition: 0.2s; }
+        .footer a:hover { color: var(--secondary-color); }
+
+        /* ===== RESPONSIVO ===== */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2rem; }
+            .hero-subtitle { font-size: 1rem; }
+            .hero-section { min-height: 450px; padding: 60px 0; }
+            .section-title { font-size: 1.8rem; }
+            .fab { width: 50px; height: 50px; font-size: 1.4rem; bottom: 100px; }
+        }
+        @media (max-width: 576px) {
+            .hero-btn-group .btn { padding: 8px 16px; font-size: 0.8rem; }
+            .brand-title { font-size: 1rem; }
+            .logo-img { height: 40px; }
+        }
+
+        /* ===== ANIMAÇÕES ===== */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== OVERLAY PROCESSAMENTO ===== */
+        .processing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+        .processing-box {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 25px 35px;
+            border-radius: 60px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            animation: fadeInScale 0.3s ease-out;
+        }
+        @keyframes fadeInScale {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(26, 122, 58, 0.2);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .processing-title {
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: 600;
+            margin-left: 15px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body data-bs-theme="light">
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast-container-custom" id="toastContainer" style="position:fixed;bottom:20px;left:20px;z-index:1100;"></div>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar navbar-expand-lg sticky-top navbar-custom">
+        <div class="container">
+            <a class="navbar-brand-custom" href="#">
+                <img src="images/turistec-rbg.png" class="logo-img" alt="Descubra Malanje">
+                <div class="brand-text">
+                    <span class="brand-title">Descubra Malanje</span>
+                    <span class="brand-sub">O Coração Turístico de Angola</span>
+                </div>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="destinos-tur.html">Destinos</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="planear.html">Planeador</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="map-tur.html">Mapa</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="eventos-tur.html">Eventos</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="parcerias.html">Parceiros</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="info-utel.html">Info Úteis</a></li>
+                </ul>
+
+                <div class="d-flex align-items-center ms-lg-4 mt-3 mt-lg-0 gap-2">
+                    <div class="language-selector me-2" style="position:relative;">
+                        <button class="lang-btn" id="langBtn">
+                            <i class="bi bi-translate"></i>
+                            <span id="currentLang">PT</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="lang-dropdown" id="langDropdown">
+                            <div class="lang-option" data-lang="pt">🇵🇹 Português</div>
+                            <div class="lang-option" data-lang="en">🇬🇧 English</div>
+                            <div class="lang-option" data-lang="fr">🇫🇷 Français</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center me-3">
+                        <i class="bi bi-sun me-1"></i>
+                        <label class="theme-toggle">
+                            <input type="checkbox" id="themeSwitch">
+                            <span class="theme-slider"></span>
+                        </label>
+                        <i class="bi bi-moon ms-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero-section" id="home">
+        <div class="slideshow-container">
+            <div class="mySlides active">
+                <div class="slide-background" style="background-image: url('https://media-cdn.tripadvisor.com/media/photo-s/12/8a/fe/13/kalandula-waterfalls.jpg');"></div>
+            </div>
+            <div class="mySlides">
+                <div class="slide-background" style="background-image: url('https://media-cdn.tripadvisor.com/media/photo-s/0d/5b/2f/2c/pedras-negras.jpg');"></div>
+            </div>
+            <div class="mySlides">
+                <div class="slide-background" style="background-image: url('https://media-cdn.tripadvisor.com/media/photo-s/0a/6c/8a/3b/lagoa-do-carumbo.jpg');"></div>
+            </div>
+            <div class="mySlides">
+                <div class="slide-background" style="background-image: url('https://media-cdn.tripadvisor.com/media/photo-s/11/7a/3d/5c/reserva-natural-do-milando.jpg');"></div>
+            </div>
+        </div>
+        <div class="container hero-content text-center">
+            <h1 class="hero-title">Descubra Malanje – Um Tesouro Turístico de Angola</h1>
+            <p class="hero-subtitle mb-4">Explore paisagens naturais, património histórico, cultura e experiências inesquecíveis.</p>
+            <div class="hero-btn-group d-flex flex-wrap justify-content-center gap-2">
+                <a href="#destinos" class="btn btn-primary-custom"><i class="fas fa-compass me-2"></i>Explorar Destinos</a>
+                <a href="#planner" class="btn btn-primary-custom" style="background:linear-gradient(135deg,#f5a623,#e67e22);box-shadow:0 6px 20px rgba(245,166,35,0.4);"><i class="fas fa-route me-2"></i>Criar Roteiro</a>
+                <a href="#como-chegar" class="btn btn-outline-light"><i class="fas fa-plane me-2"></i>Como Chegar</a>
+                <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#chatModal">
+                   <a href="invited.html"><i class="fas fa-robot me-2"></i>Falar com INVITED</a>
+                    </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== POR QUE VISITAR MALANJE? ===== -->
+    <section class="container py-5" id="por-que">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Por Que Visitar Malanje?</h2>
+            <p class="section-subtitle">Descubra os encantos que fazem desta província um destino único em Angola</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-tree"></i></div>
+                    <h5>Turismo Natural</h5>
+                    <p>Quedas de Kalandula, Lagoa do Carumbo e paisagens de tirar o fôlego.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-landmark"></i></div>
+                    <h5>Turismo Histórico</h5>
+                    <p>Pedras Negras de Pungo Andongo e o Palácio do Rei Mwatiânvua.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-music"></i></div>
+                    <h5>Turismo Cultural</h5>
+                    <p>Festivais, tradições e a hospitalidade do povo malanjano.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-leaf"></i></div>
+                    <h5>Ecoturismo</h5>
+                    <p>Reserva Natural de Milando e biodiversidade única.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-utensils"></i></div>
+                    <h5>Gastronomia Local</h5>
+                    <p>Funge, moamba e sabores autênticos da culinária angolana.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-smile"></i></div>
+                    <h5>Hospitalidade Angolana</h5>
+                    <p>Um povo acolhedor que faz cada visitante sentir-se em casa.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-mountain"></i></div>
+                    <h5>Aventura</h5>
+                    <p>Trilhas, caminhadas e exploração de paisagens deslumbrantes.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-camera"></i></div>
+                    <h5>Fotografia</h5>
+                    <p>Cenários perfeitos para capturar momentos inesquecíveis.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== DESTINOS EM DESTAQUE ===== -->
+    <section class="container py-5" id="destinos">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Destinos Turísticos em Destaque</h2>
+            <p class="section-subtitle">Conheça os lugares mais impressionantes da província de Malanje</p>
+        </div>
+        <div class="row g-4">
+            <!-- Destino 1 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card destino-card h-100 animate-on-scroll">
+                    <div class="card-img-wrapper">
+                        <img src="images/quedas.png" class="card-img-top" alt="Quedas de Kalandula">
+                        <div class="overlay-info">
+                            <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> 4.8</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Quedas de Kalandula</h5>
+                        <p class="card-text text-muted"><i class="fas fa-map-marker-alt me-1"></i> Kalandula, Malanje</p>
+                        <p class="card-text">Uma das maiores quedas de água em volume de África, com 105 metros de altura.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-outline-custom btn-sm btn-detalhes" data-destino="kalandula">Ver Detalhes</button>
+                            <button class="btn btn-primary-custom btn-sm btn-add-rota"><i class="fas fa-plus me-1"></i>Adicionar ao Roteiro</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Destino 2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card destino-card h-100 animate-on-scroll">
+                    <div class="card-img-wrapper">
+                        <img src="images/pungo-an-dongo.png" class="card-img-top" alt="Pedras Negras de Pungo Andongo">
+                        <div class="overlay-info">
+                            <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> 4.9</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Pedras Negras de Pungo Andongo</h5>
+                        <p class="card-text text-muted"><i class="fas fa-map-marker-alt me-1"></i> Cacuso, Malanje</p>
+                        <p class="card-text">Imponentes formações rochosas com vista panorâmica e rica história ligada à rainha Nzinga.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-outline-custom btn-sm btn-detalhes" data-destino="pungo">Ver Detalhes</button>
+                            <button class="btn btn-primary-custom btn-sm btn-add-rota"><i class="fas fa-plus me-1"></i>Adicionar ao Roteiro</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Destino 3 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card destino-card h-100 animate-on-scroll">
+                    <div class="card-img-wrapper">
+                        <img src="https://media-cdn.tripadvisor.com/media/photo-s/0a/6c/8a/3b/lagoa-do-carumbo.jpg" class="card-img-top" alt="Lagoa do Carumbo">
+                        <div class="overlay-info">
+                            <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> 4.7</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Lagoa do Carumbo</h5>
+                        <p class="card-text text-muted"><i class="fas fa-map-marker-alt me-1"></i> Cangandala, Malanje</p>
+                        <p class="card-text">Lagoa de águas cristalinas rodeada por vegetação exuberante, ideal para lazer e contemplação.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-outline-custom btn-sm btn-detalhes" data-destino="carumbo">Ver Detalhes</button>
+                            <button class="btn btn-primary-custom btn-sm btn-add-rota"><i class="fas fa-plus me-1"></i>Adicionar ao Roteiro</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Destino 4 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card destino-card h-100 animate-on-scroll">
+                    <div class="card-img-wrapper">
+                        <img src="https://media-cdn.tripadvisor.com/media/photo-s/11/7a/3d/5c/reserva-natural-do-milando.jpg" class="card-img-top" alt="Reserva Natural de Milando">
+                        <div class="overlay-info">
+                            <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> 4.6</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Reserva Natural de Milando</h5>
+                        <p class="card-text text-muted"><i class="fas fa-map-marker-alt me-1"></i> Milando, Malanje</p>
+                        <p class="card-text">Área de conservação com fauna e flora diversificada, perfeita para ecoturismo.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-outline-custom btn-sm btn-detalhes" data-destino="milando">Ver Detalhes</button>
+                            <button class="btn btn-primary-custom btn-sm btn-add-rota"><i class="fas fa-plus me-1"></i>Adicionar ao Roteiro</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Destino 5 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card destino-card h-100 animate-on-scroll">
+                    <div class="card-img-wrapper">
+                        <img src="https://media-cdn.tripadvisor.com/media/photo-s/1a/3b/5c/7d/palacio-do-rei-mwatianvua.jpg" class="card-img-top" alt="Palácio do Rei Mwatiânvua">
+                        <div class="overlay-info">
+                            <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> 4.5</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Palácio do Rei Mwatiânvua</h5>
+                        <p class="card-text text-muted"><i class="fas fa-map-marker-alt me-1"></i> Malanje</p>
+                        <p class="card-text">Património histórico que conta a história da dinastia Lunda, com arquitetura tradicional.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-outline-custom btn-sm btn-detalhes" data-destino="palacio">Ver Detalhes</button>
+                            <button class="btn btn-primary-custom btn-sm btn-add-rota"><i class="fas fa-plus me-1"></i>Adicionar ao Roteiro</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Destino 6 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card destino-card h-100 animate-on-scroll">
+                    <div class="card-img-wrapper">
+                        <img src="images/musseje.png" class="card-img-top" alt="Cascata de Musseleje">
+                        <div class="overlay-info">
+                            <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> 4.8</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Cascata de Musseleje</h5>
+                        <p class="card-text text-muted"><i class="fas fa-map-marker-alt me-1"></i> Cacuso, Malanje</p>
+                        <p class="card-text">Cascata de águas cristalinas, rodeada por uma vegetação luxuriante e tranquilidade.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-outline-custom btn-sm btn-detalhes" data-destino="musseleje">Ver Detalhes</button>
+                            <button class="btn btn-primary-custom btn-sm btn-add-rota"><i class="fas fa-plus me-1"></i>Adicionar ao Roteiro</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== VÍDEO PROMOCIONAL ===== -->
+    <section class="container py-5" id="video">
+        <div class="text-center mb-4">
+            <h2 class="section-title">Vídeo Promocional de Malanje</h2>
+            <p class="section-subtitle">Conheça a cultura, natureza e experiências que a província oferece</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card p-3 animate-on-scroll" style="border-radius:24px;overflow:hidden;">
+                    <div style="position:relative;padding-bottom:56.25%;height:0;border-radius:16px;overflow:hidden;">
+                        <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://www.youtube.com/embed/3bZx2cDUE7s?si=uW9nJzQx5yZ8Tl9A" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                </div>
+                <div class="row g-3 mt-4 text-center">
+                    <div class="col-6 col-md-3">
+                        <div class="feature-card p-3">
+                            <i class="fas fa-theater-masks fa-2x" style="color:var(--primary-color);"></i>
+                            <h6 class="mt-2">Cultura</h6>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="feature-card p-3">
+                            <i class="fas fa-tree fa-2x" style="color:var(--primary-color);"></i>
+                            <h6 class="mt-2">Natureza</h6>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="feature-card p-3">
+                            <i class="fas fa-utensils fa-2x" style="color:var(--primary-color);"></i>
+                            <h6 class="mt-2">Gastronomia</h6>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="feature-card p-3">
+                            <i class="fas fa-calendar-alt fa-2x" style="color:var(--primary-color);"></i>
+                            <h6 class="mt-2">Eventos</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PLANEADOR INTELIGENTE ===== -->
+    <section class="container py-5" id="planner">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Planeador Inteligente de Viagens</h2>
+            <p class="section-subtitle">Crie o seu roteiro personalizado para explorar Malanje</p>
+        </div>
+        <div class="planner-box animate-on-scroll">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Número de Dias</label>
+                    <select class="form-select" id="dias">
+                        <option value="1">1 dia</option>
+                        <option value="2" selected>2 dias</option>
+                        <option value="3">3 dias</option>
+                        <option value="5">5 dias</option>
+                        <option value="7">7 dias</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Tipo de Turismo</label>
+                    <select class="form-select" id="tipoTurismo">
+                        <option value="natureza">Natureza</option>
+                        <option value="historico">Histórico</option>
+                        <option value="cultural">Cultural</option>
+                        <option value="aventura">Aventura</option>
+                        <option value="todos">Todos</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Faixa Etária</label>
+                    <select class="form-select" id="faixaEtaria">
+                        <option value="jovem">Jovem (18-35)</option>
+                        <option value="adulto">Adulto (36-55)</option>
+                        <option value="senior">Sénior (56+)</option>
+                        <option value="familia">Família</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Orçamento</label>
+                    <select class="form-select" id="orcamento">
+                        <option value="baixo">Baixo</option>
+                        <option value="medio" selected>Médio</option>
+                        <option value="alto">Alto</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Meio de Transporte</label>
+                    <select class="form-select" id="transporte">
+                        <option value="carro">Carro Próprio</option>
+                        <option value="taxi">Táxi</option>
+                        <option value="onibus">Ônibus</option>
+                        <option value="aviao">Avião</option>
+                    </select>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label fw-bold">Preferências do Visitante</label>
+                    <select class="form-select" id="preferencias">
+                        <option value="todos">Todas as Atrações</option>
+                        <option value="quedas">Quedas de Kalandula</option>
+                        <option value="pedras">Pedras Negras</option>
+                        <option value="lagos">Lagoas e Cachoeiras</option>
+                        <option value="historico">Património Histórico</option>
+                        <option value="reserva">Reservas Naturais</option>
+                    </select>
+                </div>
+                <div class="col-12 mt-3">
+                    <button class="btn btn-primary-custom btn-lg w-100" id="btnGerarRoteiro">
+                        <i class="fas fa-magic me-2"></i>Gerar Roteiro Inteligente
+                    </button>
+                </div>
+            </div>
+            <div id="resultadoRoteiro" class="mt-4" style="display:none;">
+                <div class="alert alert-success">
+                    <h5><i class="fas fa-check-circle me-2"></i>Roteiro Personalizado</h5>
+                    <div id="roteiroConteudo"></div>
+                    <button class="btn btn-outline-custom mt-3" id="btnExportarPDF"><i class="fas fa-file-pdf me-2"></i>Exportar em PDF</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MAPA TURÍSTICO INTELIGENTE ===== -->
+    <section class="container py-5" id="mapa">
+        <div class="text-center mb-4">
+            <h2 class="section-title">Mapa Turístico Inteligente</h2>
+            <p class="section-subtitle">Encontre pontos turísticos, hotéis, restaurantes e serviços</p>
+        </div>
+        <div class="card p-3 animate-on-scroll">
+            <div id="map"></div>
+            <div class="row mt-3 g-2">
+                <div class="col-auto">
+                    <button class="btn btn-sm btn-outline-custom filter-map" data-type="all"><i class="fas fa-globe me-1"></i>Todos</button>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-sm btn-outline-custom filter-map" data-type="turismo"><i class="fas fa-tree me-1"></i>Turismo</button>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-sm btn-outline-custom filter-map" data-type="hotel"><i class="fas fa-hotel me-1"></i>Hotéis</button>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-sm btn-outline-custom filter-map" data-type="restaurante"><i class="fas fa-utensils me-1"></i>Restaurantes</button>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-sm btn-outline-custom filter-map" data-type="servico"><i class="fas fa-plus-circle me-1"></i>Serviços</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CALENDÁRIO DE EVENTOS ===== -->
+    <section class="container py-5" id="eventos">
+        <div class="text-center mb-4">
+            <h2 class="section-title">Calendário de Eventos</h2>
+            <p class="section-subtitle">Festivais, feiras e celebrações em Malanje</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4 animate-on-scroll">
+                <div class="event-card">
+                    <div class="event-date"><i class="far fa-calendar-alt me-2"></i>10-15 Jun 2025</div>
+                    <h5>Festival da Cultura Lunda</h5>
+                    <p>Celebração das tradições do povo Lunda com danças, música e gastronomia típica.</p>
+                    <div class="countdown" data-event="2025-06-10">Faltam <span class="dias-restantes"></span> dias</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 animate-on-scroll">
+                <div class="event-card">
+                    <div class="event-date"><i class="far fa-calendar-alt me-2"></i>25-27 Jul 2025</div>
+                    <h5>Feira Agropecuária de Malanje</h5>
+                    <p>Exposição de produtos agrícolas e pecuários, com negócios e troca de experiências.</p>
+                    <div class="countdown" data-event="2025-07-25">Faltam <span class="dias-restantes"></span> dias</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 animate-on-scroll">
+                <div class="event-card">
+                    <div class="event-date"><i class="far fa-calendar-alt me-2"></i>1-3 Set 2025</div>
+                    <h5>Festa da Nossa Senhora da Assunção</h5>
+                    <p>Tradição religiosa com procissões, música e celebrações comunitárias.</p>
+                    <div class="countdown" data-event="2025-09-01">Faltam <span class="dias-restantes"></span> dias</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 animate-on-scroll">
+                <div class="event-card">
+                    <div class="event-date"><i class="far fa-calendar-alt me-2"></i>15 Out 2025</div>
+                    <h5>Festival de Música e Dança</h5>
+                    <p>Apresentação de grupos musicais e danças tradicionais de toda a província.</p>
+                    <div class="countdown" data-event="2025-10-15">Faltam <span class="dias-restantes"></span> dias</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 animate-on-scroll">
+                <div class="event-card">
+                    <div class="event-date"><i class="far fa-calendar-alt me-2"></i>20 Nov 2025</div>
+                    <h5>Exposição de Artesanato</h5>
+                    <p>Mostra de artesanato local, com peças em madeira, cerâmica e tecelagem.</p>
+                    <div class="countdown" data-event="2025-11-20">Faltam <span class="dias-restantes"></span> dias</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 animate-on-scroll">
+                <div class="event-card">
+                    <div class="event-date"><i class="far fa-calendar-alt me-2"></i>15 Dez 2025</div>
+                    <h5>Natal em Malanje</h5>
+                    <p>Celebrações de fim de ano com música, gastronomia e atividades culturais.</p>
+                    <div class="countdown" data-event="2025-12-15">Faltam <span class="dias-restantes"></span> dias</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PARCEIROS DE VIAGEM ===== -->
+    <section class="container py-5" id="parceiros">
+        <div class="text-center mb-4">
+            <h2 class="section-title">Parceiros de Viagem</h2>
+            <p class="section-subtitle">Agências e serviços recomendados para a sua viagem</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4 col-lg-3">
+                <div class="partner-card animate-on-scroll">
+                    <div class="partner-logo"><i class="fas fa-plane"></i></div>
+                    <h6>TAAG Angola</h6>
+                    <p class="small text-muted">Voos para Malanje</p>
+                    <a href="#" class="btn btn-primary-custom btn-sm" onclick="showToast('🔗 A ser redirecionado para TAAG','success')">Visitar</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="partner-card animate-on-scroll">
+                    <div class="partner-logo"><i class="fas fa-hotel"></i></div>
+                    <h6>Hotel Malanje Palace</h6>
+                    <p class="small text-muted">Hospedagem de luxo</p>
+                    <a href="#" class="btn btn-primary-custom btn-sm" onclick="showToast('🔗 A ser redirecionado para o hotel','success')">Visitar</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="partner-card animate-on-scroll">
+                    <div class="partner-logo"><i class="fas fa-utensils"></i></div>
+                    <h6>Restaurante Típico</h6>
+                    <p class="small text-muted">Culinária angolana</p>
+                    <a href="#" class="btn btn-primary-custom btn-sm" onclick="showToast('🔗 A ser redirecionado para o restaurante','success')">Visitar</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="partner-card animate-on-scroll">
+                    <div class="partner-logo"><i class="fas fa-car"></i></div>
+                    <h6>Rent a Car Malanje</h6>
+                    <p class="small text-muted">Aluguer de viaturas</p>
+                    <a href="#" class="btn btn-primary-custom btn-sm" onclick="showToast('🔗 A ser redirecionado para Rent a Car','success')">Visitar</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="partner-card animate-on-scroll">
+                    <div class="partner-logo"><i class="fas fa-mountain"></i></div>
+                    <h6>Eco Turismo Angola</h6>
+                    <p class="small text-muted">Guias e excursões</p>
+                    <a href="#" class="btn btn-primary-custom btn-sm" onclick="showToast('🔗 A ser redirecionado para Eco Turismo','success')">Visitar</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="partner-card animate-on-scroll">
+                    <div class="partner-logo"><i class="fas fa-bus"></i></div>
+                    <h6>Transportes Interprovinciais</h6>
+                    <p class="small text-muted">Viagens terrestres</p>
+                    <a href="#" class="btn btn-primary-custom btn-sm" onclick="showToast('🔗 A ser redirecionado para a transportadora','success')">Visitar</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== INFORMAÇÕES ÚTEIS ===== -->
+    <section class="container py-5" id="info-uteis">
+        <div class="text-center mb-4">
+            <h2 class="section-title">Informações Úteis ao Turista</h2>
+            <p class="section-subtitle">Tudo o que precisa de saber antes de viajar</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="info-grid">
+                    <div class="info-item"><i class="fas fa-cloud-sun"></i><div><strong>Clima</strong><br><span id="climaInfo">Tropical húmido, 22°C - 30°C</span></div></div>
+                    <div class="info-item"><i class="fas fa-money-bill-wave"></i><div><strong>Moeda</strong><br>Kwanza (AOA)</div></div>
+                    <div class="info-item"><i class="fas fa-language"></i><div><strong>Idiomas</strong><br>Português, Umbundu, Kimbundu</div></div>
+                    <div class="info-item"><i class="fas fa-clock"></i><div><strong>Horário</strong><br>UTC+1 (Horário de Angola)</div></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-grid">
+                    <div class="info-item"><i class="fas fa-phone-alt"></i><div><strong>Números de Emergência</strong><br>Polícia: 113 | Bombeiros: 115 | Ambulância: 112</div></div>
+                    <div class="info-item"><i class="fas fa-hospital"></i><div><strong>Hospitais</strong><br>Hospital Geral de Malanje, Clínica Privada</div></div>
+                    <div class="info-item"><i class="fas fa-credit-card"></i><div><strong>Pagamentos</strong><br>Multicaixa, cartões internacionais</div></div>
+                    <div class="info-item"><i class="fas fa-wifi"></i><div><strong>Internet</strong><br>4G/5G disponível nas áreas urbanas</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== COMO CHEGAR A MALANJE ===== -->
+    <section class="container py-5" id="como-chegar">
+        <div class="text-center mb-4">
+            <h2 class="section-title">Como Chegar a Malanje</h2>
+            <p class="section-subtitle">Opções de transporte para explorar a província</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-plane"></i></div>
+                    <h5>Aéreo</h5>
+                    <p>Aeroporto de Malanje (MEG) com voos regulares da TAAG e outras companhias.</p>
+                    <small class="text-muted">~1h30 de Luanda</small>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-train"></i></div>
+                    <h5>Ferroviário</h5>
+                    <p>Comboio do Caminho de Ferro de Luanda (CFL) conecta Luanda a Malanje.</p>
+                    <small class="text-muted">~6h de viagem</small>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-bus"></i></div>
+                    <h5>Rodoviário</h5>
+                    <p>Autocarros interprovinciais partem de Luanda diariamente.</p>
+                    <small class="text-muted">~5h de viagem</small>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <div class="icon-wrapper"><i class="fas fa-car"></i></div>
+                    <h5>Veículo Próprio</h5>
+                    <p>Estrada EN-230 em bom estado, com paisagens deslumbrantes.</p>
+                    <small class="text-muted">~4h30 de Luanda</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== NEWSLETTER ===== -->
+    <section class="container py-4">
+        <div class="card p-4 text-center" style="background:linear-gradient(135deg,var(--primary-color),#0d5e2a);color:white;border-radius:24px;">
+            <h2>Receba Ofertas Exclusivas</h2>
+            <p>Inscreva-se para receber novidades e promoções sobre turismo em Malanje</p>
+            <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+                <input type="email" id="newsletterEmail" class="form-control w-auto" style="min-width:250px;border-radius:50px;padding:12px 20px;" placeholder="Seu melhor e-mail">
+                <button class="btn btn-light" id="btnSubscribe" style="border-radius:50px;padding:12px 30px;font-weight:600;">Assinar <i class="fas fa-envelope-open-text ms-2"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5><i class="fas fa-map-marked-alt me-2"></i>Descubra Malanje</h5>
+                    <p>Plataforma digital de promoção turística da província de Malanje, Angola. Conectamos viajantes a experiências autênticas.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5>Links Rápidos</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#destinos">Destinos</a></li>
+                        <li><a href="#planner">Planeador</a></li>
+                        <li><a href="#mapa">Mapa Turístico</a></li>
+                        <li><a href="#eventos">Eventos</a></li>
+                        <li><a href="#parceiros">Parceiros</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5>Contacto</h5>
+                    <p><i class="fas fa-map-marker-alt me-2"></i>Bairro Ritondo, Malanje, Angola</p>
+                    <p><i class="fas fa-phone me-2"></i>+244 921 151 685</p>
+                    <p><i class="fas fa-envelope me-2"></i>antoniodiogo958@gmail.com</p>
+                    <div class="d-flex gap-3 mt-2">
+                        <a href="#" style="color:white;font-size:1.4rem;"><i class="fab fa-facebook"></i></a>
+                        <a href="#" style="color:white;font-size:1.4rem;"><i class="fab fa-instagram"></i></a>
+                        <a href="#" style="color:white;font-size:1.4rem;"><i class="fab fa-youtube"></i></a>
+                        <a href="#" style="color:white;font-size:1.4rem;"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr style="border-color:#444;">
+            <div class="text-center small">&copy; 2025 Descubra Malanje - O Coração Turístico de Angola. Todos os direitos reservados.</div>
+        </div>
+    </footer>
+
+    <!-- ===== FAB CHATBOT INVITED ===== -->
+    <button class="fab" data-bs-toggle="modal" data-bs-target="#chatModal" title="Falar com INVITED">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <!-- ===== MODAL CHATBOT INVITED ===== -->
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background:linear-gradient(135deg,var(--primary-color),#0d5e2a);color:white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-robot me-2"></i>INVITED
+                        <span class="small" style="opacity:0.8;">— Assistente Turístico de Malanje</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <div id="chatMessagesContainer" class="chat-messages"></div>
+                    <div id="quickReplies" class="quick-replies"></div>
+                    <div class="chat-input-group d-flex gap-2">
+                        <input type="text" id="chatInput" class="form-control" placeholder="Pergunte sobre Malanje...">
+                        <button id="sendChatBtn" class="btn btn-primary-custom"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DETALHES DESTINO ===== -->
+    <div class="modal fade" id="destinoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="destinoModalTitle">Detalhes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="destinoModalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast-custom ${type}`;
+            toast.style.cssText = `
+                background: ${type === 'success' ? '#e8f5e9' : '#ffebee'};
+                padding: 12px 20px;
+                border-radius: 12px;
+                margin-bottom: 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                border-left: 5px solid ${type === 'success' ? '#4caf50' : '#f44336'};
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideInLeft 0.3s ease;
+                max-width: 400px;
+            `;
+            toast.innerHTML = `<span style="font-size:1.2rem;">${type === 'success' ? '✅' : '❌'}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // ============================================================
+        // IDIOMA E TEMA
+        // ============================================================
+        let currentLanguage = 'pt';
+
+        // Tema
+        const themeSwitch = document.getElementById('themeSwitch');
+        const applyTheme = (theme) => {
+            document.body.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('themePreference', theme);
+            themeSwitch.checked = (theme === 'dark');
+        };
+        applyTheme(localStorage.getItem('themePreference') || 'light');
+        themeSwitch.addEventListener('change', () => applyTheme(themeSwitch.checked ? 'dark' : 'light'));
+
+        // Idioma
+        document.getElementById('langBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('langDropdown').classList.toggle('show');
+        });
+        document.querySelectorAll('.lang-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                const lang = opt.dataset.lang;
+                currentLanguage = lang;
+                document.getElementById('currentLang').innerText = lang.toUpperCase();
+                document.getElementById('langDropdown').classList.remove('show');
+                localStorage.setItem('languagePreference', lang);
+                updateLanguage(lang);
+            });
+        });
+        document.addEventListener('click', () => document.getElementById('langDropdown').classList.remove('show'));
+
+        // Traduções simplificadas
+        const translations = {
+            pt: {
+                heroTitle: 'Descubra Malanje – Um Tesouro Turístico de Angola',
+                heroSub: 'Explore paisagens naturais, património histórico, cultura e experiências inesquecíveis.',
+            },
+            en: {
+                heroTitle: 'Discover Malanje – A Tourist Treasure of Angola',
+                heroSub: 'Explore natural landscapes, historical heritage, culture and unforgettable experiences.',
+            },
+            fr: {
+                heroTitle: 'Découvrez Malanje – Un Trésor Touristique d\'Angola',
+                heroSub: 'Explorez des paysages naturels, un patrimoine historique, une culture et des expériences inoubliables.',
+            }
+        };
+
+        function updateLanguage(lang) {
+            const t = translations[lang] || translations.pt;
+            document.querySelector('.hero-title').textContent = t.heroTitle;
+            document.querySelector('.hero-subtitle').textContent = t.heroSub;
+            // Mais traduções podem ser adicionadas conforme necessário
+        }
+
+        // Inicializar idioma
+        const savedLang = localStorage.getItem('languagePreference') || 'pt';
+        currentLanguage = savedLang;
+        document.getElementById('currentLang').innerText = savedLang.toUpperCase();
+        updateLanguage(savedLang);
+
+        // ============================================================
+        // SLIDESHOW
+        // ============================================================
+        let currentSlide = 0;
+        const slides = document.getElementsByClassName("mySlides");
+        function showSlide(n) {
+            for (let i = 0; i < slides.length; i++) slides[i].classList.remove('active');
+            if (n >= slides.length) currentSlide = 0;
+            if (n < 0) currentSlide = slides.length - 1;
+            slides[currentSlide].classList.add('active');
+        }
+        function nextSlide() { currentSlide++; showSlide(currentSlide); }
+        setInterval(nextSlide, 5000);
+
+        // ============================================================
+        // ANIMAÇÃO ON SCROLL
+        // ============================================================
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+        // ============================================================
+        // CONTADOR DE VISITANTES (SIMULADO)
+        // ============================================================
+        let visitorCount = 15234;
+        setInterval(() => {
+            visitorCount += Math.floor(Math.random() * 3) + 1;
+            document.querySelectorAll('.visitor-count').forEach(el => el.textContent = visitorCount.toLocaleString());
+        }, 3000);
+
+        // ============================================================
+        // PLANEADOR INTELIGENTE
+        // ============================================================
+        document.getElementById('btnGerarRoteiro').addEventListener('click', function() {
+            const dias = document.getElementById('dias').value;
+            const tipo = document.getElementById('tipoTurismo').value;
+            const faixa = document.getElementById('faixaEtaria').value;
+            const orcamento = document.getElementById('orcamento').value;
+            const transporte = document.getElementById('transporte').value;
+            const preferencias = document.getElementById('preferencias').value;
+
+            const atracoes = {
+                'natureza': ['Quedas de Kalandula', 'Lagoa do Carumbo', 'Cascata de Musseleje'],
+                'historico': ['Pedras Negras de Pungo Andongo', 'Palácio do Rei Mwatiânvua'],
+                'cultural': ['Museu de Malanje', 'Feira de Artesanato', 'Aldeia Tradicional'],
+                'aventura': ['Trilha da Serra', 'Rapel nas Quedas', 'Canoagem na Lagoa'],
+                'todos': ['Quedas de Kalandula', 'Pedras Negras', 'Lagoa do Carumbo', 'Palácio do Rei', 'Cascata de Musseleje', 'Reserva de Milando']
+            };
+
+            const recomendados = atracoes[preferencias] || atracoes[tipo] || atracoes['todos'];
+            const selecionados = recomendados.slice(0, Math.min(dias * 2, recomendados.length));
+
+            let html = `<p><strong>🗺️ Roteiro de ${dias} dias para Malanje</strong></p>`;
+            html += `<p><i class="fas fa-tag me-2"></i>Tipo: ${tipo} | Orçamento: ${orcamento} | Transporte: ${transporte}</p>`;
+            html += `<ul class="list-unstyled">`;
+            selecionados.forEach((atracao, index) => {
+                html += `<li class="py-1"><i class="fas fa-check-circle text-success me-2"></i><strong>Dia ${Math.floor(index / 2) + 1}</strong> - ${atracao}</li>`;
+            });
+            html += `</ul>`;
+            html += `<p><i class="fas fa-info-circle me-2"></i>Custo estimado: ${orcamento === 'baixo' ? '10.000' : orcamento === 'medio' ? '25.000' : '50.000'} AOA</p>`;
+            html += `<p><i class="fas fa-route me-2"></i>Distância total: ~${Math.floor(selecionados.length * 15)} km</p>`;
+
+            document.getElementById('roteiroConteudo').innerHTML = html;
+            document.getElementById('resultadoRoteiro').style.display = 'block';
+            document.getElementById('resultadoRoteiro').scrollIntoView({ behavior: 'smooth' });
+            showToast('✅ Roteiro gerado com sucesso!', 'success');
+        });
+
+        // ============================================================
+        // MAPA INTERATIVO (Leaflet)
+        // ============================================================
+        let map;
+        let markersLayer;
+
+        function initMap() {
+            map = L.map('map').setView([-9.536, 16.347], 8);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            markersLayer = L.layerGroup().addTo(map);
+
+            // Dados dos pontos turísticos
+            const pontos = [
+                { lat: -9.440, lng: 15.840, name: 'Quedas de Kalandula', type: 'turismo', icon: '🌊' },
+                { lat: -9.480, lng: 15.920, name: 'Pedras Negras de Pungo Andongo', type: 'turismo', icon: '🪨' },
+                { lat: -9.560, lng: 16.120, name: 'Lagoa do Carumbo', type: 'turismo', icon: '🏞️' },
+                { lat: -9.520, lng: 16.350, name: 'Reserva de Milando', type: 'turismo', icon: '🌿' },
+                { lat: -9.540, lng: 16.280, name: 'Cascata de Musseleje', type: 'turismo', icon: '💧' },
+                { lat: -9.535, lng: 16.340, name: 'Palácio do Rei Mwatiânvua', type: 'turismo', icon: '🏛️' },
+                { lat: -9.550, lng: 16.380, name: 'Hotel Malanje Palace', type: 'hotel', icon: '🏨' },
+                { lat: -9.560, lng: 16.370, name: 'Restaurante Típico', type: 'restaurante', icon: '🍽️' },
+                { lat: -9.545, lng: 16.360, name: 'Hospital Geral', type: 'servico', icon: '🏥' },
+                { lat: -9.535, lng: 16.345, name: 'Polícia', type: 'servico', icon: '👮' }
+            ];
+
+            pontos.forEach(p => {
+                const marker = L.marker([p.lat, p.lng])
+                    .bindPopup(`<strong>${p.icon} ${p.name}</strong><br><small>Tipo: ${p.type}</small>`)
+                    .addTo(markersLayer);
+                marker._type = p.type;
+            });
+
+            // Filtros do mapa
+            document.querySelectorAll('.filter-map').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    markersLayer.clearLayers();
+                    pontos.forEach(p => {
+                        if (type === 'all' || p.type === type) {
+                            const marker = L.marker([p.lat, p.lng])
+                                .bindPopup(`<strong>${p.icon} ${p.name}</strong><br><small>Tipo: ${p.type}</small>`)
+                                .addTo(markersLayer);
+                        }
+                    });
+                });
+            });
+        }
+
+        // Inicializar mapa quando a secção estiver visível
+        const mapObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !map) {
+                    initMap();
+                }
+            });
+        }, { threshold: 0.1 });
+        mapObserver.observe(document.getElementById('map'));
+
+        // ============================================================
+        // CALENDÁRIO DE EVENTOS - CONTAGEM REGRESSIVA
+        // ============================================================
+        document.querySelectorAll('.countdown').forEach(el => {
+            const eventDate = new Date(el.dataset.event);
+            const diasSpan = el.querySelector('.dias-restantes');
+            function updateCountdown() {
+                const now = new Date();
+                const diff = Math.ceil((eventDate - now) / (1000 * 60 * 60 * 24));
+                diasSpan.textContent = diff > 0 ? diff : 0;
+            }
+            updateCountdown();
+            setInterval(updateCountdown, 86400000); // Atualiza diariamente
+        });
+
+        // ============================================================
+        // BOTÃO "VER DETALHES" DOS DESTINOS
+        // ============================================================
+        const detalhesData = {
+            'kalandula': {
+                titulo: 'Quedas de Kalandula',
+                galeria: ['images/quedas.png'],
+                historia: 'As Quedas de Kalandula são uma das maiores cachoeiras da África em volume de água, com 105 metros de altura e 400 metros de largura. Localizadas no rio Lucala, são um dos principais cartões-postais de Angola.',
+                curiosidades: '• Formam-se no rio Lucala, afluente do rio Kwanza.\n• São conhecidas como "Cachoeiras de Duque de Bragança" no período colonial.\n• São uma das maiores atrações turísticas do país.'
+            },
+            'pungo': {
+                titulo: 'Pedras Negras de Pungo Andongo',
+                galeria: ['images/pungo-an-dongo.png'],
+                historia: 'As Pedras Negras de Pungo Andongo são formações rochosas de origem vulcânica que se destacam na paisagem plana da região. Guardam lendas sobre a rainha Nzinga e são um símbolo da resistência angolana.',
+                curiosidades: '• Diz a lenda que a rainha Nzinga teria usado as pedras como fortaleza.\n• As pedras são de origem vulcânica com mais de 100 milhões de anos.\n• Oferecem uma vista panorâmica impressionante.'
+            },
+            'carumbo': {
+                titulo: 'Lagoa do Carumbo',
+                galeria: ['https://media-cdn.tripadvisor.com/media/photo-s/0a/6c/8a/3b/lagoa-do-carumbo.jpg'],
+                historia: 'A Lagoa do Carumbo é um dos mais belos cartões-postais da província de Malanje, com águas cristalinas rodeadas por vegetação exuberante e uma rica biodiversidade.',
+                curiosidades: '• É um destino popular para piqueniques e passeios de barco.\n• A região é habitat de diversas espécies de aves e peixes.\n• A melhor época para visita é durante a estação seca (Maio a Setembro).'
+            },
+            'milando': {
+                titulo: 'Reserva Natural de Milando',
+                galeria: ['https://media-cdn.tripadvisor.com/media/photo-s/11/7a/3d/5c/reserva-natural-do-milando.jpg'],
+                historia: 'A Reserva Natural de Milando é uma área de conservação que protege a biodiversidade da região, com espécies como a palanca-negra-gigante, antílopes e diversas aves.',
+                curiosidades: '• É possível fazer safaris fotográficos na reserva.\n• A palanca-negra-gigante é uma espécie endémica de Angola.\n• Guias locais oferecem visitas interpretativas.'
+            },
+            'palacio': {
+                titulo: 'Palácio do Rei Mwatiânvua',
+                galeria: ['https://media-cdn.tripadvisor.com/media/photo-s/1a/3b/5c/7d/palacio-do-rei-mwatianvua.jpg'],
+                historia: 'O Palácio do Rei Mwatiânvua é um importante património histórico da dinastia Lunda, representando a resistência e a cultura do povo Lunda na região.',
+                curiosidades: '• O palácio foi construído no século XVIII.\n• É um centro cultural que preserva tradições.\n• Os visitantes podem conhecer a história da dinastia.'
+            },
+            'musseleje': {
+                titulo: 'Cascata de Musseleje',
+                galeria: ['images/musseje.png'],
+                historia: 'A Cascata de Musseleje é uma queda de água cristalina rodeada por vegetação luxuriante, proporcionando um ambiente de paz e contemplação.',
+                curiosidades: '• É um destino perfeito para banhos e relaxamento.\n• A cascata é formada pelo rio Musseleje.\n• A região é ideal para caminhadas ecoturísticas.'
+            }
+        };
+
+        document.querySelectorAll('.btn-detalhes').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const key = this.dataset.destino;
+                const data = detalhesData[key];
+                if (!data) return;
+
+                let galeriaHtml = data.galeria.map(img =>
+                    `<img src="${img}" class="img-fluid rounded" style="max-height:250px;object-fit:cover;margin-bottom:10px;">`
+                ).join('');
+
+                document.getElementById('destinoModalTitle').textContent = data.titulo;
+                document.getElementById('destinoModalBody').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">${galeriaHtml}</div>
+                        <div class="col-md-6">
+                            <h5>📖 História</h5>
+                            <p>${data.historia}</p>
+                            <h5>✨ Curiosidades</h5>
+                            <p style="white-space:pre-line;">${data.curiosidades}</p>
+                            <p><i class="fas fa-map-marker-alt me-2"></i>Localização: <a href="#" onclick="showToast('📍 A abrir localização no mapa','success')">Ver no mapa</a></p>
+                        </div>
+                    </div>
+                `;
+                new bootstrap.Modal(document.getElementById('destinoModal')).show();
+            });
+        });
+
+        // ============================================================
+        // BOTÃO ADICIONAR AO ROTEIRO
+        // ============================================================
+        document.querySelectorAll('.btn-add-rota').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const nomeDestino = this.closest('.card-body').querySelector('.card-title').textContent;
+                showToast(`✅ "${nomeDestino}" adicionado ao seu roteiro!`, 'success');
+            });
+        });
+
+        // ============================================================
+        // NEWSLETTER
+        // ============================================================
+        document.getElementById('btnSubscribe').addEventListener('click', function() {
+            const email = document.getElementById('newsletterEmail').value.trim();
+            if (!email || !email.includes('@')) {
+                showToast('Por favor, insira um e-mail válido.', 'error');
+                return;
+            }
+            showToast('✅ Inscrição confirmada! Você receberá novidades.', 'success');
+            document.getElementById('newsletterEmail').value = '';
+        });
+
+        // ============================================================
+        // CHATBOT INVITED
+        // ============================================================
+        const chatMessages = document.getElementById('chatMessagesContainer');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendChatBtn');
+        const quickReplies = document.getElementById('quickReplies');
+
+        // Respostas do chatbot INVITED
+        const botResponses = [
+            { keywords: ['olá', 'oi', 'bom dia', 'boa tarde', 'boa noite', 'hello', 'hi'],
+                response: 'Olá! 👋 Sou o INVITED, o seu assistente turístico de Malanje. Como posso ajudá-lo a explorar esta maravilhosa província?' },
+            { keywords: ['o que visitar', 'atrações', 'pontos turísticos', 'o que fazer'],
+                response: '🔍 Malanje tem muitas atrações incríveis! Recomendo começar pelas <strong>Quedas de Kalandula</strong>, depois visitar as <strong>Pedras Negras de Pungo Andongo</strong>, a <strong>Lagoa do Carumbo</strong>, a <strong>Cascata de Musseleje</strong> e o <strong>Palácio do Rei Mwatiânvua</strong>. Há também a Reserva Natural de Milando para os amantes da natureza!' },
+            { keywords: ['onde ficar', 'hotel', 'hospedagem', 'pousada', 'acomodação'],
+                response: '🏨 Em Malanje, há várias opções de hospedagem: <strong>Hotel Malanje Palace</strong> (luxo), <strong>Pousada do Turista</strong> (conforto), <strong>Hotel Central</strong> (localização central) e <strong>Albergue do Viajante</strong> (económico). Recomendo verificar o site de parceiros para promoções!' },
+            { keywords: ['onde comer', 'restaurante', 'gastronomia', 'comida'],
+                response: '🍽️ A gastronomia de Malanje é fantástica! Não deixe de provar o <strong>funge</strong>, a <strong>moamba de ginguba</strong>, o <strong>peixe grelhado</strong> e os pratos típicos da região. Os melhores restaurantes são: <strong>Restaurante Típico</strong>, <strong>Sabores de Angola</strong> e <strong>Kalandula Grill</strong>.' },
+            { keywords: ['como chegar', 'transporte', 'viagem', 'aeroporto'],
+                response: '✈️ Para chegar a Malanje, você pode: <br>- <strong>Aéreo:</strong> Voos da TAAG partem de Luanda (1h30).<br>- <strong>Ferroviário:</strong> Comboio do CFL (6h).<br>- <strong>Rodoviário:</strong> Autocarros interprovinciais (5h).<br>- <strong>Carro próprio:</strong> Pela EN-230 (4h30).' },
+            { keywords: ['melhor época', 'clima', 'chuva', 'tempo'],
+                response: '🌤️ A melhor época para visitar Malanje é durante a <strong>estação seca</strong>, de Maio a Setembro, quando o clima é mais ameno e há menos chuvas. As temperaturas variam entre 22°C e 30°C. A estação chuvosa vai de Outubro a Abril.' },
+            { keywords: ['eventos', 'festival', 'feira', 'celebração'],
+                response: '🎉 Malanje tem uma agenda cultural vibrante! Destacam-se o <strong>Festival da Cultura Lunda</strong> (Junho), a <strong>Feira Agropecuária</strong> (Julho), a <strong>Festa da Nossa Senhora da Assunção</strong> (Setembro) e o <strong>Festival de Música e Dança</strong> (Outubro). Consulte o calendário de eventos para mais detalhes!' },
+            { keywords: ['preços', 'custo', 'quanto custa', 'orçamento'],
+                response: '💰 Os custos em Malanje são acessíveis. Uma viagem de 3 dias pode custar entre <strong>10.000 AOA</strong> (orçamento baixo) e <strong>50.000 AOA</strong> (orçamento alto), dependendo do tipo de hospedagem, alimentação e atividades.' },
+            { keywords: ['segurança', 'perigoso', 'dicas', 'cuidado'],
+                response: '🛡️ Malanje é uma província acolhedora e segura para turistas. Recomenda-se: <br>- Evitar andar sozinho à noite em áreas pouco movimentadas.<br>- Guardar documentos e dinheiro em local seguro.<br>- Utilizar transporte de confiança.<br>- Em caso de emergência, ligue 113 (Polícia) ou 115 (Bombeiros).' },
+            { keywords: ['obrigado', 'gratidão', 'valeu', 'thanks'],
+                response: '😊 De nada! Foi um prazer ajudar. Se precisar de mais alguma informação sobre Malanje, estou aqui. Boa viagem!' }
+        ];
+
+        function getBotReply(userMessage) {
+            const lowerMsg = userMessage.toLowerCase();
+            for (const item of botResponses) {
+                if (item.keywords.some(keyword => lowerMsg.includes(keyword))) {
+                    return item.response;
+                }
+            }
+            return '📌 Obrigado pela sua pergunta! Sou o INVITED e estou aqui para ajudar. Pode perguntar sobre o que visitar, onde ficar, como chegar, eventos, clima e muito mais. Que informações específicas sobre Malanje você gostaria de saber?';
+        }
+
+        function addMessage(sender, text, isHtml = false) {
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerHTML = sender === 'bot' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            if (isHtml) {
+                bubble.innerHTML = text;
+            } else {
+                bubble.textContent = text;
+            }
+
+            div.appendChild(avatar);
+            div.appendChild(bubble);
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendUserMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            addMessage('user', text);
+            chatInput.value = '';
+
+            // Resposta do bot com delay
+            setTimeout(() => {
+                const reply = getBotReply(text);
+                addMessage('bot', reply, true);
+                showQuickReplies();
+            }, 500);
+        }
+
+        function showQuickReplies() {
+            quickReplies.innerHTML = '';
+            const suggestions = [
+                'O que visitar?',
+                'Onde ficar?',
+                'Como chegar?',
+                'Eventos',
+                'Clima',
+                'Gastronomia'
+            ];
+            suggestions.forEach(suggestion => {
+                const btn = document.createElement('button');
+                btn.className = 'quick-reply-btn';
+                btn.textContent = suggestion;
+                btn.addEventListener('click', function() {
+                    chatInput.value = this.textContent;
+                    sendUserMessage();
+                });
+                quickReplies.appendChild(btn);
+            });
+        }
+
+        function resetChat() {
+            chatMessages.innerHTML = '';
+            const welcome = '👋 Olá! Sou o <strong>INVITED</strong>, o seu assistente turístico de Malanje. Como posso ajudá-lo a descobrir as maravilhas da província?';
+            addMessage('bot', welcome, true);
+            showQuickReplies();
+        }
+
+        sendBtn.addEventListener('click', sendUserMessage);
+        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendUserMessage(); });
+
+        // Inicializar chat quando o modal abrir
+        document.getElementById('chatModal').addEventListener('shown.bs.modal', () => {
+            if (chatMessages.children.length === 0) {
+                resetChat();
+            }
+        });
+
+        // ============================================================
+        // EXPORTAR ROTEIRO EM PDF (SIMULADO)
+        // ============================================================
+        document.getElementById('btnExportarPDF').addEventListener('click', function() {
+            showToast('📄 O seu roteiro está a ser preparado para download...', 'success');
+            setTimeout(() => {
+                showToast('✅ Roteiro exportado com sucesso!', 'success');
+            }, 1500);
+        });
+
+        // ============================================================
+        // PROCESSING OVERLAY (PARA AÇÕES DEMORADAS)
+        // ============================================================
+        // Simulação de processamento para demonstração
+        document.querySelectorAll('.btn-primary-custom').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (this.id === 'btnGerarRoteiro') return; // Já tem ação
+                // Pequena animação para botões que não têm ação definida
+                if (!this.closest('.hero-btn-group') && !this.closest('.partner-card') && !this.closest('.destino-card')) {
+                    // Não interfere com botões que já têm ações
+                }
+            });
+        });
+
+        // ============================================================
+        // LINK PARA "COMO CHEGAR" NO HERO
+        // ============================================================
+        document.querySelector('a[href="#como-chegar"]')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('como-chegar').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        console.log('🌍 Descubra Malanje - Plataforma Turística carregada com sucesso!');
+        console.log('🤖 Chatbot INVITED pronto para ajudar!');
+    </script>
+</body>
+</html>

@@ -1,0 +1,3584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos em Malanje</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* ============================================================
+                   ESTILO GERAL - GLASSMORPHISM
+                   ============================================================ */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-image: url('images/eventos-tur.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.40);
+            z-index: 0;
+            transition: all 0.3s ease;
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================================
+                   TEMA CLARO
+                   ============================================================ */
+        body.light-theme::before {
+            background: rgba(255, 255, 255, 0.88);
+        }
+
+        body.light-theme .page-title,
+        body.light-theme .page-title .badge,
+        body.light-theme .info-card .card-title,
+        body.light-theme .nav-tabs .nav-link,
+        body.light-theme .filter-section h6,
+        body.light-theme .activity-table th,
+        body.light-theme .activity-table td,
+        body.light-theme .modal-content,
+        body.light-theme .modal .form-label,
+        body.light-theme .tab-content,
+        body.light-theme .chart-container h6,
+        body.light-theme .evento-card .evento-nome,
+        body.light-theme .evento-card .evento-desc,
+        body.light-theme .resumo-item label,
+        body.light-theme .resumo-item span,
+        body.light-theme .hero-title,
+        body.light-theme .hero-subtitle,
+        body.light-theme .filtro-rapido-btn,
+        body.light-theme .evento-detalhe-info,
+        body.light-theme .calendario-dia {
+            color: #1a1a2e !important;
+        }
+
+        body.light-theme .nav-tabs .nav-link {
+            background: rgba(255, 255, 255, 0.5);
+            color: #1a1a2e !important;
+        }
+
+        body.light-theme .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.8);
+            color: #0d6efd !important;
+        }
+
+        body.light-theme .tab-content,
+        body.light-theme .info-card,
+        body.light-theme .filter-section,
+        body.light-theme .chart-container,
+        body.light-theme .activity-table,
+        body.light-theme .evento-card,
+        body.light-theme .map-container,
+        body.light-theme .modal-content,
+        body.light-theme .hero-section,
+        body.light-theme .calendario-grid {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(15px);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .filter-section .form-control,
+        body.light-theme .filter-section .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-theme .filter-section .form-control::placeholder {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-theme #currentDateTime {
+            background: rgba(255, 255, 255, 0.8);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .quick-actions .btn-outline-secondary {
+            background: rgba(108, 117, 125, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .quick-actions .btn-outline-dark {
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-theme .page-title .badge {
+            background: rgba(13, 110, 253, 0.15) !important;
+            color: #0d6efd !important;
+        }
+
+        body.light-theme .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .dashboard-btn {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+
+        body.light-theme .filtro-rapido-btn {
+            background: rgba(0, 0, 0, 0.05) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-theme .filtro-rapido-btn:hover {
+            background: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-theme .filtro-rapido-btn.active {
+            background: rgba(13, 110, 253, 0.15) !important;
+            border-color: #0d6efd !important;
+            color: #0d6efd !important;
+        }
+
+        body.light-theme .evento-card .badge-tipo {
+            background: rgba(0, 0, 0, 0.08) !important;
+            color: #1a1a2e !important;
+        }
+
+        body.light-theme .calendario-dia {
+            background: rgba(0, 0, 0, 0.03) !important;
+        }
+
+        body.light-theme .calendario-dia:hover {
+            background: rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .calendario-dia.com-eventos {
+            background: rgba(13, 110, 253, 0.12) !important;
+        }
+
+        /* ============================================================
+                   HERO SECTION
+                   ============================================================ */
+        .hero-section {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 35px 30px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=2070') center/cover no-repeat;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .hero-section>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+
+        .filtros-rapidos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .filtro-rapido-btn {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 5px 16px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filtro-rapido-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .filtro-rapido-btn.active {
+            background: rgba(13, 110, 253, 0.25);
+            border-color: rgba(13, 110, 253, 0.4);
+            color: #fff;
+        }
+
+        /* ============================================================
+                   EVENTO CARDS
+                   ============================================================ */
+        .evento-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .evento-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.20);
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .evento-card .evento-imagem {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .evento-card:hover .evento-imagem {
+            transform: scale(1.03);
+        }
+
+        .evento-card .evento-badges {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .evento-card .badge-destaque {
+            background: rgba(255, 193, 7, 0.85);
+            backdrop-filter: blur(5px);
+            color: #1a1a2e;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .evento-card .badge-tipo {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        .evento-card .badge-preco {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        .evento-card .badge-preco.gratuito {
+            background: rgba(40, 167, 69, 0.85);
+        }
+
+        .evento-card .evento-body {
+            padding: 14px 16px 16px;
+        }
+
+        .evento-card .evento-nome {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.05rem;
+            margin-bottom: 3px;
+        }
+
+        .evento-card .evento-desc {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.82rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .evento-card .evento-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .evento-card .evento-info .data {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .evento-card .evento-info .local {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .evento-card .evento-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .evento-card .evento-actions .btn {
+            font-size: 0.72rem;
+            padding: 3px 12px;
+            border-radius: 20px;
+        }
+
+        /* ============================================================
+                   MAPA MINIATURA
+                   ============================================================ */
+        .map-mini-container {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #mapMini {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .leaflet-control-zoom {
+            display: none !important;
+        }
+
+        /* ============================================================
+                   CALENDÁRIO
+                   ============================================================ */
+        .calendario-grid {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .calendario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .calendario-header .mes-ano {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .calendario-header .btn-nav {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .calendario-header .btn-nav:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .calendario-semana {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .calendario-semana .dia-semana {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.7rem;
+            padding: 4px 0;
+            font-weight: bold;
+        }
+
+        .calendario-dias {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendario-dia {
+            text-align: center;
+            padding: 6px 0;
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.03);
+            position: relative;
+            min-height: 36px;
+        }
+
+        .calendario-dia:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .calendario-dia.com-eventos {
+            background: rgba(13, 110, 253, 0.15);
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .calendario-dia.com-eventos::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #0d6efd;
+        }
+
+        .calendario-dia.hoje {
+            border: 2px solid rgba(13, 110, 253, 0.3);
+            font-weight: bold;
+        }
+
+        .calendario-dia.vazio {
+            background: transparent;
+            cursor: default;
+        }
+
+        .calendario-dia.vazio:hover {
+            background: transparent;
+        }
+
+        /* ============================================================
+                   NAVEGAÇÃO - TABS
+                   ============================================================ */
+        .nav-tabs .nav-link {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 17px;
+            color: #fff;
+            border: none;
+            padding: 12px 22px;
+            margin-right: 5px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(15px);
+            color: #fff;
+            border-bottom: 3px solid #0d6efd;
+            font-weight: bold;
+            box-shadow: 0 -2px 20px rgba(13, 110, 253, 0.25);
+        }
+
+        .tab-content {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(15px);
+            border-radius: 0 8px 8px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        /* ============================================================
+                   FILTROS
+                   ============================================================ */
+        .filter-section {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            transition: all 0.3s ease;
+        }
+
+        .filter-section h6 {
+            color: #fff;
+        }
+
+        .filter-section .form-control,
+        .filter-section .form-select {
+            font-family: 'Times New Roman', Times, serif;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff;
+        }
+
+        .filter-section .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .filter-section .form-control:focus,
+        .filter-section .form-select:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(13, 110, 253, 0.4);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.10);
+            color: #fff;
+        }
+
+        .filter-section .form-select option {
+            background: #2c3e50;
+            color: #fff;
+        }
+
+        /* ============================================================
+                   INFO CARD
+                   ============================================================ */
+        .info-card {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            transition: all 0.3s ease;
+        }
+
+        .info-card .card-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* ============================================================
+                   QUICK ACTIONS
+                   ============================================================ */
+        .quick-actions .btn {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 3px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        .quick-actions .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .quick-actions .btn-primary {
+            background: rgba(13, 110, 253, 0.5);
+        }
+        .quick-actions .btn-success {
+            background: rgba(25, 135, 84, 0.5);
+        }
+        .quick-actions .btn-info {
+            background: rgba(13, 202, 240, 0.5);
+        }
+        .quick-actions .btn-warning {
+            background: rgba(255, 193, 7, 0.5);
+        }
+        .quick-actions .btn-danger {
+            background: rgba(220, 53, 69, 0.5);
+        }
+        .quick-actions .btn-outline-secondary {
+            background: rgba(108, 117, 125, 0.20);
+            color: #fff;
+        }
+        .quick-actions .btn-outline-dark {
+            background: rgba(33, 37, 41, 0.20);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ============================================================
+                   HEADER
+                   ============================================================ */
+        .page-title {
+            font-family: 'Times New Roman', Times, serif;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.20);
+        }
+
+        .page-title .bi {
+            animation: bounce 2s infinite;
+        }
+
+        .page-title .badge {
+            background: rgba(13, 110, 253, 0.35);
+            backdrop-filter: blur(5px);
+        }
+
+        @keyframes bounce {
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-8px);
+            }
+            60% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: rotate(30deg);
+        }
+
+        .dashboard-btn {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .dashboard-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        #currentDateTime {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: rgba(13, 110, 253, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-primary:hover {
+            background: rgba(13, 110, 253, 0.7);
+        }
+
+        /* ============================================================
+                   MODAL DETALHES
+                   ============================================================ */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .modal .btn-close {
+            filter: invert(1);
+        }
+
+        .modal .form-label {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .modal-detalhe-imagem {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .modal-detalhe-galeria {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .modal-detalhe-galeria img {
+            width: 100%;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-detalhe-galeria img:hover {
+            transform: scale(1.05);
+        }
+
+        .evento-detalhe-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 20px;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .evento-detalhe-info .item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .evento-detalhe-info .label {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .evento-detalhe-info .value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .comentario-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+        }
+
+        .comentario-item .usuario {
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .comentario-item .texto {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .comentario-item .data {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.7rem;
+        }
+
+        /* ============================================================
+                   RESPONSIVIDADE
+                   ============================================================ */
+        @media (max-width: 768px) {
+            .tab-content {
+                padding: 15px;
+            }
+            .page-title {
+                font-size: 1.3rem;
+            }
+            .header-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .nav-tabs .nav-link {
+                font-size: 14px;
+                padding: 10px 14px;
+            }
+            .hero-title {
+                font-size: 1.5rem;
+            }
+            .hero-section {
+                padding: 20px 15px;
+            }
+            .evento-card .evento-imagem {
+                height: 140px;
+            }
+            .evento-detalhe-info {
+                grid-template-columns: 1fr;
+            }
+            .modal-detalhe-galeria {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .modal-detalhe-galeria img {
+                height: 55px;
+            }
+            .filtros-rapidos {
+                gap: 4px;
+            }
+            .filtro-rapido-btn {
+                font-size: 0.7rem;
+                padding: 3px 10px;
+            }
+            .map-mini-container {
+                height: 130px;
+            }
+            .calendario-dia {
+                font-size: 0.75rem;
+                padding: 4px 0;
+                min-height: 30px;
+            }
+        }
+
+        /* ============================================================
+                   ANIMAÇÕES
+                   ============================================================ */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Scroll personalizado */
+        .eventos-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .eventos-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .eventos-container::-webkit-scrollbar-thumb {
+            background: rgba(13, 110, 253, 0.3);
+            border-radius: 4px;
+        }
+
+        /* ============================================================
+                   DROPDOWN DE IDIOMA
+                   ============================================================ */
+        .language-dropdown {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 8px;
+            color: #fff;
+            padding: 6px 12px;
+            font-family: 'Times New Roman', Times, serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 130px;
+        }
+
+        .language-dropdown:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .language-dropdown option {
+            background: #2c3e50;
+            color: #fff;
+        }
+
+        body.light-theme .language-dropdown {
+            background: rgba(0, 0, 0, 0.08);
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-theme .language-dropdown option {
+            background: #fff;
+            color: #1a1a2e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+
+        <!-- ============================================================
+        CABEÇALHO
+        ============================================================ -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap header-actions">
+                    <h2 class="page-title">
+                        <i class="bi bi-calendar-event text-success"></i>
+                        <span id="tituloPagina">Eventos em Malanje</span>
+                        <span class="badge bg-success ms-2 pulse-icon">AGENDA</span>
+                    </h2>
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- DROPDOWN DE IDIOMA -->
+                        <select class="language-dropdown" id="languageDropdown">
+                            <option value="pt">🇵🇹 Português</option>
+                            <option value="en">🇬🇧 English</option>
+                            <option value="fr">🇫🇷 Français</option>
+                            <option value="es">🇪🇸 Español</option>
+                            <option value="it">🇮🇹 Italiano</option>
+                            <option value="de">🇩🇪 Deutsch</option>
+                            <option value="zh">🇨🇳 中文</option>
+                            <option value="ja">🇯🇵 日本語</option>
+                            <option value="ru">🇷🇺 Русский</option>
+                            <option value="ar">🇸🇦 العربية</option>
+                            <option value="hi">🇮🇳 हिन्दी</option>
+                            <option value="sw">🇰🇪 Kiswahili</option>
+                        </select>
+                        <a href="#" class="dashboard-btn" id="btnDashboard">
+                            <i class="bi bi-grid-3x3-gap-fill"></i> <span id="txtDashboard">Dashboard</span>
+                        </a>
+                        <button class="theme-toggle-btn" id="themeToggle">
+                            <i class="bi bi-moon-stars" id="themeIcon"></i>
+                        </button>
+                        <span class="badge bg-info text-dark" id="currentDateTime">
+                            <i class="bi bi-clock"></i>
+                            <span id="dateTimeDisplay">Carregando...</span>
+                        </span>
+                        <button class="btn btn-outline-primary" id="btnLembretes">
+                            <i class="bi bi-bell"></i> <span id="txtLembretes">Lembretes</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        HERO SECTION
+        ============================================================ -->
+        <div class="hero-section">
+            <div class="row">
+                <div class="col-md-8">
+                    <h1 class="hero-title" id="heroTitle">Eventos e Experiências em Malanje</h1>
+                    <p class="hero-subtitle" id="heroSubtitle">Não perca o que está a acontecer agora!</p>
+                    <div class="filtros-rapidos">
+                        <button class="filtro-rapido-btn active" data-filtro="todos" id="filtroTodos">📅 <span id="txtTodos">Todos</span></button>
+                        <button class="filtro-rapido-btn" data-filtro="hoje" id="filtroHoje">🔴 <span id="txtHoje">Hoje</span></button>
+                        <button class="filtro-rapido-btn" data-filtro="semana" id="filtroSemana">📆 <span id="txtSemana">Esta Semana</span></button>
+                        <button class="filtro-rapido-btn" data-filtro="mes" id="filtroMes">📅 <span id="txtMes">Este Mês</span></button>
+                        <button class="filtro-rapido-btn" data-filtro="futuros" id="filtroFuturos">⏳ <span id="txtFuturos">Futuros</span></button>
+                    </div>
+                </div>
+                <div class="col-md-4 d-none d-md-block">
+                    <div class="map-mini-container" id="mapMiniContainer">
+                        <div id="mapMini"></div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button class="btn btn-sm btn-outline-primary" id="btnVerMapaCompleto">
+                            <i class="bi bi-arrows-expand"></i> <span id="txtVerMapa">Ver no Mapa</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        FILTROS AVANÇADOS
+        ============================================================ -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-12 mb-2">
+                    <h6><i class="bi bi-funnel"></i> <span id="txtFiltrosAvancados">Filtros Avançados</span></h6>
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroTipo" class="form-select">
+                        <option value="todos"><span id="optTodosTipos">Todos os Tipos</span></option>
+                        <option value="cultural">🎭 <span id="optCultural">Festivais Culturais</span></option>
+                        <option value="musica">🎵 <span id="optMusica">Eventos Musicais</span></option>
+                        <option value="feira">🛍️ <span id="optFeira">Feiras de Artesanato</span></option>
+                        <option value="natureza">🌿 <span id="optNatureza">Atividades de Natureza</span></option>
+                        <option value="religioso">⛪ <span id="optReligioso">Festivais Religiosos</span></option>
+                        <option value="desporto">⚽ <span id="optDesporto">Desportos e Aventura</span></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroLocal" class="form-select">
+                        <option value="todos"><span id="optTodosLocais">Todos os Locais</span></option>
+                        <option value="malanje"><span id="optMalange">Malanje Cidade</span></option>
+                        <option value="kalandula"><span id="optKalandula">Kalandula</span></option>
+                        <option value="pungo"><span id="optPungo">Pungo Andongo</span></option>
+                        <option value="cangandala"><span id="optCangandala">Cangandala</span></option>
+                        <option value="kwanza"><span id="optKwanza">Rápidos do Kwanza</span></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroPrecoEvento" class="form-select">
+                        <option value="todos"><span id="optTodosPrecos">Todos os Preços</span></option>
+                        <option value="gratuito">🆓 <span id="optGratuito">Gratuito</span></option>
+                        <option value="pago">💰 <span id="optPago">Pago</span></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control" id="filtroDataEvento" placeholder="Data específica">
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-outline-primary btn-sm" id="btnAplicarFiltros">
+                            <i class="bi bi-check"></i> <span id="txtAplicarFiltros">Aplicar Filtros</span>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" id="btnLimparFiltros">
+                            <i class="bi bi-x"></i> <span id="txtLimparFiltros">Limpar Filtros</span>
+                        </button>
+                        <div class="ms-auto">
+                            <span style="color:rgba(255,255,255,0.4);font-size:0.85rem;" id="contadorEventos">0 eventos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        TABS - EVENTOS E CALENDÁRIO
+        ============================================================ -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="eventos-tab" data-bs-toggle="tab" data-bs-target="#eventos" type="button" role="tab">
+                    <i class="bi bi-list-ul"></i> <span id="tabTodosEventos">Todos os Eventos</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="destaques-tab" data-bs-toggle="tab" data-bs-target="#destaques" type="button" role="tab">
+                    <i class="bi bi-star"></i> <span id="tabDestaques">Destaques</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="calendario-tab" data-bs-toggle="tab" data-bs-target="#calendario" type="button" role="tab">
+                    <i class="bi bi-calendar3"></i> <span id="tabCalendario">Calendário</span>
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+
+            <!-- ============================================================
+            TODOS OS EVENTOS
+            ============================================================ -->
+            <div class="tab-pane fade show active" id="eventos" role="tabpanel">
+                <div class="row" id="gridEventos">
+                    <!-- Renderizado via JavaScript -->
+                </div>
+            </div>
+
+            <!-- ============================================================
+            DESTAQUES
+            ============================================================ -->
+            <div class="tab-pane fade" id="destaques" role="tabpanel">
+                <div class="row" id="gridDestaques">
+                    <!-- Renderizado via JavaScript -->
+                </div>
+            </div>
+
+            <!-- ============================================================
+            CALENDÁRIO
+            ============================================================ -->
+            <div class="tab-pane fade" id="calendario" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="calendario-grid">
+                            <div class="calendario-header">
+                                <button class="btn-nav" id="calAnterior"><i class="bi bi-chevron-left"></i></button>
+                                <span class="mes-ano" id="calMesAno">Janeiro 2026</span>
+                                <button class="btn-nav" id="calProximo"><i class="bi bi-chevron-right"></i></button>
+                            </div>
+                            <div class="calendario-semana" id="calSemana">
+                                <div class="dia-semana"><span id="semDom">Dom</span></div>
+                                <div class="dia-semana"><span id="semSeg">Seg</span></div>
+                                <div class="dia-semana"><span id="semTer">Ter</span></div>
+                                <div class="dia-semana"><span id="semQua">Qua</span></div>
+                                <div class="dia-semana"><span id="semQui">Qui</span></div>
+                                <div class="dia-semana"><span id="semSex">Sex</span></div>
+                                <div class="dia-semana"><span id="semSab">Sáb</span></div>
+                            </div>
+                            <div class="calendario-dias" id="calDias">
+                                <!-- Renderizado via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-info-circle"></i> <span id="tituloEventosDia">Eventos do Dia</span></h6>
+                            <div id="eventosDoDia">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.85rem;" id="msgCliqueDia">
+                                    Clique em um dia no calendário para ver os eventos.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <h6 class="card-title"><i class="bi bi-plus-circle"></i> <span id="tituloAdicionarEvento">Adicionar Evento</span></h6>
+                            <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;" id="msgSugerirEvento">
+                                Quer sugerir um evento? Entre em contato conosco!
+                            </p>
+                            <button class="btn btn-sm btn-outline-primary" id="btnSugerirEvento">
+                                <i class="bi bi-envelope"></i> <span id="txtSugerirEvento">Sugerir Evento</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /tab-content -->
+
+        <!-- ============================================================
+        AÇÕES RÁPIDAS
+        ============================================================ -->
+        <div class="quick-actions mt-4 d-flex flex-wrap gap-2">
+            <button class="btn btn-success" id="btnAdicionarRoteiro">
+                <i class="bi bi-calendar-plus"></i> <span id="txtAdicionarRoteiro">Adicionar ao Roteiro</span>
+            </button>
+            <button class="btn btn-info" id="btnMapaEventos">
+                <i class="bi bi-map"></i> <span id="txtVerMapaAcao">Ver no Mapa</span>
+            </button>
+            <button class="btn btn-warning" id="btnLembrete">
+                <i class="bi bi-bell"></i> <span id="txtDefinirLembrete">Definir Lembrete</span>
+            </button>
+            <button class="btn btn-outline-primary" id="btnAtualizar">
+                <i class="bi bi-arrow-repeat"></i> <span id="txtAtualizar">Atualizar</span>
+            </button>
+            <button class="btn btn-outline-dark" id="btnVoltar">
+                <i class="bi bi-arrow-left"></i> <span id="txtVoltar">Voltar</span>
+            </button>
+        </div>
+
+    </div><!-- /container-fluid -->
+
+    <!-- ============================================================
+    MODAL - DETALHES DO EVENTO (MODAL VERDADEIRO)
+    ============================================================ -->
+    <div class="modal fade" id="detalhesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detalhesTitulo"><i class="bi bi-calendar-event"></i> <span id="modalDetalhesTitulo">Evento</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalhesConteudo">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal"><span id="modalFechar">Fechar</span></button>
+                    <button type="button" class="btn btn-outline-primary" id="btnAdicionarRoteiroEvento">
+                        <i class="bi bi-plus-circle"></i> <span id="modalAdicionarRoteiro">Adicionar ao Roteiro</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-success" id="btnComprarBilhete">
+                        <i class="bi bi-ticket"></i> <span id="modalComprarBilhete">Comprar Bilhete</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL - LEMBRETE (MODAL VERDADEIRO)
+    ============================================================ -->
+    <div class="modal fade" id="lembreteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-bell"></i> <span id="modalLembreteTitulo">Definir Lembrete</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" id="modalLembreteEventoLabel">Evento</label>
+                        <select class="form-select" id="lembreteEvento">
+                            <option value="">Selecione um evento...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" id="modalLembreteQuandoLabel">Quando lembrar</label>
+                        <select class="form-select" id="lembreteTempo">
+                            <option value="1h"><span id="lemb1h">1 hora antes</span></option>
+                            <option value="3h"><span id="lemb3h">3 horas antes</span></option>
+                            <option value="6h"><span id="lemb6h">6 horas antes</span></option>
+                            <option value="12h"><span id="lemb12h">12 horas antes</span></option>
+                            <option value="1d"><span id="lemb1d">1 dia antes</span></option>
+                            <option value="3d"><span id="lemb3d">3 dias antes</span></option>
+                        </select>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="lembreteEmail">
+                        <label class="form-check-label" for="lembreteEmail" id="modalLembreteEmailLabel">Enviar por e-mail também</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><span id="modalLembreteCancelar">Cancelar</span></button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmarLembrete"><span id="modalLembreteConfirmar">Definir Lembrete</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL - SUGERIR EVENTO (MODAL VERDADEIRO)
+    ============================================================ -->
+    <div class="modal fade" id="sugerirModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-envelope"></i> <span id="modalSugerirTitulo">Sugerir Evento</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label" id="modalSugerirNomeLabel">Nome do Evento</label>
+                            <input type="text" class="form-control" id="sugerirNome" placeholder="Ex: Festival de Música">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="modalSugerirDataLabel">Data</label>
+                            <input type="date" class="form-control" id="sugerirData">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="modalSugerirLocalLabel">Local</label>
+                            <input type="text" class="form-control" id="sugerirLocal" placeholder="Ex: Quedas de Kalandula">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="modalSugerirDescLabel">Descrição</label>
+                            <textarea class="form-control" id="sugerirDesc" rows="3" placeholder="Descreva o evento..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="modalSugerirNomeUsuarioLabel">Seu Nome</label>
+                            <input type="text" class="form-control" id="sugerirNomeUsuario" placeholder="Seu nome">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="modalSugerirEmailLabel">E-mail para contato</label>
+                            <input type="email" class="form-control" id="sugerirEmail" placeholder="seu@email.com">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                        <span id="modalSugerirCancelar">Cancelar</span></button>
+                    <button type="button" class="btn btn-outline-success" id="btnEnviarSugestao"><span id="modalSugerirEnviar">Enviar Sugestão</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL - IDIOMA (MODAL VERDADEIRO)
+    ============================================================ -->
+    <div class="modal fade" id="idiomaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-translate"></i> <span id="modalIdiomaTitulo">Idioma</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group" id="listaIdiomas">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" id="modalIdiomaFechar">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js">
+    </script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script>
+        $(document).ready(function() {
+
+            // ============================================================
+            // BANCO DE DADOS - EVENTOS
+            // ============================================================
+
+            const eventos = [{
+                id: 1,
+                nome: 'Festival das Quedas de Kalandula 2026',
+                tipo: 'cultural',
+                local: 'kalandula',
+                lat: -9.0833,
+                lng: 16.1667,
+                descricao: 'O maior festival cultural da região, celebrando as belezas das Quedas de Kalandula com música, dança e artesanato.',
+                descricaoCompleta: 'O Festival das Quedas de Kalandula é o evento mais aguardado do ano em Malanje. Durante 4 dias, o Miradouro das Quedas se transforma em um palco de celebração da cultura angolana. O evento conta com apresentações de grupos musicais tradicionais, danças típicas, feira de artesanato, gastronomia local e atividades de ecoturismo. É uma oportunidade única de vivenciar a cultura e a natureza em harmonia.',
+                dataInicio: '2026-08-15',
+                dataFim: '2026-08-18',
+                hora: '09:00 - 18:00',
+                preco: 'Gratuito',
+                gratuito: true,
+                imagem: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=400&h=300&fit=crop'
+                ],
+                destaque: true,
+                imperdivel: true,
+                programacao: [
+                    '09:00 - Abertura com cerimônia tradicional',
+                    '10:00 - Apresentação de grupos folclóricos',
+                    '12:00 - Almoço com gastronomia local',
+                    '14:00 - Feira de artesanato e exposições',
+                    '16:00 - Show musical com artistas locais',
+                    '18:00 - Encerramento com fogo de artifício'
+                ],
+                artistas: ['Grupo Folclórico Kalandula', 'Banda Semba Angola', 'Cantora Maria Kituxi'],
+                comentarios: [
+                    { usuario: 'João Silva', texto: 'Evento incrível! As quedas ficam ainda mais bonitas com a festa.',
+                        data: '2025-08-20' },
+                    { usuario: 'Ana Pereira', texto: 'A melhor experiência cultural em Malanje. Recomendo a todos!',
+                        data: '2025-08-19' }
+                ]
+            }, {
+                id: 2,
+                nome: 'Feira de Artesanato de Pungo Andongo',
+                tipo: 'feira',
+                local: 'pungo',
+                lat: -9.3833,
+                lng: 15.7667,
+                descricao: 'Feira com artesanato local, produtos típicos e apresentações culturais ao pé das Pedras Negras.',
+                descricaoCompleta: 'A Feira de Artesanato de Pungo Andongo é um evento mensal que acontece ao pé das imponentes Pedras Negras. Artesãos de toda a província se reúnem para expor e vender seus produtos: esculturas em madeira, cestaria, tecidos tradicionais, bijuterias e muito mais. O evento também conta com apresentações culturais e gastronomia típica.',
+                dataInicio: '2026-08-20',
+                dataFim: '2026-08-22',
+                hora: '08:00 - 17:00',
+                preco: 'Gratuito',
+                gratuito: true,
+                imagem: 'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1599751449128-9b5cf6a35d1b?q=80&w=400&h=300&fit=crop'
+                ],
+                destaque: true,
+                imperdivel: false,
+                programacao: [
+                    '08:00 - Abertura da feira',
+                    '10:00 - Demonstração de artesanato ao vivo',
+                    '12:00 - Almoço com pratos típicos',
+                    '14:00 - Apresentação cultural',
+                    '16:00 - Sorteio de artesanato',
+                    '17:00 - Encerramento'
+                ],
+                artistas: ['Artesãos locais'],
+                comentarios: [
+                    { usuario: 'Carlos Mota', texto: 'Produtos lindos e preços justos. Vale a visita!',
+                    data: '2025-07-15' }
+                ]
+            }, {
+                id: 3,
+                nome: 'Caminhada Ecológica no Parque Cangandala',
+                tipo: 'natureza',
+                local: 'cangandala',
+                lat: -9.7667,
+                lng: 16.7500,
+                descricao: 'Caminhada guiada pelo Parque Nacional da Cangandala com observação de fauna e flora.',
+                descricaoCompleta: 'A Caminhada Ecológica no Parque Nacional da Cangandala é uma atividade imperdível para os amantes da natureza. Acompanhados por guias especializados, os participantes percorrem trilhas pela savana, com a oportunidade de avistar a rara Palanca Negra, além de diversas aves e outras espécies. A caminhada é de nível moderado e adequada para todas as idades.',
+                dataInicio: '2026-08-25',
+                dataFim: '2026-08-25',
+                hora: '06:30 - 12:00',
+                preco: '2500 Kz',
+                gratuito: false,
+                imagem: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1440589473619-3cde28941638?q=80&w=400&h=300&fit=crop'
+                ],
+                destaque: false,
+                imperdivel: false,
+                programacao: [
+                    '06:30 - Encontro no parque',
+                    '07:00 - Início da caminhada',
+                    '09:00 - Pausa para observação',
+                    '10:30 - Continuação da trilha',
+                    '12:00 - Retorno e encerramento'
+                ],
+                artistas: ['Guias do Parque Nacional'],
+                comentarios: [
+                    { usuario: 'Pedro Santos', texto: 'Experiência única! Vi a Palanca Negra de perto.',
+                        data: '2025-06-10' }
+                ]
+            }, {
+                id: 4,
+                nome: 'Festival de Música Tradicional de Malanje',
+                tipo: 'musica',
+                local: 'malanje',
+                lat: -9.5333,
+                lng: 16.3500,
+                descricao: 'Festival de música tradicional angolana com artistas locais e nacionais.',
+                descricaoCompleta: 'O Festival de Música Tradicional de Malanje reúne os melhores artistas da música tradicional angolana. O evento celebra a riqueza musical da região, com apresentações de Semba, Kuduro, Kizomba e ritmos tradicionais. É uma noite de dança e celebração da cultura angolana.',
+                dataInicio: '2026-08-28',
+                dataFim: '2026-08-28',
+                hora: '18:00 - 23:00',
+                preco: '5000 Kz',
+                gratuito: false,
+                imagem: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=400&h=300&fit=crop'
+                ],
+                destaque: true,
+                imperdivel: true,
+                programacao: [
+                    '18:00 - Abertura com DJ',
+                    '19:00 - Grupo de Semba',
+                    '20:30 - Show principal',
+                    '22:00 - Encerramento com fogo de artifício'
+                ],
+                artistas: ['Grupo Semba Angola', 'Cantora Maria Kituxi', 'DJ Kwanza'],
+                comentarios: [
+                    { usuario: 'Rita Costa', texto: 'Festa maravilhosa! A melhor noite em Malanje.',
+                    data: '2025-06-15' }
+                ]
+            }, {
+                id: 5,
+                nome: 'Rafting nos Rápidos do Kwanza',
+                tipo: 'desporto',
+                local: 'kwanza',
+                lat: -9.5333,
+                lng: 16.0333,
+                descricao: 'Aventura de rafting nas corredeiras do rio Kwanza com instrutores experientes.',
+                descricaoCompleta: 'Uma experiência de adrenalina pura! A atividade de rafting nos Rápidos do Kwanza é ideal para os amantes de aventura. Com instrutores experientes e equipamentos de segurança, os participantes descem as corredeiras do rio Kwanza em uma experiência inesquecível. Disponível para todos os níveis de experiência.',
+                dataInicio: '2026-08-30',
+                dataFim: '2026-08-31',
+                hora: '08:00 - 15:00',
+                preco: '8000 Kz',
+                gratuito: false,
+                imagem: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=400&h=300&fit=crop'
+                ],
+                destaque: false,
+                imperdivel: false,
+                programacao: [
+                    '08:00 - Briefing e equipamento',
+                    '08:30 - Início do rafting',
+                    '12:00 - Pausa para almoço',
+                    '13:00 - Continuação',
+                    '15:00 - Retorno e encerramento'
+                ],
+                artistas: ['Instrutores de Rafting'],
+                comentarios: [
+                    { usuario: 'Bruno Almeida', texto: 'Aventura incrível! Super recomendo.', data: '2025-05-20' }
+                ]
+            }, {
+                id: 6,
+                nome: 'Feira Semanal de Artesanato de Malanje',
+                tipo: 'feira',
+                local: 'malanje',
+                lat: -9.5450,
+                lng: 16.3400,
+                descricao: 'Feira semanal com artesanato, produtos agrícolas e gastronomia local.',
+                descricaoCompleta: 'A Feira Semanal de Artesanato de Malanje acontece todos os sábados no centro da cidade. É o lugar ideal para comprar lembranças, produtos típicos, artesanato local e experimentar a culinária tradicional. Uma ótima oportunidade de interagir com os locais e conhecer a cultura.',
+                dataInicio: '2026-08-27',
+                dataFim: '2026-08-27',
+                hora: '07:00 - 16:00',
+                preco: 'Gratuito',
+                gratuito: true,
+                imagem: 'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=400&h=300&fit=crop'
+                ],
+                destaque: false,
+                imperdivel: false,
+                programacao: [
+                    '07:00 - Abertura da feira',
+                    '10:00 - Momento cultural',
+                    '12:00 - Almoço típico',
+                    '14:00 - Demonstração de artesanato',
+                    '16:00 - Encerramento'
+                ],
+                artistas: ['Artesãos locais'],
+                comentarios: [
+                    { usuario: 'Sofia Nunes', texto: 'Adorei os produtos! Volto sempre.', data: '2025-07-22' }
+                ]
+            }, {
+                id: 7,
+                nome: 'Celebração da Rainha Ginga',
+                tipo: 'cultural',
+                local: 'malanje',
+                lat: -9.5333,
+                lng: 16.3500,
+                descricao: 'Celebração histórica em homenagem à Rainha Ginga, figura icônica de Angola.',
+                descricaoCompleta: 'A Celebração da Rainha Ginga é um evento cultural e histórico que homenageia a lendária rainha do Ndongo. O evento inclui recriações históricas, danças tradicionais, palestras sobre a história de Angola e apresentações culturais. Uma oportunidade de conhecer mais sobre a rica história do país.',
+                dataInicio: '2026-09-02',
+                dataFim: '2026-09-02',
+                hora: '09:00 - 17:00',
+                preco: 'Gratuito',
+                gratuito: true,
+                imagem: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?q=80&w=400&h=300&fit=crop'
+                ],
+                destaque: true,
+                imperdivel: true,
+                programacao: [
+                    '09:00 - Abertura com cerimônia',
+                    '10:30 - Palestra sobre a Rainha Ginga',
+                    '12:00 - Apresentação cultural',
+                    '14:00 - Recriação histórica',
+                    '16:00 - Encerramento'
+                ],
+                artistas: ['Historiadores locais', 'Grupos culturais'],
+                comentarios: [
+                    { usuario: 'Miguel Fernandes', texto: 'Evento emocionante e educativo.', data: '2025-06-05' }
+                ]
+            }, {
+                id: 8,
+                nome: 'Observação de Aves no Parque Cangandala',
+                tipo: 'natureza',
+                local: 'cangandala',
+                lat: -9.7667,
+                lng: 16.7500,
+                descricao: 'Atividade de observação de aves com guia especializado no Parque Nacional.',
+                descricaoCompleta: 'O Parque Nacional da Cangandala é um paraíso para os observadores de aves. Esta atividade inclui uma caminhada guiada com um especialista em ornitologia, que ajuda a identificar as diversas espécies de aves que habitam o parque. É uma atividade tranquila e educativa, ideal para todas as idades.',
+                dataInicio: '2026-09-05',
+                dataFim: '2026-09-05',
+                hora: '06:00 - 10:00',
+                preco: '1500 Kz',
+                gratuito: false,
+                imagem: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=600&h=400&fit=crop',
+                galeria: [
+                    'https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1440589473619-3cde28941638?q=80&w=400&h=300&fit=crop'
+                ],
+                destaque: false,
+                imperdivel: false,
+                programacao: [
+                    '06:00 - Encontro no parque',
+                    '06:30 - Início da observação',
+                    '08:00 - Pausa para café',
+                    '08:30 - Continuação',
+                    '10:00 - Encerramento'
+                ],
+                artistas: ['Ornitólogo especialista'],
+                comentarios: [
+                    { usuario: 'Carla Mendes', texto: 'Vi mais de 20 espécies diferentes!', data: '2025-06-18' }
+                ]
+            }];
+
+            // ============================================================
+            // TRADUÇÕES
+            // ============================================================
+
+            const traducoes = {
+                pt: {
+                    tituloPagina: 'Eventos em Malanje',
+                    heroTitle: 'Eventos e Experiências em Malanje',
+                    heroSubtitle: 'Não perca o que está a acontecer agora!',
+                    todos: 'Todos',
+                    hoje: 'Hoje',
+                    semana: 'Esta Semana',
+                    mes: 'Este Mês',
+                    futuros: 'Futuros',
+                    filtrosAvancados: 'Filtros Avançados',
+                    todosTipos: 'Todos os Tipos',
+                    cultural: 'Festivais Culturais',
+                    musica: 'Eventos Musicais',
+                    feira: 'Feiras de Artesanato',
+                    natureza: 'Atividades de Natureza',
+                    religioso: 'Festivais Religiosos',
+                    desporto: 'Desportos e Aventura',
+                    todosLocais: 'Todos os Locais',
+                    malange: 'Malanje Cidade',
+                    kalandula: 'Kalandula',
+                    pungo: 'Pungo Andongo',
+                    cangandala: 'Cangandala',
+                    kwanza: 'Rápidos do Kwanza',
+                    todosPrecos: 'Todos os Preços',
+                    gratuito: 'Gratuito',
+                    pago: 'Pago',
+                    aplicarFiltros: 'Aplicar Filtros',
+                    limparFiltros: 'Limpar Filtros',
+                    tabTodosEventos: 'Todos os Eventos',
+                    tabDestaques: 'Destaques',
+                    tabCalendario: 'Calendário',
+                    eventosDia: 'Eventos do Dia',
+                    msgCliqueDia: 'Clique em um dia no calendário para ver os eventos.',
+                    adicionarEvento: 'Adicionar Evento',
+                    msgSugerir: 'Quer sugerir um evento? Entre em contato conosco!',
+                    sugerirEvento: 'Sugerir Evento',
+                    adicionarRoteiro: 'Adicionar ao Roteiro',
+                    verMapa: 'Ver no Mapa',
+                    definirLembrete: 'Definir Lembrete',
+                    atualizar: 'Atualizar',
+                    voltar: 'Voltar',
+                    lembretes: 'Lembretes',
+                    dashboard: 'Dashboard',
+                    verMapaCompleto: 'Ver no Mapa',
+                    // Modais
+                    modalDetalhesTitulo: 'Evento',
+                    modalFechar: 'Fechar',
+                    modalAdicionarRoteiro: 'Adicionar ao Roteiro',
+                    modalComprarBilhete: 'Comprar Bilhete',
+                    modalLembreteTitulo: 'Definir Lembrete',
+                    modalLembreteEvento: 'Evento',
+                    modalLembreteQuando: 'Quando lembrar',
+                    lemb1h: '1 hora antes',
+                    lemb3h: '3 horas antes',
+                    lemb6h: '6 horas antes',
+                    lemb12h: '12 horas antes',
+                    lemb1d: '1 dia antes',
+                    lemb3d: '3 dias antes',
+                    modalLembreteEmail: 'Enviar por e-mail também',
+                    modalLembreteCancelar: 'Cancelar',
+                    modalLembreteConfirmar: 'Definir Lembrete',
+                    modalSugerirTitulo: 'Sugerir Evento',
+                    modalSugerirNome: 'Nome do Evento',
+                    modalSugerirData: 'Data',
+                    modalSugerirLocal: 'Local',
+                    modalSugerirDesc: 'Descrição',
+                    modalSugerirNomeUsuario: 'Seu Nome',
+                    modalSugerirEmail: 'E-mail para contato',
+                    modalSugerirCancelar: 'Cancelar',
+                    modalSugerirEnviar: 'Enviar Sugestão',
+                    modalIdiomaTitulo: 'Idioma',
+                    modalIdiomaFechar: 'Fechar',
+                    semDom: 'Dom',
+                    semSeg: 'Seg',
+                    semTer: 'Ter',
+                    semQua: 'Qua',
+                    semQui: 'Qui',
+                    semSex: 'Sex',
+                    semSab: 'Sáb',
+                },
+                en: {
+                    tituloPagina: 'Events in Malanje',
+                    heroTitle: 'Events and Experiences in Malanje',
+                    heroSubtitle: "Don't miss what's happening now!",
+                    todos: 'All',
+                    hoje: 'Today',
+                    semana: 'This Week',
+                    mes: 'This Month',
+                    futuros: 'Upcoming',
+                    filtrosAvancados: 'Advanced Filters',
+                    todosTipos: 'All Types',
+                    cultural: 'Cultural Festivals',
+                    musica: 'Music Events',
+                    feira: 'Craft Fairs',
+                    natureza: 'Nature Activities',
+                    religioso: 'Religious Festivals',
+                    desporto: 'Sports & Adventure',
+                    todosLocais: 'All Locations',
+                    malange: 'Malanje City',
+                    kalandula: 'Kalandula',
+                    pungo: 'Pungo Andongo',
+                    cangandala: 'Cangandala',
+                    kwanza: 'Kwanza Rapids',
+                    todosPrecos: 'All Prices',
+                    gratuito: 'Free',
+                    pago: 'Paid',
+                    aplicarFiltros: 'Apply Filters',
+                    limparFiltros: 'Clear Filters',
+                    tabTodosEventos: 'All Events',
+                    tabDestaques: 'Highlights',
+                    tabCalendario: 'Calendar',
+                    eventosDia: "Today's Events",
+                    msgCliqueDia: 'Click on a day in the calendar to see events.',
+                    adicionarEvento: 'Add Event',
+                    msgSugerir: 'Want to suggest an event? Contact us!',
+                    sugerirEvento: 'Suggest Event',
+                    adicionarRoteiro: 'Add to Itinerary',
+                    verMapa: 'View on Map',
+                    definirLembrete: 'Set Reminder',
+                    atualizar: 'Refresh',
+                    voltar: 'Back',
+                    lembretes: 'Reminders',
+                    dashboard: 'Dashboard',
+                    verMapaCompleto: 'View on Map',
+                    modalDetalhesTitulo: 'Event',
+                    modalFechar: 'Close',
+                    modalAdicionarRoteiro: 'Add to Itinerary',
+                    modalComprarBilhete: 'Buy Ticket',
+                    modalLembreteTitulo: 'Set Reminder',
+                    modalLembreteEvento: 'Event',
+                    modalLembreteQuando: 'When to remind',
+                    lemb1h: '1 hour before',
+                    lemb3h: '3 hours before',
+                    lemb6h: '6 hours before',
+                    lemb12h: '12 hours before',
+                    lemb1d: '1 day before',
+                    lemb3d: '3 days before',
+                    modalLembreteEmail: 'Send by email too',
+                    modalLembreteCancelar: 'Cancel',
+                    modalLembreteConfirmar: 'Set Reminder',
+                    modalSugerirTitulo: 'Suggest Event',
+                    modalSugerirNome: 'Event Name',
+                    modalSugerirData: 'Date',
+                    modalSugerirLocal: 'Location',
+                    modalSugerirDesc: 'Description',
+                    modalSugerirNomeUsuario: 'Your Name',
+                    modalSugerirEmail: 'Contact Email',
+                    modalSugerirCancelar: 'Cancel',
+                    modalSugerirEnviar: 'Send Suggestion',
+                    modalIdiomaTitulo: 'Language',
+                    modalIdiomaFechar: 'Close',
+                    semDom: 'Sun',
+                    semSeg: 'Mon',
+                    semTer: 'Tue',
+                    semQua: 'Wed',
+                    semQui: 'Thu',
+                    semSex: 'Fri',
+                    semSab: 'Sat',
+                },
+                fr: {
+                    tituloPagina: 'Événements à Malanje',
+                    heroTitle: 'Événements et Expériences à Malanje',
+                    heroSubtitle: "Ne manquez pas ce qui se passe en ce moment !",
+                    todos: 'Tous',
+                    hoje: "Aujourd'hui",
+                    semana: 'Cette Semaine',
+                    mes: 'Ce Mois',
+                    futuros: 'À Venir',
+                    filtrosAvancados: 'Filtres Avancés',
+                    todosTipos: 'Tous les Types',
+                    cultural: 'Festivals Culturels',
+                    musica: 'Événements Musicaux',
+                    feira: 'Foires Artisanales',
+                    natureza: 'Activités Nature',
+                    religioso: 'Festivals Religieux',
+                    desporto: 'Sports & Aventure',
+                    todosLocais: 'Tous les Lieux',
+                    malange: 'Ville de Malanje',
+                    kalandula: 'Kalandula',
+                    pungo: 'Pungo Andongo',
+                    cangandala: 'Cangandala',
+                    kwanza: "Rapides du Kwanza",
+                    todosPrecos: 'Tous les Prix',
+                    gratuito: 'Gratuit',
+                    pago: 'Payant',
+                    aplicarFiltros: 'Appliquer les Filtres',
+                    limparFiltros: 'Effacer les Filtres',
+                    tabTodosEventos: 'Tous les Événements',
+                    tabDestaques: 'Points Forts',
+                    tabCalendario: 'Calendrier',
+                    eventosDia: "Événements du Jour",
+                    msgCliqueDia: 'Cliquez sur un jour du calendrier pour voir les événements.',
+                    adicionarEvento: 'Ajouter un Événement',
+                    msgSugerir: 'Vous voulez suggérer un événement ? Contactez-nous !',
+                    sugerirEvento: 'Suggérer un Événement',
+                    adicionarRoteiro: 'Ajouter à l\'Itinéraire',
+                    verMapa: 'Voir sur la Carte',
+                    definirLembrete: 'Définir un Rappel',
+                    atualizar: 'Actualiser',
+                    voltar: 'Retour',
+                    lembretes: 'Rappels',
+                    dashboard: 'Tableau de Bord',
+                    verMapaCompleto: 'Voir sur la Carte',
+                    modalDetalhesTitulo: 'Événement',
+                    modalFechar: 'Fermer',
+                    modalAdicionarRoteiro: 'Ajouter à l\'Itinéraire',
+                    modalComprarBilhete: 'Acheter un Billet',
+                    modalLembreteTitulo: 'Définir un Rappel',
+                    modalLembreteEvento: 'Événement',
+                    modalLembreteQuando: 'Quand rappeler',
+                    lemb1h: '1 heure avant',
+                    lemb3h: '3 heures avant',
+                    lemb6h: '6 heures avant',
+                    lemb12h: '12 heures avant',
+                    lemb1d: '1 jour avant',
+                    lemb3d: '3 jours avant',
+                    modalLembreteEmail: 'Envoyer aussi par e-mail',
+                    modalLembreteCancelar: 'Annuler',
+                    modalLembreteConfirmar: 'Définir le Rappel',
+                    modalSugerirTitulo: 'Suggérer un Événement',
+                    modalSugerirNome: "Nom de l'Événement",
+                    modalSugerirData: 'Date',
+                    modalSugerirLocal: 'Lieu',
+                    modalSugerirDesc: 'Description',
+                    modalSugerirNomeUsuario: 'Votre Nom',
+                    modalSugerirEmail: 'E-mail de contact',
+                    modalSugerirCancelar: 'Annuler',
+                    modalSugerirEnviar: 'Envoyer la Suggestion',
+                    modalIdiomaTitulo: 'Langue',
+                    modalIdiomaFechar: 'Fermer',
+                    semDom: 'Dim',
+                    semSeg: 'Lun',
+                    semTer: 'Mar',
+                    semQua: 'Mer',
+                    semQui: 'Jeu',
+                    semSex: 'Ven',
+                    semSab: 'Sam',
+                },
+                es: {
+                    tituloPagina: 'Eventos en Malanje',
+                    heroTitle: 'Eventos y Experiencias en Malanje',
+                    heroSubtitle: '¡No te pierdas lo que está pasando ahora!',
+                    todos: 'Todos',
+                    hoje: 'Hoy',
+                    semana: 'Esta Semana',
+                    mes: 'Este Mes',
+                    futuros: 'Futuros',
+                    filtrosAvancados: 'Filtros Avanzados',
+                    todosTipos: 'Todos los Tipos',
+                    cultural: 'Festivales Culturales',
+                    musica: 'Eventos Musicales',
+                    feira: 'Ferias Artesanales',
+                    natureza: 'Actividades de Naturaleza',
+                    religioso: 'Festivales Religiosos',
+                    desporto: 'Deportes y Aventura',
+                    todosLocais: 'Todos los Lugares',
+                    malange: 'Ciudad de Malanje',
+                    kalandula: 'Kalandula',
+                    pungo: 'Pungo Andongo',
+                    cangandala: 'Cangandala',
+                    kwanza: 'Rápidos del Kwanza',
+                    todosPrecos: 'Todos los Precios',
+                    gratuito: 'Gratuito',
+                    pago: 'De Pago',
+                    aplicarFiltros: 'Aplicar Filtros',
+                    limparFiltros: 'Limpiar Filtros',
+                    tabTodosEventos: 'Todos los Eventos',
+                    tabDestaques: 'Destacados',
+                    tabCalendario: 'Calendario',
+                    eventosDia: 'Eventos del Día',
+                    msgCliqueDia: 'Haz clic en un día del calendario para ver los eventos.',
+                    adicionarEvento: 'Agregar Evento',
+                    msgSugerir: '¿Quieres sugerir un evento? ¡Contáctanos!',
+                    sugerirEvento: 'Sugerir Evento',
+                    adicionarRoteiro: 'Agregar al Itinerario',
+                    verMapa: 'Ver en el Mapa',
+                    definirLembrete: 'Definir Recordatorio',
+                    atualizar: 'Actualizar',
+                    voltar: 'Volver',
+                    lembretes: 'Recordatorios',
+                    dashboard: 'Panel de Control',
+                    verMapaCompleto: 'Ver en el Mapa',
+                    modalDetalhesTitulo: 'Evento',
+                    modalFechar: 'Cerrar',
+                    modalAdicionarRoteiro: 'Agregar al Itinerario',
+                    modalComprarBilhete: 'Comprar Entrada',
+                    modalLembreteTitulo: 'Definir Recordatorio',
+                    modalLembreteEvento: 'Evento',
+                    modalLembreteQuando: 'Cuándo recordar',
+                    lemb1h: '1 hora antes',
+                    lemb3h: '3 horas antes',
+                    lemb6h: '6 horas antes',
+                    lemb12h: '12 horas antes',
+                    lemb1d: '1 día antes',
+                    lemb3d: '3 días antes',
+                    modalLembreteEmail: 'Enviar también por correo electrónico',
+                    modalLembreteCancelar: 'Cancelar',
+                    modalLembreteConfirmar: 'Definir Recordatorio',
+                    modalSugerirTitulo: 'Sugerir Evento',
+                    modalSugerirNome: 'Nombre del Evento',
+                    modalSugerirData: 'Fecha',
+                    modalSugerirLocal: 'Lugar',
+                    modalSugerirDesc: 'Descripción',
+                    modalSugerirNomeUsuario: 'Tu Nombre',
+                    modalSugerirEmail: 'Correo de contacto',
+                    modalSugerirCancelar: 'Cancelar',
+                    modalSugerirEnviar: 'Enviar Sugerencia',
+                    modalIdiomaTitulo: 'Idioma',
+                    modalIdiomaFechar: 'Cerrar',
+                    semDom: 'Dom',
+                    semSeg: 'Lun',
+                    semTer: 'Mar',
+                    semQua: 'Mié',
+                    semQui: 'Jue',
+                    semSex: 'Vie',
+                    semSab: 'Sáb',
+                },
+                it: {
+                    tituloPagina: 'Eventi a Malanje',
+                    heroTitle: 'Eventi ed Esperienze a Malanje',
+                    heroSubtitle: 'Non perdere cosa sta succedendo ora!',
+                    todos: 'Tutti',
+                    hoje: 'Oggi',
+                    semana: 'Questa Settimana',
+                    mes: 'Questo Mese',
+                    futuros: 'Futuri',
+                    filtrosAvancados: 'Filtri Avanzati',
+                    todosTipos: 'Tutti i Tipi',
+                    cultural: 'Festival Culturali',
+                    musica: 'Eventi Musicali',
+                    feira: 'Fiere Artigianali',
+                    natureza: 'Attività Naturali',
+                    religioso: 'Festival Religiosi',
+                    desporto: 'Sport e Avventura',
+                    todosLocais: 'Tutti i Luoghi',
+                    malange: 'Città di Malanje',
+                    kalandula: 'Kalandula',
+                    pungo: 'Pungo Andongo',
+                    cangandala: 'Cangandala',
+                    kwanza: 'Rapide del Kwanza',
+                    todosPrecos: 'Tutti i Prezzi',
+                    gratuito: 'Gratuito',
+                    pago: 'A Pagamento',
+                    aplicarFiltros: 'Applica Filtri',
+                    limparFiltros: 'Cancella Filtri',
+                    tabTodosEventos: 'Tutti gli Eventi',
+                    tabDestaques: 'Evidenze',
+                    tabCalendario: 'Calendario',
+                    eventosDia: 'Eventi del Giorno',
+                    msgCliqueDia: 'Clicca su un giorno nel calendario per vedere gli eventi.',
+                    adicionarEvento: 'Aggiungi Evento',
+                    msgSugerir: 'Vuoi suggerire un evento? Contattaci!',
+                    sugerirEvento: 'Suggerisci Evento',
+                    adicionarRoteiro: 'Aggiungi all\'Itinerario',
+                    verMapa: 'Vedi sulla Mappa',
+                    definirLembrete: 'Imposta Promemoria',
+                    atualizar: 'Aggiorna',
+                    voltar: 'Indietro',
+                    lembretes: 'Promemoria',
+                    dashboard: 'Pannello di Controllo',
+                    verMapaCompleto: 'Vedi sulla Mappa',
+                    modalDetalhesTitulo: 'Evento',
+                    modalFechar: 'Chiudi',
+                    modalAdicionarRoteiro: 'Aggiungi all\'Itinerario',
+                    modalComprarBilhete: 'Acquista Biglietto',
+                    modalLembreteTitulo: 'Imposta Promemoria',
+                    modalLembreteEvento: 'Evento',
+                    modalLembreteQuando: 'Quando ricordare',
+                    lemb1h: '1 ora prima',
+                    lemb3h: '3 ore prima',
+                    lemb6h: '6 ore prima',
+                    lemb12h: '12 ore prima',
+                    lemb1d: '1 giorno prima',
+                    lemb3d: '3 giorni prima',
+                    modalLembreteEmail: 'Invia anche via e-mail',
+                    modalLembreteCancelar: 'Annulla',
+                    modalLembreteConfirmar: 'Imposta Promemoria',
+                    modalSugerirTitulo: 'Suggerisci Evento',
+                    modalSugerirNome: 'Nome Evento',
+                    modalSugerirData: 'Data',
+                    modalSugerirLocal: 'Luogo',
+                    modalSugerirDesc: 'Descrizione',
+                    modalSugerirNomeUsuario: 'Il Tuo Nome',
+                    modalSugerirEmail: 'E-mail di contatto',
+                    modalSugerirCancelar: 'Annulla',
+                    modalSugerirEnviar: 'Invia Suggerimento',
+                    modalIdiomaTitulo: 'Lingua',
+                    modalIdiomaFechar: 'Chiudi',
+                    semDom: 'Dom',
+                    semSeg: 'Lun',
+                    semTer: 'Mar',
+                    semQua: 'Mer',
+                    semQui: 'Gio',
+                    semSex: 'Ven',
+                    semSab: 'Sab',
+                },
+                de: {
+                    tituloPagina: 'Veranstaltungen in Malanje',
+                    heroTitle: 'Veranstaltungen und Erlebnisse in Malanje',
+                    heroSubtitle: 'Verpassen Sie nicht, was gerade passiert!',
+                    todos: 'Alle',
+                    hoje: 'Heute',
+                    semana: 'Diese Woche',
+                    mes: 'Diesen Monat',
+                    futuros: 'Bevorstehend',
+                    filtrosAvancados: 'Erweiterte Filter',
+                    todosTipos: 'Alle Typen',
+                    cultural: 'Kulturfestivals',
+                    musica: 'Musikveranstaltungen',
+                    feira: 'Kunsthandwerksmärkte',
+                    natureza: 'Naturaktivitäten',
+                    religioso: 'Religiöse Feste',
+                    desporto: 'Sport & Abenteuer',
+                    todosLocais: 'Alle Orte',
+                    malange: 'Stadt Malanje',
+                    kalandula: 'Kalandula',
+                    pungo: 'Pungo Andongo',
+                    cangandala: 'Cangandala',
+                    kwanza: 'Kwanza-Stromschnellen',
+                    todosPrecos: 'Alle Preise',
+                    gratuito: 'Kostenlos',
+                    pago: 'Bezahlt',
+                    aplicarFiltros: 'Filter anwenden',
+                    limparFiltros: 'Filter zurücksetzen',
+                    tabTodosEventos: 'Alle Veranstaltungen',
+                    tabDestaques: 'Highlights',
+                    tabCalendario: 'Kalender',
+                    eventosDia: 'Veranstaltungen des Tages',
+                    msgCliqueDia: 'Klicken Sie auf einen Tag im Kalender, um Veranstaltungen zu sehen.',
+                    adicionarEvento: 'Veranstaltung hinzufügen',
+                    msgSugerir: 'Möchten Sie eine Veranstaltung vorschlagen? Kontaktieren Sie uns!',
+                    sugerirEvento: 'Veranstaltung vorschlagen',
+                    adicionarRoteiro: 'Zur Reiseroute hinzufügen',
+                    verMapa: 'Auf Karte anzeigen',
+                    definirLembrete: 'Erinnerung einstellen',
+                    atualizar: 'Aktualisieren',
+                    voltar: 'Zurück',
+                    lembretes: 'Erinnerungen',
+                    dashboard: 'Dashboard',
+                    verMapaCompleto: 'Auf Karte anzeigen',
+                    modalDetalhesTitulo: 'Veranstaltung',
+                    modalFechar: 'Schließen',
+                    modalAdicionarRoteiro: 'Zur Reiseroute hinzufügen',
+                    modalComprarBilhete: 'Ticket kaufen',
+                    modalLembreteTitulo: 'Erinnerung einstellen',
+                    modalLembreteEvento: 'Veranstaltung',
+                    modalLembreteQuando: 'Wann erinnern',
+                    lemb1h: '1 Stunde vorher',
+                    lemb3h: '3 Stunden vorher',
+                    lemb6h: '6 Stunden vorher',
+                    lemb12h: '12 Stunden vorher',
+                    lemb1d: '1 Tag vorher',
+                    lemb3d: '3 Tage vorher',
+                    modalLembreteEmail: 'Auch per E-Mail senden',
+                    modalLembreteCancelar: 'Abbrechen',
+                    modalLembreteConfirmar: 'Erinnerung einstellen',
+                    modalSugerirTitulo: 'Veranstaltung vorschlagen',
+                    modalSugerirNome: 'Name der Veranstaltung',
+                    modalSugerirData: 'Datum',
+                    modalSugerirLocal: 'Ort',
+                    modalSugerirDesc: 'Beschreibung',
+                    modalSugerirNomeUsuario: 'Ihr Name',
+                    modalSugerirEmail: 'Kontakt-E-Mail',
+                    modalSugerirCancelar: 'Abbrechen',
+                    modalSugerirEnviar: 'Vorschlag senden',
+                    modalIdiomaTitulo: 'Sprache',
+                    modalIdiomaFechar: 'Schließen',
+                    semDom: 'So',
+                    semSeg: 'Mo',
+                    semTer: 'Di',
+                    semQua: 'Mi',
+                    semQui: 'Do',
+                    semSex: 'Fr',
+                    semSab: 'Sa',
+                },
+                zh: {
+                    tituloPagina: '马兰热活动',
+                    heroTitle: '马兰热的活动和体验',
+                    heroSubtitle: '不要错过正在发生的事情！',
+                    todos: '全部',
+                    hoje: '今天',
+                    semana: '本周',
+                    mes: '本月',
+                    futuros: '即将到来',
+                    filtrosAvancados: '高级筛选',
+                    todosTipos: '所有类型',
+                    cultural: '文化节',
+                    musica: '音乐活动',
+                    feira: '工艺品展销会',
+                    natureza: '自然活动',
+                    religioso: '宗教节日',
+                    desporto: '体育与冒险',
+                    todosLocais: '所有地点',
+                    malange: '马兰热市',
+                    kalandula: '卡兰杜拉',
+                    pungo: '彭戈安东戈',
+                    cangandala: '坎甘达拉',
+                    kwanza: '宽扎急流',
+                    todosPrecos: '所有价格',
+                    gratuito: '免费',
+                    pago: '付费',
+                    aplicarFiltros: '应用筛选',
+                    limparFiltros: '清除筛选',
+                    tabTodosEventos: '所有活动',
+                    tabDestaques: '亮点',
+                    tabCalendario: '日历',
+                    eventosDia: '今日活动',
+                    msgCliqueDia: '点击日历中的某一天查看活动。',
+                    adicionarEvento: '添加活动',
+                    msgSugerir: '想建议一个活动？联系我们！',
+                    sugerirEvento: '建议活动',
+                    adicionarRoteiro: '添加到行程',
+                    verMapa: '在地图上查看',
+                    definirLembrete: '设置提醒',
+                    atualizar: '刷新',
+                    voltar: '返回',
+                    lembretes: '提醒',
+                    dashboard: '仪表板',
+                    verMapaCompleto: '在地图上查看',
+                    modalDetalhesTitulo: '活动',
+                    modalFechar: '关闭',
+                    modalAdicionarRoteiro: '添加到行程',
+                    modalComprarBilhete: '购买门票',
+                    modalLembreteTitulo: '设置提醒',
+                    modalLembreteEvento: '活动',
+                    modalLembreteQuando: '何时提醒',
+                    lemb1h: '1小时前',
+                    lemb3h: '3小时前',
+                    lemb6h: '6小时前',
+                    lemb12h: '12小时前',
+                    lemb1d: '1天前',
+                    lemb3d: '3天前',
+                    modalLembreteEmail: '也通过电子邮件发送',
+                    modalLembreteCancelar: '取消',
+                    modalLembreteConfirmar: '设置提醒',
+                    modalSugerirTitulo: '建议活动',
+                    modalSugerirNome: '活动名称',
+                    modalSugerirData: '日期',
+                    modalSugerirLocal: '地点',
+                    modalSugerirDesc: '描述',
+                    modalSugerirNomeUsuario: '您的姓名',
+                    modalSugerirEmail: '联系邮箱',
+                    modalSugerirCancelar: '取消',
+                    modalSugerirEnviar: '发送建议',
+                    modalIdiomaTitulo: '语言',
+                    modalIdiomaFechar: '关闭',
+                    semDom: '日',
+                    semSeg: '一',
+                    semTer: '二',
+                    semQua: '三',
+                    semQui: '四',
+                    semSex: '五',
+                    semSab: '六',
+                },
+                ja: {
+                    tituloPagina: 'マランジェのイベント',
+                    heroTitle: 'マランジェのイベントと体験',
+                    heroSubtitle: '今何が起こっているか見逃さないでください！',
+                    todos: 'すべて',
+                    hoje: '今日',
+                    semana: '今週',
+                    mes: '今月',
+                    futuros: '今後',
+                    filtrosAvancados: '高度なフィルター',
+                    todosTipos: 'すべてのタイプ',
+                    cultural: '文化祭',
+                    musica: '音楽イベント',
+                    feira: '工芸品フェア',
+                    natureza: '自然アクティビティ',
+                    religioso: '宗教祭り',
+                    desporto: 'スポーツ＆アドベンチャー',
+                    todosLocais: 'すべての場所',
+                    malange: 'マランジェ市',
+                    kalandula: 'カランドゥラ',
+                    pungo: 'プンゴ・アンドンゴ',
+                    cangandala: 'カンガンダラ',
+                    kwanza: 'クワンザ急流',
+                    todosPrecos: 'すべての価格',
+                    gratuito: '無料',
+                    pago: '有料',
+                    aplicarFiltros: 'フィルターを適用',
+                    limparFiltros: 'フィルターをクリア',
+                    tabTodosEventos: 'すべてのイベント',
+                    tabDestaques: 'ハイライト',
+                    tabCalendario: 'カレンダー',
+                    eventosDia: '今日のイベント',
+                    msgCliqueDia: 'カレンダーの日付をクリックしてイベントを表示します。',
+                    adicionarEvento: 'イベントを追加',
+                    msgSugerir: 'イベントを提案したいですか？お問い合わせください！',
+                    sugerirEvento: 'イベントを提案',
+                    adicionarRoteiro: '旅程に追加',
+                    verMapa: '地図で見る',
+                    definirLembrete: 'リマインダーを設定',
+                    atualizar: '更新',
+                    voltar: '戻る',
+                    lembretes: 'リマインダー',
+                    dashboard: 'ダッシュボード',
+                    verMapaCompleto: '地図で見る',
+                    modalDetalhesTitulo: 'イベント',
+                    modalFechar: '閉じる',
+                    modalAdicionarRoteiro: '旅程に追加',
+                    modalComprarBilhete: 'チケットを購入',
+                    modalLembreteTitulo: 'リマインダーを設定',
+                    modalLembreteEvento: 'イベント',
+                    modalLembreteQuando: 'リマインダー時期',
+                    lemb1h: '1時間前',
+                    lemb3h: '3時間前',
+                    lemb6h: '6時間前',
+                    lemb12h: '12時間前',
+                    lemb1d: '1日前',
+                    lemb3d: '3日前',
+                    modalLembreteEmail: 'メールでも送信',
+                    modalLembreteCancelar: 'キャンセル',
+                    modalLembreteConfirmar: 'リマインダーを設定',
+                    modalSugerirTitulo: 'イベントを提案',
+                    modalSugerirNome: 'イベント名',
+                    modalSugerirData: '日付',
+                    modalSugerirLocal: '場所',
+                    modalSugerirDesc: '説明',
+                    modalSugerirNomeUsuario: 'あなたの名前',
+                    modalSugerirEmail: '連絡先メール',
+                    modalSugerirCancelar: 'キャンセル',
+                    modalSugerirEnviar: '提案を送信',
+                    modalIdiomaTitulo: '言語',
+                    modalIdiomaFechar: '閉じる',
+                    semDom: '日',
+                    semSeg: '月',
+                    semTer: '火',
+                    semQua: '水',
+                    semQui: '木',
+                    semSex: '金',
+                    semSab: '土',
+                },
+                ru: {
+                    tituloPagina: 'События в Маланже',
+                    heroTitle: 'События и впечатления в Маланже',
+                    heroSubtitle: 'Не пропустите то, что происходит сейчас!',
+                    todos: 'Все',
+                    hoje: 'Сегодня',
+                    semana: 'На этой неделе',
+                    mes: 'В этом месяце',
+                    futuros: 'Будущие',
+                    filtrosAvancados: 'Расширенные фильтры',
+                    todosTipos: 'Все типы',
+                    cultural: 'Культурные фестивали',
+                    musica: 'Музыкальные события',
+                    feira: 'Ярмарки ремесел',
+                    natureza: 'Природные активности',
+                    religioso: 'Религиозные фестивали',
+                    desporto: 'Спорт и приключения',
+                    todosLocais: 'Все места',
+                    malange: 'Город Маланже',
+                    kalandula: 'Каландула',
+                    pungo: 'Пунго Андонго',
+                    cangandala: 'Кангандала',
+                    kwanza: 'Пороги Кванзы',
+                    todosPrecos: 'Все цены',
+                    gratuito: 'Бесплатно',
+                    pago: 'Платно',
+                    aplicarFiltros: 'Применить фильтры',
+                    limparFiltros: 'Очистить фильтры',
+                    tabTodosEventos: 'Все события',
+                    tabDestaques: 'Избранное',
+                    tabCalendario: 'Календарь',
+                    eventosDia: 'События дня',
+                    msgCliqueDia: 'Нажмите на день в календаре, чтобы увидеть события.',
+                    adicionarEvento: 'Добавить событие',
+                    msgSugerir: 'Хотите предложить событие? Свяжитесь с нами!',
+                    sugerirEvento: 'Предложить событие',
+                    adicionarRoteiro: 'Добавить в маршрут',
+                    verMapa: 'Посмотреть на карте',
+                    definirLembrete: 'Установить напоминание',
+                    atualizar: 'Обновить',
+                    voltar: 'Назад',
+                    lembretes: 'Напоминания',
+                    dashboard: 'Панель управления',
+                    verMapaCompleto: 'Посмотреть на карте',
+                    modalDetalhesTitulo: 'Событие',
+                    modalFechar: 'Закрыть',
+                    modalAdicionarRoteiro: 'Добавить в маршрут',
+                    modalComprarBilhete: 'Купить билет',
+                    modalLembreteTitulo: 'Установить напоминание',
+                    modalLembreteEvento: 'Событие',
+                    modalLembreteQuando: 'Когда напомнить',
+                    lemb1h: 'За 1 час',
+                    lemb3h: 'За 3 часа',
+                    lemb6h: 'За 6 часов',
+                    lemb12h: 'За 12 часов',
+                    lemb1d: 'За 1 день',
+                    lemb3d: 'За 3 дня',
+                    modalLembreteEmail: 'Отправить по электронной почте',
+                    modalLembreteCancelar: 'Отмена',
+                    modalLembreteConfirmar: 'Установить напоминание',
+                    modalSugerirTitulo: 'Предложить событие',
+                    modalSugerirNome: 'Название события',
+                    modalSugerirData: 'Дата',
+                    modalSugerirLocal: 'Место',
+                    modalSugerirDesc: 'Описание',
+                    modalSugerirNomeUsuario: 'Ваше имя',
+                    modalSugerirEmail: 'Контактный email',
+                    modalSugerirCancelar: 'Отмена',
+                    modalSugerirEnviar: 'Отправить предложение',
+                    modalIdiomaTitulo: 'Язык',
+                    modalIdiomaFechar: 'Закрыть',
+                    semDom: 'Вс',
+                    semSeg: 'Пн',
+                    semTer: 'Вт',
+                    semQua: 'Ср',
+                    semQui: 'Чт',
+                    semSex: 'Пт',
+                    semSab: 'Сб',
+                },
+                ar: {
+                    tituloPagina: 'الفعاليات في مالانجي',
+                    heroTitle: 'الفعاليات والتجارب في مالانجي',
+                    heroSubtitle: 'لا تفوت ما يحدث الآن!',
+                    todos: 'الكل',
+                    hoje: 'اليوم',
+                    semana: 'هذا الأسبوع',
+                    mes: 'هذا الشهر',
+                    futuros: 'القادمة',
+                    filtrosAvancados: 'فلاتر متقدمة',
+                    todosTipos: 'جميع الأنواع',
+                    cultural: 'المهرجانات الثقافية',
+                    musica: 'الفعاليات الموسيقية',
+                    feira: 'معارض الحرف اليدوية',
+                    natureza: 'أنشطة الطبيعة',
+                    religioso: 'المهرجانات الدينية',
+                    desporto: 'الرياضة والمغامرة',
+                    todosLocais: 'جميع المواقع',
+                    malange: 'مدينة مالانجي',
+                    kalandula: 'كالاندولا',
+                    pungo: 'بونغو أندونغو',
+                    cangandala: 'كانغانداالا',
+                    kwanza: 'منحدرات كوانزا',
+                    todosPrecos: 'جميع الأسعار',
+                    gratuito: 'مجاني',
+                    pago: 'مدفوع',
+                    aplicarFiltros: 'تطبيق الفلاتر',
+                    limparFiltros: 'مسح الفلاتر',
+                    tabTodosEventos: 'جميع الفعاليات',
+                    tabDestaques: 'المميزات',
+                    tabCalendario: 'التقويم',
+                    eventosDia: 'فعاليات اليوم',
+                    msgCliqueDia: 'انقر على يوم في التقويم لرؤية الفعاليات.',
+                    adicionarEvento: 'إضافة فعالية',
+                    msgSugerir: 'هل تريد اقتراح فعالية؟ اتصل بنا!',
+                    sugerirEvento: 'اقتراح فعالية',
+                    adicionarRoteiro: 'إضافة إلى المسار',
+                    verMapa: 'عرض على الخريطة',
+                    definirLembrete: 'تعيين تذكير',
+                    atualizar: 'تحديث',
+                    voltar: 'رجوع',
+                    lembretes: 'تذكيرات',
+                    dashboard: 'لوحة التحكم',
+                    verMapaCompleto: 'عرض على الخريطة',
+                    modalDetalhesTitulo: 'فعالية',
+                    modalFechar: 'إغلاق',
+                    modalAdicionarRoteiro: 'إضافة إلى المسار',
+                    modalComprarBilhete: 'شراء تذكرة',
+                    modalLembreteTitulo: 'تعيين تذكير',
+                    modalLembreteEvento: 'فعالية',
+                    modalLembreteQuando: 'متى يتم التذكير',
+                    lemb1h: 'قبل ساعة واحدة',
+                    lemb3h: 'قبل 3 ساعات',
+                    lemb6h: 'قبل 6 ساعات',
+                    lemb12h: 'قبل 12 ساعة',
+                    lemb1d: 'قبل يوم واحد',
+                    lemb3d: 'قبل 3 أيام',
+                    modalLembreteEmail: 'إرسال عبر البريد الإلكتروني أيضًا',
+                    modalLembreteCancelar: 'إلغاء',
+                    modalLembreteConfirmar: 'تعيين التذكير',
+                    modalSugerirTitulo: 'اقتراح فعالية',
+                    modalSugerirNome: 'اسم الفعالية',
+                    modalSugerirData: 'التاريخ',
+                    modalSugerirLocal: 'الموقع',
+                    modalSugerirDesc: 'الوصف',
+                    modalSugerirNomeUsuario: 'اسمك',
+                    modalSugerirEmail: 'البريد الإلكتروني للتواصل',
+                    modalSugerirCancelar: 'إلغاء',
+                    modalSugerirEnviar: 'إرسال الاقتراح',
+                    modalIdiomaTitulo: 'اللغة',
+                    modalIdiomaFechar: 'إغلاق',
+                    semDom: 'أحد',
+                    semSeg: 'إثن',
+                    semTer: 'ثلاث',
+                    semQua: 'أربع',
+                    semQui: 'خميس',
+                    semSex: 'جمعة',
+                    semSab: 'سبت',
+                },
+                hi: {
+                    tituloPagina: 'मालांजे में आयोजन',
+                    heroTitle: 'मालांजे में आयोजन और अनुभव',
+                    heroSubtitle: 'अभी क्या हो रहा है, इसे मिस न करें!',
+                    todos: 'सभी',
+                    hoje: 'आज',
+                    semana: 'इस सप्ताह',
+                    mes: 'इस माह',
+                    futuros: 'आगामी',
+                    filtrosAvancados: 'उन्नत फ़िल्टर',
+                    todosTipos: 'सभी प्रकार',
+                    cultural: 'सांस्कृतिक त्योहार',
+                    musica: 'संगीत कार्यक्रम',
+                    feira: 'हस्तशिल्प मेले',
+                    natureza: 'प्राकृतिक गतिविधियाँ',
+                    religioso: 'धार्मिक त्योहार',
+                    desporto: 'खेल और साहसिक',
+                    todosLocais: 'सभी स्थान',
+                    malange: 'मालांजे शहर',
+                    kalandula: 'कालंडुला',
+                    pungo: 'पुंगो अंडोंगो',
+                    cangandala: 'कंगंडाला',
+                    kwanza: 'क्वान्ज़ा रैपिड्स',
+                    todosPrecos: 'सभी मूल्य',
+                    gratuito: 'मुफ्त',
+                    pago: 'सशुल्क',
+                    aplicarFiltros: 'फ़िल्टर लागू करें',
+                    limparFiltros: 'फ़िल्टर साफ़ करें',
+                    tabTodosEventos: 'सभी आयोजन',
+                    tabDestaques: 'हाइलाइट्स',
+                    tabCalendario: 'कैलेंडर',
+                    eventosDia: 'आज के आयोजन',
+                    msgCliqueDia: 'आयोजन देखने के लिए कैलेंडर में एक दिन पर क्लिक करें।',
+                    adicionarEvento: 'आयोजन जोड़ें',
+                    msgSugerir: 'कोई आयोजन सुझाना चाहते हैं? हमसे संपर्क करें!',
+                    sugerirEvento: 'आयोजन सुझाएं',
+                    adicionarRoteiro: 'यात्रा कार्यक्रम में जोड़ें',
+                    verMapa: 'मानचित्र पर देखें',
+                    definirLembrete: 'रिमाइंडर सेट करें',
+                    atualizar: 'ताज़ा करें',
+                    voltar: 'वापस जाएं',
+                    lembretes: 'रिमाइंडर',
+                    dashboard: 'डैशबोर्ड',
+                    verMapaCompleto: 'मानचित्र पर देखें',
+                    modalDetalhesTitulo: 'आयोजन',
+                    modalFechar: 'बंद करें',
+                    modalAdicionarRoteiro: 'यात्रा कार्यक्रम में जोड़ें',
+                    modalComprarBilhete: 'टिकट खरीदें',
+                    modalLembreteTitulo: 'रिमाइंडर सेट करें',
+                    modalLembreteEvento: 'आयोजन',
+                    modalLembreteQuando: 'कब याद दिलाएं',
+                    lemb1h: '1 घंटा पहले',
+                    lemb3h: '3 घंटे पहले',
+                    lemb6h: '6 घंटे पहले',
+                    lemb12h: '12 घंटे पहले',
+                    lemb1d: '1 दिन पहले',
+                    lemb3d: '3 दिन पहले',
+                    modalLembreteEmail: 'ईमेल से भी भेजें',
+                    modalLembreteCancelar: 'रद्द करें',
+                    modalLembreteConfirmar: 'रिमाइंडर सेट करें',
+                    modalSugerirTitulo: 'आयोजन सुझाएं',
+                    modalSugerirNome: 'आयोजन का नाम',
+                    modalSugerirData: 'तारीख',
+                    modalSugerirLocal: 'स्थान',
+                    modalSugerirDesc: 'विवरण',
+                    modalSugerirNomeUsuario: 'आपका नाम',
+                    modalSugerirEmail: 'संपर्क ईमेल',
+                    modalSugerirCancelar: 'रद्द करें',
+                    modalSugerirEnviar: 'सुझाव भेजें',
+                    modalIdiomaTitulo: 'भाषा',
+                    modalIdiomaFechar: 'बंद करें',
+                    semDom: 'रवि',
+                    semSeg: 'सोम',
+                    semTer: 'मंगल',
+                    semQua: 'बुध',
+                    semQui: 'गुरु',
+                    semSex: 'शुक्र',
+                    semSab: 'शनि',
+                },
+                sw: {
+                    tituloPagina: 'Matukio Malanje',
+                    heroTitle: 'Matukio na Uzoefu Malanje',
+                    heroSubtitle: 'Usikose kinachoendelea sasa!',
+                    todos: 'Yote',
+                    hoje: 'Leo',
+                    semana: 'Wiki Hii',
+                    mes: 'Mwezi Huu',
+                    futuros: 'Vijavyo',
+                    filtrosAvancados: 'Vichujio vya Juu',
+                    todosTipos: 'Aina Zote',
+                    cultural: 'Sherehe za Kitamaduni',
+                    musica: 'Matukio ya Muziki',
+                    feira: 'Maonyesho ya Ufundi',
+                    natureza: 'Shughuli za Mazingira',
+                    religioso: 'Sherehe za Kidini',
+                    desporto: 'Michezo na Vituko',
+                    todosLocais: 'Maeneo Yote',
+                    malange: 'Jiji la Malanje',
+                    kalandula: 'Kalandula',
+                    pungo: 'Pungo Andongo',
+                    cangandala: 'Cangandala',
+                    kwanza: 'Maporomoko ya Kwanza',
+                    todosPrecos: 'Bei Zote',
+                    gratuito: 'Bure',
+                    pago: 'Inalipwa',
+                    aplicarFiltros: 'Weka Vichujio',
+                    limparFiltros: 'Futa Vichujio',
+                    tabTodosEventos: 'Matukio Yote',
+                    tabDestaques: 'Yanayoangaziwa',
+                    tabCalendario: 'Kalenda',
+                    eventosDia: 'Matukio ya Leo',
+                    msgCliqueDia: 'Bonyeza siku kwenye kalenda kuona matukio.',
+                    adicionarEvento: 'Ongeza Tukio',
+                    msgSugerir: 'Unataka kupendekeza tukio? Wasiliana nasi!',
+                    sugerirEvento: 'Pendekeza Tukio',
+                    adicionarRoteiro: 'Ongeza kwenye Ratiba',
+                    verMapa: 'Tazama kwenye Ramani',
+                    definirLembrete: 'Weka Kikumbusho',
+                    atualizar: 'Sasisha',
+                    voltar: 'Rudi',
+                    lembretes: 'Vikumbusho',
+                    dashboard: 'Dashibodi',
+                    verMapaCompleto: 'Tazama kwenye Ramani',
+                    modalDetalhesTitulo: 'Tukio',
+                    modalFechar: 'Funga',
+                    modalAdicionarRoteiro: 'Ongeza kwenye Ratiba',
+                    modalComprarBilhete: 'Nunua Tiketi',
+                    modalLembreteTitulo: 'Weka Kikumbusho',
+                    modalLembreteEvento: 'Tukio',
+                    modalLembreteQuando: 'Wakati wa kukumbusha',
+                    lemb1h: 'Saa 1 kabla',
+                    lemb3h: 'Saa 3 kabla',
+                    lemb6h: 'Saa 6 kabla',
+                    lemb12h: 'Saa 12 kabla',
+                    lemb1d: 'Siku 1 kabla',
+                    lemb3d: 'Siku 3 kabla',
+                    modalLembreteEmail: 'Tuma pia kwa barua pepe',
+                    modalLembreteCancelar: 'Ghairi',
+                    modalLembreteConfirmar: 'Weka Kikumbusho',
+                    modalSugerirTitulo: 'Pendekeza Tukio',
+                    modalSugerirNome: 'Jina la Tukio',
+                    modalSugerirData: 'Tarehe',
+                    modalSugerirLocal: 'Mahali',
+                    modalSugerirDesc: 'Maelezo',
+                    modalSugerirNomeUsuario: 'Jina Lako',
+                    modalSugerirEmail: 'Barua pepe ya mawasiliano',
+                    modalSugerirCancelar: 'Ghairi',
+                    modalSugerirEnviar: 'Tuma Pendekezo',
+                    modalIdiomaTitulo: 'Lugha',
+                    modalIdiomaFechar: 'Funga',
+                    semDom: 'Jum',
+                    semSeg: 'Jumat',
+                    semTer: 'Juman',
+                    semQua: 'Jumatano',
+                    semQui: 'Alhamisi',
+                    semSex: 'Ijumaa',
+                    semSab: 'Jumamosi',
+                }
+            };
+
+            // ============================================================
+            // ESTADO
+            // ============================================================
+
+            let idiomaAtual = localStorage.getItem('sicami-idioma') || 'pt';
+            let eventosFiltrados = [...eventos];
+            let selectedEvento = null;
+            let lembretes = JSON.parse(localStorage.getItem('eventosLembretes') || '[]');
+            let mesAtual = new Date().getMonth();
+            let anoAtual = new Date().getFullYear();
+
+            // ============================================================
+            // FUNÇÃO DE TRADUÇÃO
+            // ============================================================
+
+            function aplicarIdioma(lang) {
+                const t = traducoes[lang];
+                if (!t) return;
+
+                // Atualiza todos os elementos com IDs específicos
+                $('#tituloPagina').text(t.tituloPagina);
+                $('#heroTitle').text(t.heroTitle);
+                $('#heroSubtitle').text(t.heroSubtitle);
+                $('#txtTodos').text(t.todos);
+                $('#txtHoje').text(t.hoje);
+                $('#txtSemana').text(t.semana);
+                $('#txtMes').text(t.mes);
+                $('#txtFuturos').text(t.futuros);
+                $('#txtFiltrosAvancados').text(t.filtrosAvancados);
+                $('#txtAplicarFiltros').text(t.aplicarFiltros);
+                $('#txtLimparFiltros').text(t.limparFiltros);
+                $('#tabTodosEventos').text(t.tabTodosEventos);
+                $('#tabDestaques').text(t.tabDestaques);
+                $('#tabCalendario').text(t.tabCalendario);
+                $('#tituloEventosDia').text(t.eventosDia);
+                $('#msgCliqueDia').text(t.msgCliqueDia);
+                $('#tituloAdicionarEvento').text(t.adicionarEvento);
+                $('#msgSugerirEvento').text(t.msgSugerir);
+                $('#txtSugerirEvento').text(t.sugerirEvento);
+                $('#txtAdicionarRoteiro').text(t.adicionarRoteiro);
+                $('#txtVerMapaAcao').text(t.verMapa);
+                $('#txtDefinirLembrete').text(t.definirLembrete);
+                $('#txtAtualizar').text(t.atualizar);
+                $('#txtVoltar').text(t.voltar);
+                $('#txtLembretes').text(t.lembretes);
+                $('#txtDashboard').text(t.dashboard);
+                $('#txtVerMapa').text(t.verMapaCompleto);
+                $('#modalDetalhesTitulo').text(t.modalDetalhesTitulo);
+                $('#modalFechar').text(t.modalFechar);
+                $('#modalAdicionarRoteiro').text(t.modalAdicionarRoteiro);
+                $('#modalComprarBilhete').text(t.modalComprarBilhete);
+                $('#modalLembreteTitulo').text(t.modalLembreteTitulo);
+                $('#modalLembreteEventoLabel').text(t.modalLembreteEvento);
+                $('#modalLembreteQuandoLabel').text(t.modalLembreteQuando);
+                $('#lemb1h').text(t.lemb1h);
+                $('#lemb3h').text(t.lemb3h);
+                $('#lemb6h').text(t.lemb6h);
+                $('#lemb12h').text(t.lemb12h);
+                $('#lemb1d').text(t.lemb1d);
+                $('#lemb3d').text(t.lemb3d);
+                $('#modalLembreteEmailLabel').text(t.modalLembreteEmail);
+                $('#modalLembreteCancelar').text(t.modalLembreteCancelar);
+                $('#modalLembreteConfirmar').text(t.modalLembreteConfirmar);
+                $('#modalSugerirTitulo').text(t.modalSugerirTitulo);
+                $('#modalSugerirNomeLabel').text(t.modalSugerirNome);
+                $('#modalSugerirDataLabel').text(t.modalSugerirData);
+                $('#modalSugerirLocalLabel').text(t.modalSugerirLocal);
+                $('#modalSugerirDescLabel').text(t.modalSugerirDesc);
+                $('#modalSugerirNomeUsuarioLabel').text(t.modalSugerirNomeUsuario);
+                $('#modalSugerirEmailLabel').text(t.modalSugerirEmail);
+                $('#modalSugerirCancelar').text(t.modalSugerirCancelar);
+                $('#modalSugerirEnviar').text(t.modalSugerirEnviar);
+                $('#modalIdiomaTitulo').text(t.modalIdiomaTitulo);
+                $('#modalIdiomaFechar').text(t.modalIdiomaFechar);
+                $('#semDom').text(t.semDom);
+                $('#semSeg').text(t.semSeg);
+                $('#semTer').text(t.semTer);
+                $('#semQua').text(t.semQua);
+                $('#semQui').text(t.semQui);
+                $('#semSex').text(t.semSex);
+                $('#semSab').text(t.semSab);
+
+                // Filtros dropdowns
+                $('#optTodosTipos').text(t.todosTipos);
+                $('#optCultural').text(t.cultural);
+                $('#optMusica').text(t.musica);
+                $('#optFeira').text(t.feira);
+                $('#optNatureza').text(t.natureza);
+                $('#optReligioso').text(t.religioso);
+                $('#optDesporto').text(t.desporto);
+                $('#optTodosLocais').text(t.todosLocais);
+                $('#optMalange').text(t.malange);
+                $('#optKalandula').text(t.kalandula);
+                $('#optPungo').text(t.pungo);
+                $('#optCangandala').text(t.cangandala);
+                $('#optKwanza').text(t.kwanza);
+                $('#optTodosPrecos').text(t.todosPrecos);
+                $('#optGratuito').text(t.gratuito);
+                $('#optPago').text(t.pago);
+
+                // Placeholder data
+                $('#filtroDataEvento').attr('placeholder', t.filtrosAvancados || 'Data específica');
+
+                // Atualizar dropdown do modal de lembrete
+                const select = $('#lembreteEvento');
+                const currentVal = select.val();
+                select.find('option').each(function() {
+                    const opt = $(this);
+                    if (opt.val() === '') {
+                        opt.text('Selecione um evento...');
+                    }
+                });
+
+                // Atualizar lista de idiomas
+                const listaIdiomas = $('#listaIdiomas');
+                listaIdiomas.empty();
+                const idiomas = [
+                    { code: 'pt', label: '🇵🇹 Português' },
+                    { code: 'en', label: '🇬🇧 English' },
+                    { code: 'fr', label: '🇫🇷 Français' },
+                    { code: 'es', label: '🇪🇸 Español' },
+                    { code: 'it', label: '🇮🇹 Italiano' },
+                    { code: 'de', label: '🇩🇪 Deutsch' },
+                    { code: 'zh', label: '🇨🇳 中文' },
+                    { code: 'ja', label: '🇯🇵 日本語' },
+                    { code: 'ru', label: '🇷🇺 Русский' },
+                    { code: 'ar', label: '🇸🇦 العربية' },
+                    { code: 'hi', label: '🇮🇳 हिन्दी' },
+                    { code: 'sw', label: '🇰🇪 Kiswahili' }
+                ];
+                idiomas.forEach(idioma => {
+                    listaIdiomas.append(`
+                        <button class="list-group-item list-group-item-action ${idioma.code === lang ? 'active' : ''}"
+                                onclick="mudarIdioma('${idioma.code}')">
+                            ${idioma.label}
+                        </button>
+                    `);
+                });
+
+                // Salvar idioma
+                localStorage.setItem('sicami-idioma', lang);
+                idiomaAtual = lang;
+
+                // Atualizar dropdown
+                $('#languageDropdown').val(lang);
+                // Renomear a opção do dropdown para o nome do idioma
+                const optionText = {
+                    'pt': '🇵🇹 Português',
+                    'en': '🇬🇧 English',
+                    'fr': '🇫🇷 Français',
+                    'es': '🇪🇸 Español',
+                    'it': '🇮🇹 Italiano',
+                    'de': '🇩🇪 Deutsch',
+                    'zh': '🇨🇳 中文',
+                    'ja': '🇯🇵 日本語',
+                    'ru': '🇷🇺 Русский',
+                    'ar': '🇸🇦 العربية',
+                    'hi': '🇮🇳 हिन्दी',
+                    'sw': '🇰🇪 Kiswahili'
+                };
+                if (optionText[lang]) {
+                    $('#languageDropdown option:selected').text(optionText[lang]);
+                }
+
+                // Atualizar elementos que são renderizados dinamicamente
+                // Os eventos serão re-renderizados
+                aplicarFiltros();
+                renderizarDestaques();
+                renderizarCalendario(mesAtual, anoAtual);
+            }
+
+            // Expor função global para ser chamada a partir do modal
+            window.mudarIdioma = function(lang) {
+                aplicarIdioma(lang);
+                $('#idiomaModal').modal('hide');
+            };
+
+            // ============================================================
+            // INICIALIZAR MAPA MINIATURA
+            // ============================================================
+
+            let mapMini = null;
+            let mapMiniInitialized = false;
+
+            function initMapMini() {
+                if (mapMiniInitialized) return;
+
+                const container = document.getElementById('mapMini');
+                if (!container) return;
+
+                mapMini = L.map('mapMini', {
+                    zoomControl: false,
+                    attributionControl: false,
+                    dragging: false,
+                    touchZoom: false,
+                    scrollWheelZoom: false,
+                    doubleClickZoom: false,
+                    boxZoom: false,
+                    keyboard: false
+                }).setView([-9.5333, 16.3500], 8);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                }).addTo(mapMini);
+
+                mapMiniInitialized = true;
+                atualizarMapaMini();
+            }
+
+            function atualizarMapaMini() {
+                if (!mapMiniInitialized) return;
+
+                mapMini.eachLayer(function(layer) {
+                    if (layer instanceof L.Marker) {
+                        mapMini.removeLayer(layer);
+                    }
+                });
+
+                const cores = {
+                    'cultural': '#FF9800',
+                    'musica': '#E91E63',
+                    'feira': '#4CAF50',
+                    'natureza': '#2196F3',
+                    'religioso': '#9C27B0',
+                    'desporto': '#F44336'
+                };
+
+                eventosFiltrados.forEach(e => {
+                    const cor = cores[e.tipo] || '#6c757d';
+                    L.marker([e.lat, e.lng], {
+                        icon: L.divIcon({
+                            html: `<div style="
+                                background: ${cor};
+                                color: #fff;
+                                border-radius: 50%;
+                                width: 12px;
+                                height: 12px;
+                                border: 2px solid rgba(255,255,255,0.5);
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                            "></div>`,
+                            className: 'custom-marker',
+                            iconSize: [12, 12],
+                            iconAnchor: [6, 6]
+                        })
+                    }).addTo(mapMini);
+                });
+
+                if (eventosFiltrados.length > 0) {
+                    const group = L.featureGroup();
+                    eventosFiltrados.forEach(e => {
+                        group.addLayer(L.marker([e.lat, e.lng]));
+                    });
+                    mapMini.fitBounds(group.getBounds(), { padding: [20, 20] });
+                }
+            }
+
+            // ============================================================
+            // RENDERIZAR EVENTOS
+            // ============================================================
+
+            function renderizarEventos(lista) {
+                const container = $('#gridEventos');
+                container.empty();
+
+                if (lista.length === 0) {
+                    container.html(`
+                        <div class="col-12">
+                            <div style="text-align:center;padding:60px;color:rgba(255,255,255,0.4);">
+                                <i class="bi bi-calendar-x" style="font-size:3rem;display:block;margin-bottom:15px;"></i>
+                                <h5>Nenhum evento encontrado</h5>
+                                <p style="font-size:0.9rem;">Tente ajustar os filtros ou verifique os eventos futuros.</p>
+                            </div>
+                        </div>
+                    `);
+                    return;
+                }
+
+                const cores = {
+                    'cultural': '#FF9800',
+                    'musica': '#E91E63',
+                    'feira': '#4CAF50',
+                    'natureza': '#2196F3',
+                    'religioso': '#9C27B0',
+                    'desporto': '#F44336'
+                };
+
+                const icones = {
+                    'cultural': '🎭',
+                    'musica': '🎵',
+                    'feira': '🛍️',
+                    'natureza': '🌿',
+                    'religioso': '⛪',
+                    'desporto': '⚽'
+                };
+
+                const t = traducoes[idiomaAtual] || traducoes.pt;
+
+                lista.forEach(e => {
+                    const cor = cores[e.tipo] || '#6c757d';
+                    const icone = icones[e.tipo] || '📅';
+                    const isHoje = e.dataInicio === new Date().toISOString().split('T')[0];
+
+                    container.append(`
+                        <div class="col-md-6 col-lg-4 col-xl-3 mb-4 fade-in">
+                            <div class="evento-card" onclick="abrirDetalhes(${e.id})">
+                                <img src="${e.imagem}" class="evento-imagem" alt="${e.nome}">
+                                <div class="evento-badges">
+                                    ${e.destaque ? '<span class="badge-destaque">⭐ Destaque</span>' : ''}
+                                    ${e.imperdivel ? '<span class="badge-destaque" style="background:rgba(220,53,69,0.85);color:#fff;">🔥 Imperdível</span>' : ''}
+                                    ${isHoje ? '<span class="badge-destaque" style="background:rgba(13,202,240,0.85);color:#1a1a2e;">🔴 Hoje</span>' : ''}
+                                    <span class="badge-tipo">${icone} ${e.tipo}</span>
+                                </div>
+                                <div class="badge-preco ${e.gratuito ? 'gratuito' : ''}">
+                                    ${e.gratuito ? '🆓 Gratuito' : e.preco}
+                                </div>
+                                <div class="evento-body">
+                                    <div class="evento-nome">${e.nome}</div>
+                                    <div class="evento-desc">${e.descricao}</div>
+                                    <div class="evento-info">
+                                        <span class="data">📅 ${formatarData(e.dataInicio)}</span>
+                                        <span class="local">📍 ${e.local}</span>
+                                    </div>
+                                    <div class="evento-actions">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); abrirDetalhes(${e.id})">
+                                            <i class="bi bi-eye"></i> Detalhes
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); adicionarAoRoteiroEvento(${e.id})">
+                                            <i class="bi bi-plus-circle"></i> Roteiro
+                                        </button>
+                                        <button class="btn btn-outline-warning btn-sm" onclick="event.stopPropagation(); definirLembrete(${e.id})">
+                                            <i class="bi bi-bell"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+
+                $('#contadorEventos').text(`${lista.length} ${t.eventosDia ? 'eventos' : 'eventos'}`);
+                atualizarMapaMini();
+            }
+
+            // ============================================================
+            // RENDERIZAR DESTAQUES
+            // ============================================================
+
+            function renderizarDestaques() {
+                const container = $('#gridDestaques');
+                container.empty();
+
+                const destaques = eventos.filter(e => e.destaque || e.imperdivel);
+
+                const cores = {
+                    'cultural': '#FF9800',
+                    'musica': '#E91E63',
+                    'feira': '#4CAF50',
+                    'natureza': '#2196F3',
+                    'religioso': '#9C27B0',
+                    'desporto': '#F44336'
+                };
+
+                const icones = {
+                    'cultural': '🎭',
+                    'musica': '🎵',
+                    'feira': '🛍️',
+                    'natureza': '🌿',
+                    'religioso': '⛪',
+                    'desporto': '⚽'
+                };
+
+                destaques.forEach(e => {
+                    const cor = cores[e.tipo] || '#6c757d';
+                    const icone = icones[e.tipo] || '📅';
+
+                    container.append(`
+                        <div class="col-md-6 col-lg-4 mb-4 fade-in">
+                            <div class="evento-card" onclick="abrirDetalhes(${e.id})" style="border-color:rgba(255,193,7,0.3);">
+                                <img src="${e.imagem}" class="evento-imagem" alt="${e.nome}">
+                                <div class="evento-badges">
+                                    <span class="badge-destaque" style="background:rgba(255,193,7,0.85);color:#1a1a2e;">⭐ Destaque</span>
+                                    ${e.imperdivel ? '<span class="badge-destaque" style="background:rgba(220,53,69,0.85);color:#fff;">🔥 Imperdível</span>' : ''}
+                                    <span class="badge-tipo">${icone} ${e.tipo}</span>
+                                </div>
+                                <div class="badge-preco ${e.gratuito ? 'gratuito' : ''}">
+                                    ${e.gratuito ? '🆓 Gratuito' : e.preco}
+                                </div>
+                                <div class="evento-body">
+                                    <div class="evento-nome">${e.nome}</div>
+                                    <div class="evento-desc">${e.descricao}</div>
+                                    <div class="evento-info">
+                                        <span class="data">📅 ${formatarData(e.dataInicio)}</span>
+                                        <span class="local">📍 ${e.local}</span>
+                                    </div>
+                                    <div class="evento-actions">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); abrirDetalhes(${e.id})">
+                                            <i class="bi bi-eye"></i> Detalhes
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); adicionarAoRoteiroEvento(${e.id})">
+                                            <i class="bi bi-plus-circle"></i> Roteiro
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
+            // ============================================================
+            // CALENDÁRIO
+            // ============================================================
+
+            function renderizarCalendario(mes, ano) {
+                const t = traducoes[idiomaAtual] || traducoes.pt;
+                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                ];
+
+                $('#calMesAno').text(`${meses[mes]} ${ano}`);
+
+                const primeiroDia = new Date(ano, mes, 1).getDay();
+                const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+                const hoje = new Date();
+                const hojeStr = hoje.toISOString().split('T')[0];
+
+                const container = $('#calDias');
+                container.empty();
+
+                // Dias vazios
+                for (let i = 0; i < primeiroDia; i++) {
+                    container.append('<div class="calendario-dia vazio"></div>');
+                }
+
+                // Dias do mês
+                for (let d = 1; d <= diasNoMes; d++) {
+                    const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const temEvento = eventos.some(e => e.dataInicio === dataStr);
+                    const isHoje = dataStr === hojeStr;
+
+                    let classes = 'calendario-dia';
+                    if (temEvento) classes += ' com-eventos';
+                    if (isHoje) classes += ' hoje';
+
+                    container.append(`
+                        <div class="${classes}" data-data="${dataStr}" onclick="verEventosDia('${dataStr}')">
+                            ${d}
+                        </div>
+                    `);
+                }
+
+                // Destacar hoje por padrão
+                if (eventos.some(e => e.dataInicio === hojeStr)) {
+                    verEventosDia(hojeStr);
+                }
+            }
+
+            window.verEventosDia = function(data) {
+                const eventosDia = eventos.filter(e => e.dataInicio === data);
+                const container = $('#eventosDoDia');
+                container.empty();
+
+                if (eventosDia.length === 0) {
+                    container.html(`
+                        <p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">
+                            📅 Nenhum evento neste dia.
+                        </p>
+                    `);
+                    return;
+                }
+
+                eventosDia.forEach(e => {
+                    container.append(`
+                        <div style="padding:8px 10px;margin-bottom:6px;background:rgba(255,255,255,0.05);border-radius:6px;cursor:pointer;" onclick="abrirDetalhes(${e.id})">
+                            <div style="font-weight:bold;color:#fff;">${e.nome}</div>
+                            <div style="font-size:0.8rem;color:rgba(255,255,255,0.5);">🕐 ${e.hora}</div>
+                            <div style="font-size:0.7rem;color:rgba(255,255,255,0.3);">📍 ${e.local}</div>
+                        </div>
+                    `);
+                });
+            };
+
+            // ============================================================
+            // FUNÇÕES DE FORMATAÇÃO
+            // ============================================================
+
+            function formatarData(data) {
+                const d = new Date(data + 'T00:00:00');
+                return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+            }
+
+            function getCategoriaCor(tipo) {
+                const cores = {
+                    'cultural': '#FF9800',
+                    'musica': '#E91E63',
+                    'feira': '#4CAF50',
+                    'natureza': '#2196F3',
+                    'religioso': '#9C27B0',
+                    'desporto': '#F44336'
+                };
+                return cores[tipo] || '#6c757d';
+            }
+
+            function getCategoriaIcone(tipo) {
+                const icones = {
+                    'cultural': '🎭',
+                    'musica': '🎵',
+                    'feira': '🛍️',
+                    'natureza': '🌿',
+                    'religioso': '⛪',
+                    'desporto': '⚽'
+                };
+                return icones[tipo] || '📅';
+            }
+
+            // ============================================================
+            // FUNÇÕES DE INTERAÇÃO
+            // ============================================================
+
+            window.abrirDetalhes = function(id) {
+                const evento = eventos.find(e => e.id === id);
+                if (!evento) return;
+                selectedEvento = evento;
+                const t = traducoes[idiomaAtual] || traducoes.pt;
+
+                const estrelas = '⭐'.repeat(4) + '☆';
+
+                $('#detalhesTitulo').html(`<i class="bi bi-calendar-event"></i> ${evento.nome}`);
+
+                const conteudo = `
+                    <div class="row">
+                        <div class="col-md-12">
+                            <img src="${evento.imagem}" class="modal-detalhe-imagem" alt="${evento.nome}">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="badge" style="background:${getCategoriaCor(evento.tipo)};">${getCategoriaIcone(evento.tipo)} ${evento.tipo.toUpperCase()}</span>
+                                    ${evento.destaque ? '<span class="badge bg-warning text-dark">⭐ Destaque</span>' : ''}
+                                    ${evento.imperdivel ? '<span class="badge bg-danger">🔥 Imperdível</span>' : ''}
+                                    <span class="badge ${evento.gratuito ? 'bg-success' : 'bg-info'}">${evento.gratuito ? '🆓 Gratuito' : evento.preco}</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="definirLembrete(${evento.id})">
+                                        <i class="bi bi-bell"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <h4>${evento.nome}</h4>
+                            <div style="color:#ffc107;font-size:1rem;">${estrelas} 4.5 (${evento.comentarios.length} avaliações)</div>
+                            <p style="color:rgba(255,255,255,0.7);margin-top:10px;">${evento.descricaoCompleta}</p>
+
+                            <div class="evento-detalhe-info">
+                                <div class="item">
+                                    <span class="label">📅 Data</span>
+                                    <span class="value">${formatarData(evento.dataInicio)} ${evento.dataFim !== evento.dataInicio ? `a ${formatarData(evento.dataFim)}` : ''}</span>
+                                </div>
+                                <div class="item">
+                                    <span class="label">🕐 Horário</span>
+                                    <span class="value">${evento.hora}</span>
+                                </div>
+                                <div class="item">
+                                    <span class="label">📍 Local</span>
+                                    <span class="value">${evento.local}</span>
+                                </div>
+                                <div class="item">
+                                    <span class="label">💰 Preço</span>
+                                    <span class="value">${evento.gratuito ? 'Gratuito' : evento.preco}</span>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <h6><i class="bi bi-clock"></i> Programação</h6>
+                            <ul style="color:rgba(255,255,255,0.7);">
+                                ${evento.programacao.map(p => `<li>${p}</li>`).join('')}
+                            </ul>
+
+                            <hr>
+                            <h6><i class="bi bi-people"></i> Artistas / Atrações</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                ${evento.artistas.map(a => `<span class="badge" style="background:rgba(255,255,255,0.1);padding:5px 12px;">${a}</span>`).join('')}
+                            </div>
+
+                            <hr>
+                            <h6><i class="bi bi-images"></i> Galeria</h6>
+                            <div class="modal-detalhe-galeria">
+                                ${evento.galeria.map(img => `<img src="${img}" alt="${evento.nome}" onclick="alert('📷 Abrindo imagem em tamanho completo...')">`).join('')}
+                            </div>
+
+                            <hr>
+                            <h6><i class="bi bi-chat"></i> Comentários</h6>
+                            ${evento.comentarios.map(c => `
+                                <div class="comentario-item">
+                                    <div class="usuario">👤 ${c.usuario} <span style="color:#ffc107;">⭐⭐⭐⭐⭐</span></div>
+                                    <div class="texto">"${c.texto}"</div>
+                                    <div class="data">📅 ${formatarData(c.data)}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                $('#detalhesConteudo').html(conteudo);
+                $('#detalhesModal').modal('show');
+            };
+
+            window.adicionarAoRoteiroEvento = function(id) {
+                const evento = eventos.find(e => e.id === id);
+                if (!evento) return;
+                alert(`✅ "${evento.nome}" adicionado ao seu roteiro!\n\n` +
+                    `📅 Data: ${formatarData(evento.dataInicio)}\n` +
+                    `📍 Local: ${evento.local}\n\n` +
+                    `💡 Vá ao Planeador de Viagem para organizar seu itinerário.`);
+            };
+
+            window.definirLembrete = function(id) {
+                const evento = eventos.find(e => e.id === id);
+                if (!evento) return;
+
+                const select = $('#lembreteEvento');
+                select.empty();
+                eventos.forEach(e => {
+                    select.append(`<option value="${e.id}" ${e.id === id ? 'selected' : ''}>${e.nome}</option>`);
+                });
+
+                $('#lembreteModal').modal('show');
+            };
+
+            // ============================================================
+            // FILTROS
+            // ============================================================
+
+            function aplicarFiltros() {
+                const tipo = $('#filtroTipo').val();
+                const local = $('#filtroLocal').val();
+                const preco = $('#filtroPrecoEvento').val();
+                const data = $('#filtroDataEvento').val();
+                const filtroRapido = $('.filtro-rapido-btn.active').data('filtro');
+
+                const hoje = new Date();
+                const hojeStr = hoje.toISOString().split('T')[0];
+                const semanaFim = new Date(hoje);
+                semanaFim.setDate(hoje.getDate() + 7);
+                const semanaFimStr = semanaFim.toISOString().split('T')[0];
+                const mesFim = new Date(hoje);
+                mesFim.setMonth(hoje.getMonth() + 1);
+                const mesFimStr = mesFim.toISOString().split('T')[0];
+
+                eventosFiltrados = eventos.filter(e => {
+                    // Tipo
+                    if (tipo !== 'todos' && e.tipo !== tipo) return false;
+
+                    // Local
+                    if (local !== 'todos' && e.local !== local) return false;
+
+                    // Preço
+                    if (preco === 'gratuito' && !e.gratuito) return false;
+                    if (preco === 'pago' && e.gratuito) return false;
+
+                    // Data
+                    if (data && e.dataInicio !== data) return false;
+
+                    // Filtro rápido
+                    if (filtroRapido === 'hoje' && e.dataInicio !== hojeStr) return false;
+                    if (filtroRapido === 'semana' && (e.dataInicio < hojeStr || e.dataInicio > semanaFimStr))
+                    return false;
+                    if (filtroRapido === 'mes' && (e.dataInicio < hojeStr || e.dataInicio > mesFimStr)) return false;
+                    if (filtroRapido === 'futuros' && e.dataInicio < hojeStr) return false;
+
+                    return true;
+                });
+
+                // Se estiver na aba de destaques, mostrar apenas destaques
+                if ($('#destaques-tab').hasClass('active')) {
+                    eventosFiltrados = eventosFiltrados.filter(e => e.destaque || e.imperdivel);
+                }
+
+                renderizarEventos(eventosFiltrados);
+                renderizarDestaques();
+                atualizarMapaMini();
+
+                // Atualizar calendário
+                renderizarCalendario(mesAtual, anoAtual);
+            }
+
+            // ============================================================
+            // EVENTOS DOS BOTÕES
+            // ============================================================
+
+            // Filtros rápidos
+            $('.filtro-rapido-btn').click(function() {
+                $('.filtro-rapido-btn').removeClass('active');
+                $(this).addClass('active');
+                aplicarFiltros();
+            });
+
+            // Aplicar filtros
+            $('#btnAplicarFiltros').click(function() {
+                aplicarFiltros();
+                $('#eventos-tab').tab('show');
+            });
+
+            // Limpar filtros
+            $('#btnLimparFiltros').click(function() {
+                $('#filtroTipo').val('todos');
+                $('#filtroLocal').val('todos');
+                $('#filtroPrecoEvento').val('todos');
+                $('#filtroDataEvento').val('');
+                $('.filtro-rapido-btn').removeClass('active');
+                $('.filtro-rapido-btn[data-filtro="todos"]').addClass('active');
+                aplicarFiltros();
+            });
+
+            // Lembretes
+            $('#btnLembretes').click(function() {
+                if (lembretes.length === 0) {
+                    alert('🔔 Você não tem lembretes configurados.\n\n' +
+                        'Clique no 🔔 de um evento para definir um lembrete.');
+                    return;
+                }
+                alert(`🔔 Seus Lembretes:\n\n${lembretes.map(l => `- ${l.nome}: ${l.quando}`).join('\n')}`);
+            });
+
+            // Adicionar ao Roteiro (ação rápida)
+            $('#btnAdicionarRoteiro').click(function() {
+                if (eventosFiltrados.length === 0) {
+                    alert('⚠️ Nenhum evento disponível para adicionar.');
+                    return;
+                }
+                alert('✅ Eventos adicionados ao roteiro!\n\n' +
+                    `${eventosFiltrados.length} eventos selecionados.`);
+            });
+
+            // Ver no Mapa
+            $('#btnMapaEventos').click(function() {
+                alert('🗺️ Redirecionando para o Mapa Interativo...\n\n' +
+                    `${eventosFiltrados.length} eventos disponíveis no mapa.`);
+            });
+
+            // Lembrete (ação rápida)
+            $('#btnLembrete').click(function() {
+                if (eventosFiltrados.length === 0) {
+                    alert('⚠️ Nenhum evento disponível.');
+                    return;
+                }
+                definirLembrete(eventosFiltrados[0].id);
+            });
+
+            // Atualizar
+            $('#btnAtualizar').click(function() {
+                aplicarFiltros();
+                alert('🔄 Dados atualizados com sucesso!\n\n' +
+                    `📅 ${eventos.length} eventos disponíveis\n` +
+                    `🔔 ${lembretes.length} lembretes configurados`);
+            });
+
+            // Voltar
+            $('#btnVoltar').click(function() {
+                if (confirm('Deseja realmente sair da tela de eventos?')) {
+                    alert('🔙 Retornando ao menu principal...');
+                }
+            });
+
+            // Ver Mapa Completo
+            $('#btnVerMapaCompleto').click(function() {
+                alert('🗺️ Redirecionando para o Mapa Interativo completo...\n\n' +
+                    `${eventosFiltrados.length} eventos no mapa.`);
+            });
+
+            // Dashboard
+            $('#btnDashboard').click(function(e) {
+                e.preventDefault();
+                alert('🔙 Redirecionando para o Dashboard Principal...');
+            });
+
+            // Adicionar ao Roteiro (modal)
+            $('#btnAdicionarRoteiroEvento').click(function() {
+                if (selectedEvento) {
+                    adicionarAoRoteiroEvento(selectedEvento.id);
+                    $('#detalhesModal').modal('hide');
+                }
+            });
+
+            // Comprar Bilhete
+            $('#btnComprarBilhete').click(function() {
+                if (selectedEvento) {
+                    if (selectedEvento.gratuito) {
+                        alert(`🎫 Evento gratuito! Não é necessário comprar bilhete.\n\n` +
+                            `📅 ${selectedEvento.nome}\n` +
+                            `📍 ${selectedEvento.local}`);
+                    } else {
+                        alert(`🎫 Redirecionando para compra de bilhete...\n\n` +
+                            `📅 ${selectedEvento.nome}\n` +
+                            `💰 ${selectedEvento.preco}\n\n` +
+                            `💡 Bilhete disponível para compra online.`);
+                    }
+                    $('#detalhesModal').modal('hide');
+                }
+            });
+
+            // Confirmar Lembrete
+            $('#btnConfirmarLembrete').click(function() {
+                const id = parseInt($('#lembreteEvento').val());
+                const tempo = $('#lembreteTempo').val();
+                const enviarEmail = $('#lembreteEmail').is(':checked');
+
+                if (!id) {
+                    alert('⚠️ Selecione um evento.');
+                    return;
+                }
+
+                const evento = eventos.find(e => e.id === id);
+                if (!evento) return;
+
+                const lembrete = {
+                    id: evento.id,
+                    nome: evento.nome,
+                    quando: tempo,
+                    email: enviarEmail
+                };
+
+                lembretes.push(lembrete);
+                localStorage.setItem('eventosLembretes', JSON.stringify(lembretes));
+
+                $('#lembreteModal').modal('hide');
+                alert(`🔔 Lembrete configurado!\n\n` +
+                    `📅 Evento: ${evento.nome}\n` +
+                    `⏰ Quando: ${tempo} antes\n` +
+                    `${enviarEmail ? '📧 E-mail: Será enviado também' : '📧 E-mail: Não será enviado'}`);
+            });
+
+            // Sugerir Evento
+            $('#btnSugerirEvento').click(function() {
+                $('#sugerirModal').modal('show');
+            });
+
+            $('#btnEnviarSugestao').click(function() {
+                const nome = $('#sugerirNome').val();
+                const data = $('#sugerirData').val();
+                const local = $('#sugerirLocal').val();
+                const desc = $('#sugerirDesc').val();
+                const usuario = $('#sugerirNomeUsuario').val();
+                const email = $('#sugerirEmail').val();
+
+                if (!nome || !data || !local) {
+                    alert('⚠️ Preencha os campos obrigatórios (Nome, Data e Local).');
+                    return;
+                }
+
+                $('#sugerirModal').modal('hide');
+                alert(`✅ Sugestão enviada com sucesso!\n\n` +
+                    `📅 Evento: ${nome}\n` +
+                    `📆 Data: ${formatarData(data)}\n` +
+                    `📍 Local: ${local}\n` +
+                    `👤 Enviado por: ${usuario || 'Anônimo'}\n\n` +
+                    `💡 Agradecemos sua contribuição! Entraremos em contato em breve.`);
+            });
+
+            // Calendário - Navegação
+            $('#calAnterior').click(function() {
+                mesAtual--;
+                if (mesAtual < 0) {
+                    mesAtual = 11;
+                    anoAtual--;
+                }
+                renderizarCalendario(mesAtual, anoAtual);
+            });
+
+            $('#calProximo').click(function() {
+                mesAtual++;
+                if (mesAtual > 11) {
+                    mesAtual = 0;
+                    anoAtual++;
+                }
+                renderizarCalendario(mesAtual, anoAtual);
+            });
+
+            // Tema
+            let isDarkTheme = true;
+
+            function toggleTheme() {
+                isDarkTheme = !isDarkTheme;
+                if (isDarkTheme) {
+                    $('body').removeClass('light-theme');
+                    $('#themeIcon').removeClass('bi-sun-fill').addClass('bi-moon-stars');
+                } else {
+                    $('body').addClass('light-theme');
+                    $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+                }
+                localStorage.setItem('sicami-theme-eventos', isDarkTheme ? 'dark' : 'light');
+            }
+
+            const savedTheme = localStorage.getItem('sicami-theme-eventos');
+            if (savedTheme === 'light') {
+                isDarkTheme = false;
+                $('body').addClass('light-theme');
+                $('#themeIcon').removeClass('bi-moon-stars').addClass('bi-sun-fill');
+            }
+            $('#themeToggle').click(toggleTheme);
+
+            // Data/Hora
+            function updateDateTime() {
+                const now = new Date();
+                $('#dateTimeDisplay').text(
+                    now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR')
+                );
+            }
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+
+            // ============================================================
+            // DROPDOWN DE IDIOMA - Abre modal verdadeiro
+            // ============================================================
+
+            $('#languageDropdown').click(function(e) {
+                e.preventDefault();
+                // Preencher lista de idiomas no modal
+                const listaIdiomas = $('#listaIdiomas');
+                listaIdiomas.empty();
+                const idiomas = [
+                    { code: 'pt', label: '🇵🇹 Português' },
+                    { code: 'en', label: '🇬🇧 English' },
+                    { code: 'fr', label: '🇫🇷 Français' },
+                    { code: 'es', label: '🇪🇸 Español' },
+                    { code: 'it', label: '🇮🇹 Italiano' },
+                    { code: 'de', label: '🇩🇪 Deutsch' },
+                    { code: 'zh', label: '🇨🇳 中文' },
+                    { code: 'ja', label: '🇯🇵 日本語' },
+                    { code: 'ru', label: '🇷🇺 Русский' },
+                    { code: 'ar', label: '🇸🇦 العربية' },
+                    { code: 'hi', label: '🇮🇳 हिन्दी' },
+                    { code: 'sw', label: '🇰🇪 Kiswahili' }
+                ];
+                idiomas.forEach(idioma => {
+                    listaIdiomas.append(`
+                        <button class="list-group-item list-group-item-action ${idioma.code === idiomaAtual ? 'active' : ''}"
+                                onclick="mudarIdioma('${idioma.code}')">
+                            ${idioma.label}
+                        </button>
+                    `);
+                });
+                $('#idiomaModal').modal('show');
+            });
+
+            // ============================================================
+            // INICIALIZAÇÃO
+            // ============================================================
+
+            // Aplicar idioma salvo
+            aplicarIdioma(idiomaAtual);
+
+            setTimeout(initMapMini, 500);
+
+            console.log('✅ Eventos em Malanje carregado!');
+            console.log(`📅 ${eventos.length} eventos disponíveis`);
+            console.log(`🔔 ${lembretes.length} lembretes configurados`);
+            console.log(`🌐 Idioma: ${idiomaAtual}`);
+
+        });
+    </script>
+</body>
+</html>
